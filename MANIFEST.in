@@ -1,0 +1,5 @@
+include README.md
+include LICENSE.md
+include MANIFEST.in
+include fuzzinator/VERSION
+recursive-include fuzzinator/ui/tui/resources *

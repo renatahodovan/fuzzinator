@@ -1,0 +1,10 @@
+Load the attached test with $sut:
+
+Checked version: $version
+OS: $platform
+
+$test
+
+Backtrace:
+
+$stderr

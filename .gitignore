@@ -1,0 +1,6 @@
+__pycache__
+build
+dist
+fuzzinator.egg-info
+.DS_Store
+.idea

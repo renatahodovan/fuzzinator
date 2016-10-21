@@ -1,0 +1,85 @@
+[
+    {"main_bg": ["dark green", "black"]},
+    {"motto": ["yellow", "black", "bold"]},
+
+    {"table_header": ["black", "light gray"]},
+    {"table_header focused": ["black", "light gray"]},
+    {"table_header column_focused": ["yellow, bold", "light gray"]},
+    {"table_header column_focused focused": ["yellow, bold", "light gray"]},
+
+    {"table_row": ["white", "black"]},
+    {"table_row focused": ["white", "dark gray"]},
+    {"table_row_reported": ["dark gray", "black"]},
+    {"table_row_reported focused": ["white", "dark gray"]},
+    {"table_row_reduced": ["yellow", "black"]},
+    {"table_row_reduced focused": ["yellow", "dark gray"]},
+
+    {"red": ["light red", "black"]},
+    {"yellow": ["yellow", "black"]},
+    {"green": ["light green", "black"]},
+    {"blue": ["light blue", "black"]},
+
+    {"table_header": ["black", "light gray"]},
+    {"table_header focused": ["black", "light gray"]},
+    {"table_header column_focused": ["yellow,bold", "light gray"]},
+    {"table_header column_focused focused": ["yellow,bold", "light gray"]},
+    {"table_footer": ["black", "light gray"]},
+    {"table_footer focused": ["black", "light gray"]},
+    {"table_footer column_focused": ["yellow,bold", "light gray"]},
+    {"table_footer column_focused focused": ["yellow,bold", "light gray"]},
+    {"table_header_text": ["black", "dark cyan", "bold"]},
+    {"table_header_bg": ["black", "dark cyan"]},
+
+    {"footer_button": ["black", "dark cyan", "bold"]},
+    {"footer_button_bg": ["black", "black"]},
+
+    {"inactive_job": ["black", "black"]},
+    {"inactive_job_prop": ["dark gray", "black", "bold"]},
+    {"inactive_job_prop_value": ["dark gray", "black"]},
+    {"inactive_job_title": ["light gray", "dark gray"]},
+    {"inactive_job_title_bg": ["white", "dark gray"]},
+    {"inactive_job_progress_normal": ["dark gray", "black"]},
+
+    {"inactive_job focused": ["dark gray", "dark gray"]},
+    {"inactive_job_prop focused": ["black", "dark gray", "bold"]},
+    {"inactive_job_prop_value focused": ["light gray", "dark gray"]},
+    {"inactive_job_title focused": ["light gray", "dark gray"]},
+    {"inactive_job_progress_normal focused": ["dark gray", "light gray"]},
+    {"inactive_job_progress_done focused": ["dark gray", "light gray"]},
+
+    {"active_job": ["black", "black"]},
+    {"active_job_title": ["black", "light green"]},
+    {"active_job_title_bg": ["light green", "light green"]},
+    {"active_job_prop": ["dark green", "black", "bold"]},
+    {"active_job_prop_value": ["light gray", "black"]},
+    {"active_job_progress_normal": ["light gray", "dark gray"]},
+    {"active_job_progress_done": ["dark gray", "light gray"]},
+    {"active_job_progress_smooth": ["light gray", "dark gray"]},
+
+    {"active_job focused": ["dark gray", "dark gray"]},
+    {"active_job_title focused": ["black", "light green"]},
+    {"active_job_title_bg focused": ["light green", "light green"]},
+    {"active_job_prop focused": ["dark green", "dark gray", "bold"]},
+    {"active_job_prop_value focused": ["light gray", "dark gray"]},
+    {"active_job_progress_normal focused": ["dark gray", "light gray"]},
+    {"active_job_progress_done focused": ["dark gray", "light gray"]},
+    {"active_job_progress_smooth focused": ["dark gray", "light gray"]},
+
+    {"progress_normal": ["dark gray", "light gray"]},
+    {"progress_complete": ["white", "dark blue"]},
+    {"progress_smooth": ["light green", "black"]},
+
+    {"timer_label": ["light gray", "black", "bold"]},
+    {"timer_value": ["light gray", "black"]},
+
+    {"load_label": ["light gray", "black", "bold"]},
+    {"load_value": ["light gray", "black"]},
+
+    {"dialog_title": ["black", "yellow", "bold"]},
+    {"dialog_bg": ["black", "yellow"]},
+    {"warning_dialog_title": ["light red", "black"]},
+
+    {"report_status": ["dark red", "dark gray", "bold"]},
+    {"warning_header_bg": ["white", "dark red"]}
+
+]

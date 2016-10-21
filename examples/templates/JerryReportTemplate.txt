@@ -1,0 +1,20 @@
+Version: $version
+OS: $platform
+
+Load the attached test with $sut:
+
+```js
+$test
+```
+
+Output:
+
+```
+$stderr
+```
+
+Backtrace:
+
+```
+$backtrace
+```

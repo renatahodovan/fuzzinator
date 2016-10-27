@@ -65,7 +65,7 @@ class MainWindow(PopUpLauncher):
         super(MainWindow, self).__init__(self.view)
 
         connect_signal(self, 'warning', lambda _, msg: self.create_warning(msg))
-        connect_signal(self.issues_table, 'select', lambda source, selection: self.formatted_issue_popup(selection[1]))
+        connect_signal(self.issues_table, 'select', lambda source, selection: self.footer_btns['view'].keypress((0, 0), 'enter'))
         connect_signal(self.issues_table, 'refresh', lambda source: self._emit('refresh'))
         connect_signal(self.stat_table, 'refresh', lambda source: self._emit('refresh'))
 

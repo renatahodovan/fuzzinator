@@ -19,11 +19,12 @@ class BugzillaReportDialog(WidgetWrap):
     def __init__(self, issue, tracker):
         self.issue = issue
         self.tracker = tracker
+        self.duplicate = None
 
         # TODO: ugly! refactor needed!
         from .widgets import FormattedButton
         report_button = FormattedButton('Report', lambda button: self.report(btn=button))
-        save_button = FormattedButton('Save as reported', lambda button: self.tracker.set_reported(self.issue, self.duplicate))
+        save_button = FormattedButton('Save as reported', lambda button: self.save_reported())
         close_button = FormattedButton('Close', lambda button: self._emit('close'))
 
         self.summary_box = Edit(caption='', edit_text=self.tracker.title(issue))
@@ -55,16 +56,18 @@ class BugzillaReportDialog(WidgetWrap):
                                       Columns([('fixed', 13, Text('Description: ')), ('weight', 10, self.desc_box)], dividechars=1)])
 
         dups = self.tracker.find_issue(issue)
-        self.dups_walker = None
+        self.edit_dups = None
         if dups:
             options = []
-            self.dups_walker = SimpleListWalker([RadioButton(options, 'None')])
+            dups_walker = SimpleListWalker([RadioButton(options, 'None')])
             for entry in dups:
-                self.dups_walker.append(RadioButton(options, entry.weburl, on_state_change=self.set_duplicate))
-            self.body.insert(0, Columns([('fixed', 13, Text('Duplicates: ')), ('weight', 10, BoxAdapter(ListBox(self.dups_walker), height=len(self.dups_walker)))]))
+                dups_walker.append(RadioButton(options, entry.weburl, on_state_change=self.set_duplicate))
+            self.body.insert(0, Columns([('fixed', 13, Text('Duplicates: ')), ('weight', 10, BoxAdapter(ListBox(dups_walker), height=len(dups_walker)))]))
+        else:
+            self.edit_dups = Edit()
+            self.body.insert(0, Columns([('fixed', 13, Text('Duplicates: ')), ('weight', 10, self.edit_dups)]))
 
-        frame = Frame(#header=AttrMap(Text(issue['id'], align='center'), attr_map='table_header_bg'),
-                      body=AttrMap(
+        frame = Frame(body=AttrMap(
                           Columns([
                               ('weight', 10, ListBox(self.body)),
                               ('weight', 3, ListBox(SimpleListWalker([
@@ -83,6 +86,12 @@ class BugzillaReportDialog(WidgetWrap):
 
         WidgetWrap.__init__(self, AttrMap(PatternBox(frame, title=('dialog_title', issue['id']), **fz_box_pattern()), attr_map='main_bg'))
         self.set_product(self.products_walker.contents[0], True)
+
+    def save_reported(self):
+        if self.duplicate:
+            self.tracker.set_reported(self.issue, self.duplicate)
+        elif self.edit_dups.text:
+            self.tracker.set_reported(self.issue, self.edit_dups.text)
 
     def set_duplicate(self, btn, state):
         if state:
@@ -131,6 +140,7 @@ class BugzillaReportDialog(WidgetWrap):
             blocks=self.block_box.edit_text
         )
         bug = self.tracker.report_issue(report_details=report_details,
+                                        test=self.issue['test'],
                                         extension=self.extension.edit_text)
 
         self.result_box.set_text('Reported at: {weburl}'.format(weburl=bug.weburl))

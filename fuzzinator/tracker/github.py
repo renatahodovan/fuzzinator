@@ -51,7 +51,7 @@ class GithubReport(BaseTracker):
                     options.append(issue)
         return options
 
-    def report_issue(self, report_details, extension=None):
+    def report_issue(self, report_details):
         return self.ghapi.create_issue(title=report_details['title'],
                                        body=report_details['body'])
 

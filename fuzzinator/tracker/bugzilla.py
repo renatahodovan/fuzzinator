@@ -41,7 +41,7 @@ class BugzillaReport(BaseTracker):
                                                        short_desc=self.title(issue),
                                                        include_fields=['id', 'summary', 'weburl']))
 
-    def report_issue(self, report_details, extension):
+    def report_issue(self, report_details, test, extension):
         create_info = self.bzapi.build_createbug(product=report_details['product'],
                                                  component=report_details['component'],
                                                  summary=report_details['summary'],
@@ -52,7 +52,7 @@ class BugzillaReport(BaseTracker):
         bug = self.bzapi.createbug(create_info)
         test_file = 'test.{ext}'.format(ext=extension)
         with open(test_file, 'wb') as f:
-            f.write(report_details['test'])
+            f.write(test)
         self.bzapi.attachfile(idlist=bug.bug_id, attachfile=test_file, description='Test', is_patch=False)
         os.remove(test_file)
         return bug

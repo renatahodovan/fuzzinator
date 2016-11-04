@@ -1,7 +1,7 @@
 # Copyright (c) 2016 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
-# <LICENSE.md or https://opensource.org/licenses/BSD-3-Clause>.
+# <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
@@ -20,7 +20,7 @@ setup(
     author='Renata Hodovan, Akos Kiss',
     author_email='hodovan@inf.u-szeged.hu, akiss@inf.u-szeged.hu',
     description='Fuzzinator Random Testing Framework',
-    long_description=open('README.md').read(),
+    long_description=open('README.rst').read(),
     zip_safe=False,
     include_package_data=True,
     install_requires=['chardet', 'picire', 'pexpect', 'psutil',

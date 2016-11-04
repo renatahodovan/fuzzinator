@@ -1,18 +1,21 @@
-# Fuzzinator
-_Random Testing Framework_
+##########
+Fuzzinator
+##########
+*Random Testing Framework*
 
-
-## Requirements
+Requirements
+============
 
 * Python >= 3.4
 * pip and setuptools Python packages (the latter is automatically installed by
   pip)
 * MongoDB (either local installation or access to remote database)
-* Picireny (see its [documentation](https://github.com/renatahodovan/picireny)
+* Picireny (see its `documentation <https://github.com/renatahodovan/picireny>`_
   why manual installation is required)
 
 
-## Install
+Install
+=======
 
 The quick way:
 
@@ -23,14 +26,16 @@ Alternatively, by cloning the project and running setuptools:
     python setup.py install
 
 
-## Usage
+Usage
+=====
 
 A common form of *Fuzzinator*'s usage:
 
     fuzzinator --tui --force-encoding=utf-8 <path/to/the/config.ini>
 
 
-## Compatibility
+Compatibility
+=============
 
 *Fuzzinator* was tested on:
 
@@ -38,12 +43,14 @@ A common form of *Fuzzinator*'s usage:
 * Mac OS X (OS X El Capitan - 10.11).
 
 
-## Acknowledgements
+Acknowledgements
+================
 
 The authors are immensely grateful to Dr. Heinz Doofenshmirtz for the continuous
 inspiration.
 
 
-## Copyright and Licensing
+Copyright and Licensing
+=======================
 
-See [LICENSE](LICENSE.md).
+Licensed under the BSD 3-Clause License (see LICENSE.rst).

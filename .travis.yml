@@ -1,0 +1,15 @@
+language: python
+matrix:
+  include:
+    - python: 3.4
+      env: TOXENV=py34
+    - python: 3.5
+      env: TOXENV=py35
+sudo: false
+
+# TODO: no tests for now, all tox is testing whether fuzzinator installs OK
+# TODO: start mongodb once tests are implemented
+# services: mongodb
+
+install: pip install -U tox
+script: tox

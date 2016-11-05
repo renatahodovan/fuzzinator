@@ -4,3 +4,5 @@ dist
 fuzzinator.egg-info
 .DS_Store
 .idea
+.cache
+.tox

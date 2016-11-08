@@ -17,11 +17,15 @@ class GithubReport(BaseTracker):
         BaseTracker.__init__(self, template=title, title=title)
         self.repository = repository
         self.template = template
-        self.ghapi = None
+        self.ghapi = Github().get_repo(self.repository)
 
     @property
     def logged_in(self):
-        return self.ghapi is not None
+        try:
+            gh.get_user().id
+            return True
+        except:
+            return False
     
     def login(self, username, pwd):
         try:
@@ -46,9 +50,10 @@ class GithubReport(BaseTracker):
             idx += 1
             if not page:
                 break
-            for issue in page:
-                if all(word in issue.body for word in issue['id'].decode('utf-8', errors='ignore').split()):
-                    options.append(issue)
+            for entry in page:
+                ident = issue['id'].decode('utf-8', errors='ignore') if isinstance(issue['id'], bytes) else issue['id']
+                if all(word in entry.body for word in ident.split()):
+                    options.append(entry)
         return options
 
     def report_issue(self, report_details):

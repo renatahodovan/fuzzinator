@@ -22,7 +22,7 @@ class StreamMonitoredSubprocessCall(object):
         self.command = command
         self.cwd = cwd or os.getcwd()
         self.end_patterns = [re.compile(pattern.encode('utf-8', errors='ignore')) for pattern in json.loads(end_patterns)] if end_patterns else []
-        self.env = dict(os.environ, **json.loads(self.env)) if env else None
+        self.env = dict(os.environ, **json.loads(env)) if env else None
 
     def __enter__(self):
         return self

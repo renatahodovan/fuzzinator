@@ -7,3 +7,9 @@
 
 from .bugzilla import BugzillaReport
 from .github import GithubReport
+
+
+__all__ = [
+    'BugzillaReport',
+    'GithubReport',
+]

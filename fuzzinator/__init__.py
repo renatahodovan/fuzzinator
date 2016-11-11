@@ -14,3 +14,14 @@ from . import fuzzer
 from . import reduce
 from . import tracker
 from . import update
+
+__all__ = [
+    'Controller',
+    'EventListener',
+    '__version__',
+    'call',
+    'fuzzer',
+    'reduce',
+    'tracker',
+    'update',
+]

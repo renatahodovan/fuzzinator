@@ -17,6 +17,7 @@ import subprocess
 
 
 class StreamMonitoredSubprocessCall(object):
+    """ """
 
     def __init__(self, command, cwd=None, env=None, end_patterns=None, **kwargs):
         self.command = command

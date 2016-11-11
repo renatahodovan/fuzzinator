@@ -13,34 +13,41 @@ import subprocess
 def SubprocessCall(command, cwd=None, env=None, test=None, **kwargs):
     """
     Subprocess invocation-based call of a SUT that takes test input on its
-    command line. (See FileWriterDecorator for SUTs that take input from a
-    file.)
+    command line. (See :class:`fuzzinator.call.FileWriterDecorator` for SUTs
+    that take input from a file.)
 
-    Mandatory parameter of the SUT call:
-      - 'command': string to pass to the child shell as a command to run (all
-        occurrences of "{test}" in the string are replaced by the actual test
+    **Mandatory parameter of the SUT call:**
+
+      - ``command``: string to pass to the child shell as a command to run (all
+        occurrences of ``{test}`` in the string are replaced by the actual test
         input).
-    Optional parameters of the SUT call:
-      - 'cwd': if not None, change working directory before the command
+
+    **Optional parameters of the SUT call:**
+
+      - ``cwd``: if not ``None``, change working directory before the command
         invocation.
-      - 'env': if not None, a dictionary of variable names-values to update the
-        environment with.
+      - ``env``: if not ``None``, a dictionary of variable names-values to
+        update the environment with.
 
-    Result of the SUT call:
+    **Result of the SUT call:**
+
       - If the child process exits with 0 exit code, no issue is returned.
-      - Otherwise, an issue with 'exit_code', 'stdout', 'stderr' properties is
-        returned.
+      - Otherwise, an issue with ``'exit_code'``, ``'stdout'``, and ``'stderr'``
+        properties is returned.
 
-    Example configuration snippet:
-    [sut.foo]
-    call=fuzzinator.call.SubprocessCall
+    **Example configuration snippet:**
 
-    [sut.foo.call]
-    # assuming that {test} is something that can be interpreted by foo as
-    # command line argument
-    command=./bin/foo {test}
-    cwd=/home/alice/foo
-    env={"BAR": "1"}
+        .. code-block:: ini
+
+            [sut.foo]
+            call=fuzzinator.call.SubprocessCall
+
+            [sut.foo.call]
+            # assuming that {test} is something that can be interpreted by foo as
+            # command line argument
+            command=./bin/foo {test}
+            cwd=/home/alice/foo
+            env={"BAR": "1"}
     """
     env = dict(os.environ, **json.loads(env)) if env else None
     with subprocess.Popen(command.format(test=test),

@@ -17,23 +17,29 @@ def SubprocessUpdate(command, cwd=None, env=None):
     """
     Subprocess invocation-based SUT update.
 
-    Mandatory parameter of the SUT update:
-      - 'command': string to pass to the child shell as a command to run.
-    Optional parameters of the SUT update:
-      - 'cwd': if not None, change working directory before the command
+    **Mandatory parameter of the SUT update:**
+
+      - ``command``: string to pass to the child shell as a command to run.
+
+    **Optional parameters of the SUT update:**
+
+      - ``cwd``: if not ``None``, change working directory before the command
         invocation.
-      - 'env': if not None, a dictionary of variable names-values to update the
-        environment with.
+      - ``env``: if not ``None``, a dictionary of variable names-values to
+        update the environment with.
 
-    Example configuration snippet:
-    [sut.foo]
-    update=fuzzinator.update.SubprocessUpdate
-    #update_condition=... is needed to trigger the update
+    **Example configuration snippet:**
 
-    [sut.foo.update]
-    command=git pull && make
-    cwd=/home/alice/foo
-    env={"BAR": "1"}
+        .. code-block:: ini
+
+            [sut.foo]
+            update=fuzzinator.update.SubprocessUpdate
+            #update_condition=... is needed to trigger the update
+
+            [sut.foo.update]
+            command=git pull && make
+            cwd=/home/alice/foo
+            env={"BAR": "1"}
     """
 
     with subprocess.Popen(command,

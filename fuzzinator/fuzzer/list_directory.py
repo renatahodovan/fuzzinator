@@ -10,8 +10,9 @@ import os
 
 class ListDirectory(object):
     """
-    A simple fuzzer to iterate through the files in a directory and return their
-    contents one by one. Useful for re-testing previously discovered issues.
+    A simple test generator to iterate through existing files in a directory and
+    return their contents one by one. Useful for re-testing previously
+    discovered issues.
 
     Since the fuzzer starts iterating from the beginning of the directory in
     every fuzz job, there is no gain in running multiple instances of this
@@ -19,22 +20,26 @@ class ListDirectory(object):
     running in the same fuzz job batch until all the files of the directory are
     processed.
 
-    Mandatory parameter of the fuzzer:
-      - 'outdir': path to the directory containing the files that act as test
+    **Mandatory parameter of the fuzzer:**
+
+      - ``outdir``: path to the directory containing the files that act as test
         inputs.
 
-    Example configuration snippet:
-    [sut.foo]
-    # see fuzzinator.call.*
+    **Example configuration snippet:**
 
-    [fuzz.foo-with-oldbugs]
-    sut=sut.foo
-    fuzzer=fuzzinator.fuzzer.ListDirectory
-    instances=1
-    batch=inf
+        .. code-block:: ini
 
-    [fuzz.foo-with-oldbugs.fuzzer.init]
-    outdir=/home/alice/foo-old-bugs/
+            [sut.foo]
+            # see fuzzinator.call.*
+
+            [fuzz.foo-with-oldbugs]
+            sut=sut.foo
+            fuzzer=fuzzinator.fuzzer.ListDirectory
+            instances=1
+            batch=inf
+
+            [fuzz.foo-with-oldbugs.fuzzer.init]
+            outdir=/home/alice/foo-old-bugs/
     """
 
     def __init__(self, outdir, **kwargs):

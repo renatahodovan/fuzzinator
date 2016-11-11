@@ -25,78 +25,120 @@ from .update_job import UpdateJob
 
 class Controller(object):
     """
-    Fuzzinator's main scheduler/controller. All configuration options of the
-    framework must be encapsulated in a configparser.ConfigParser object.
+    Fuzzinator's main controller that orchestrates a fuzz session by scheduling
+    all related activities (e.g., keeps SUTs up-to-date, runs fuzzers and feeds
+    test cases to SUTs, or minimizes failure inducing test cases) . All
+    configuration options of the framework must be encapsulated in a
+    :class:`configparser.ConfigParser` object.
 
     The following config sections and options are recognized:
-      - Section 'fuzzinator': Global settings of the framework.
-        - Option 'work_dir': Work directory for temporary files. (Optional,
-          default: ~/.fuzzinator)
-        - Option 'db_uri': URI to a MongoDB database to store found issues and
-          execution statistics. (Optional, default:
-          mongodb://localhost/fuzzinator)
-        - Option 'cost_budget': (Optional, default: number of cpus)
 
-      - Sections 'sut.NAME': Definitions of a SUT named NAME
-        - Option 'call': Fully qualified name of a python callable that must
-          accept a 'test' keyword argument representing the input to the SUT and
-          must return a dictionary object or None if the input triggered an
-          issue in the SUT of not, respectively. The returned issue dictionary
-          (if any) should contain an 'id' field that equals for issues that are
-          not considered unique. (Mandatory)
-        - Option 'cost': (Optional, default: 1)
-        - Option 'reduce': Fully qualified name of a python callable that must
-          accept 'issue,sut_call,sut_call_kwargs,listener,ident,work_dir'
-          keyword arguments representing an issue to be reduced (and various
-          other potentially needed objects), and must return a tuple consisting
-          of a reduced test case for the issue (or None if the issue's current
-          test case could not be reduced) and a (potentially empty) list of new
-          issues that were discovered during test case reduction (if any).
-          (Optional, no reduction for this SUT if option is missing.)
-        - Option 'reduce_call': Fully qualified name of a python callable that
-          acts as the SUT's 'call' option during test case reduction. (Optional,
-          default: the value of option 'call')
-        - Option 'reduce_cost': (Optional, default: the value of option 'cost')
-        - Option 'update_condition': Fully qualified name of a python callable
-          that must return True if and only if the SUT should be updated.
-          (Optional, SUT is never updated if option is missing.)
-        - Option 'update': Fully qualified name of a python callable that should
-          perform the update of the SUT. (Optional, SUT is never updated if
+      - Section ``fuzzinator``: Global settings of the framework.
+
+        - Option ``work_dir``: Work directory for temporary files. (Optional,
+          default: ``~/.fuzzinator``)
+
+        - Option ``db_uri``: URI to a MongoDB database to store found issues and
+          execution statistics. (Optional, default:
+          ``mongodb://localhost/fuzzinator``)
+
+        - Option ``cost_budget``: (Optional, default: number of cpus)
+
+      - Sections ``sut.NAME``: Definitions of a SUT named *NAME*
+
+        - Option ``call``: Fully qualified name of a python callable that must
+          accept a ``test`` keyword argument representing the input to the SUT
+          and must return a dictionary object if the input triggered an issue in
+          the SUT, or ``None`` otherwise. The returned issue dictionary (if any)
+          *should* contain an ``'id'`` field that equals for issues that are not
+          considered unique. (Mandatory)
+
+          See package :mod:`fuzzinator.call` for potential callables.
+
+        - Option ``cost``: (Optional, default: 1)
+
+        - Option ``reduce``: Fully qualified name of a python callable that must
+          accept ``issue``, ``sut_call``, ``sut_call_kwargs``, ``listener``,
+          ``ident``, ``work_dir`` keyword arguments representing an issue to be
+          reduced (and various other potentially needed objects), and must
+          return a tuple consisting of a reduced test case for the issue (or
+          ``None`` if the issue's current test case could not be reduced) and a
+          (potentially empty) list of new issues that were discovered during
+          test case reduction (if any). (Optional, no reduction for this SUT if
           option is missing.)
 
-      - Sections 'fuzz.NAME': Definitions of a fuzz job named NAME
-        - Option 'sut': Name of the SUT section that describes the subject of
+          See package :mod:`fuzzinator.reduce` for potential callables.
+
+        - Option ``reduce_call``: Fully qualified name of a python callable that
+          acts as the SUT's ``call`` option during test case reduction.
+          (Optional, default: the value of option ``call``)
+
+          See package :mod:`fuzzinator.call` for potential callables.
+
+        - Option ``reduce_cost``: (Optional, default: the value of option
+          ``cost``)
+
+        - Option ``update_condition``: Fully qualified name of a python callable
+          that must return ``True`` if and only if the SUT should be updated.
+          (Optional, SUT is never updated if option is missing.)
+
+          See package :mod:`fuzzinator.update` for potential callables.
+
+        - Option ``update``: Fully qualified name of a python callable that
+          should perform the update of the SUT. (Optional, SUT is never updated
+          if option is missing.)
+
+          See package :mod:`fuzzinator.update` for potential callables.
+
+      - Sections ``fuzz.NAME``: Definitions of a fuzz job named *NAME*
+
+        - Option ``sut``: Name of the SUT section that describes the subject of
           this fuzz job. (Mandatory)
-        - Option 'fuzzer': Fully qualified name of a python callable that must
-          accept and 'index' keyword argument representing a running counter in
-          the fuzz job and must return a test input (or None, which signals that
-          the fuzzer is "exhausted" and cannot generate more test cases in this
-          fuzz job). The semantics of the generated test input is not
-          restricted by the framework, it is up to the configuration to ensure
-          that the SUT of the fuzz job can deal with the tests generated by the
-          fuzzer of the fuzz job. (Mandatory)
-        - Option 'batch': Number of times the fuzzer is requested to generate a
-          new test and the SUT is called with it. (Optional, default: 1)
-        - Option 'instances': Number of instances of this fuzz job allowed to
-          run in parallel. (Optional, default: inf)
+
+        - Option ``fuzzer``: Fully qualified name of a python callable that must
+          accept and ``index`` keyword argument representing a running counter
+          in the fuzz job and must return a test input (or ``None``, which
+          signals that the fuzzer is "exhausted" and cannot generate more test
+          cases in this fuzz job). The semantics of the generated test input is
+          not restricted by the framework, it is up to the configuration to
+          ensure that the SUT of the fuzz job can deal with the tests generated
+          by the fuzzer of the fuzz job. (Mandatory)
+
+          See package :mod:`fuzzinator.fuzzer` for potential callables.
+
+        - Option ``batch``: Number of times the fuzzer is requested to generate
+          a new test and the SUT is called with it. (Optional, default: 1)
+
+        - Option ``instances``: Number of instances of this fuzz job allowed to
+          run in parallel. (Optional, default: ``inf``)
 
       - Callable options can be implemented as functions or classes with
-        '__call__' method (the latter are instantiated first to get a callable
+        ``__call__`` method (the latter are instantiated first to get a callable
         object). Both constructor calls (if any) and the "real" calls can be
         given keyword arguments. These arguments have to be specified in
-        sections '(sut|fuzz).NAME.OPT[.init]' with appropriate names (where the
-        '.init' sections stand for the constructor arguments).
+        sections ``(sut|fuzz).NAME.OPT[.init]`` with appropriate names (where
+        the ``.init`` sections stand for the constructor arguments).
 
       - All callables can be decorated according to python semantics. The
         decorators must be callable classes themselves and have to be specified
-        in options 'OPT.decorator(N)' with fully qualified name. Multiple
-        decorators can be applied to a callable OPT, their order is specified by
-        an integer index in parentheses. Keyword arguments to be passed to the
-        decorators have to be listed in sections
-        '(sut|fuzz).NAME.OPT.decorator(N)'.
+        in options ``OPT.decorate(N)`` with fully qualified name. Multiple
+        decorators can be applied to a callable ``OPT``, their order is
+        specified by an integer index in parentheses. Keyword arguments to be
+        passed to the decorators have to be listed in sections
+        ``(sut|fuzz).NAME.OPT.decorate(N)``.
+
+        See packages :mod:`fuzzinator.call` and :mod:`fuzzinator.fuzzer` for
+        potential decorators.
     """
 
     def __init__(self, config):
+        """
+        :param configparser.ConfigParser config: the configuration options of the
+            fuzz session.
+
+        :ivar fuzzinator.EventListener listener: a listener object that is
+            called on various events during the fuzz session.
+        """
         self.config = config
 
         # Extract sections describing fuzzing jobs.
@@ -115,6 +157,7 @@ class Controller(object):
         self._lock = Lock()
 
     def run(self):
+        """Start the fuzz session."""
         running_jobs = dict()
         fuzz_idx = 0
         try:

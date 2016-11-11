@@ -7,20 +7,23 @@
 
 import platform
 
-from .callable_decorator import CallableDecorator
+from . import CallableDecorator
 
 
 class PlatformInfoDecorator(CallableDecorator):
     """
-    Decorator for SUT calls to extend issues with 'platform' property.
+    Decorator for SUT calls to extend issues with ``'platform'`` property.
 
-    The new 'platform' issue property will contain the result of Python's
-    platform.platform().
+    The new ``'platform'`` issue property will contain the result of Python's
+    :func:`platform.platform`.
 
-    Example configuration snippet:
-    [sut.foo]
-    #call=...
-    call.decorate(0)=fuzzinator.call.PlatformInfoDecorator
+    **Example configuration snippet:**
+
+        .. code-block:: ini
+
+            [sut.foo]
+            #call=...
+            call.decorate(0)=fuzzinator.call.PlatformInfoDecorator
     """
 
     def decorator(self, **kwargs):

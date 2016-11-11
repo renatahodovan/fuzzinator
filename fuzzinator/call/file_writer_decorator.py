@@ -7,7 +7,7 @@
 
 import os
 
-from .callable_decorator import CallableDecorator
+from . import CallableDecorator
 
 
 class FileWriterDecorator(CallableDecorator):
@@ -15,26 +15,30 @@ class FileWriterDecorator(CallableDecorator):
     Decorator for SUTs that take input from a file: writes the test input to a
     temporary file and replaces the test input with the name of that file.
 
-    Mandatory parameter of the decorator:
-      - 'filename': path pattern for the temporary file, which may contain the
-        substring "{uid}" as a placeholder for a unique string (replaced by the
-        decorator).
+    **Mandatory parameter of the decorator:**
+
+      - ``filename``: path pattern for the temporary file, which may contain the
+        substring ``{uid}`` as a placeholder for a unique string (replaced by
+        the decorator).
 
     The issue returned by the decorated SUT (if any) is extended with the new
-    'filename' property containing the name of the generated file (although the
-    file itself is removed).
+    ``'filename'`` property containing the name of the generated file (although
+    the file itself is removed).
 
-    Example configuration snippet:
-    [sut.foo]
-    call=fuzzinator.call.SubprocessCall
-    call.decorator(0)=fuzzionator.call.FileWriterDecorator
+    **Example configuration snippet:**
 
-    [sut.foo.call]
-    # assuming that foo takes one file as input specified on command line
-    command=/home/alice/foo/bin/foo {test}
+        .. code-block:: ini
 
-    [sut.foo.call.decorator(0)]
-    filename=${fuzzinator:work_dir}/test-{uid}.txt
+            [sut.foo]
+            call=fuzzinator.call.SubprocessCall
+            call.decorate(0)=fuzzionator.call.FileWriterDecorator
+
+            [sut.foo.call]
+            # assuming that foo takes one file as input specified on command line
+            command=/home/alice/foo/bin/foo {test}
+
+            [sut.foo.call.decorate(0)]
+            filename=${fuzzinator:work_dir}/test-{uid}.txt
     """
 
     def decorator(self, filename, **kwargs):

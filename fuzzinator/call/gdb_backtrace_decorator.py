@@ -9,43 +9,49 @@ import json
 import os
 import pexpect
 
-from .callable_decorator import CallableDecorator
+from . import CallableDecorator
 
 
 class GdbBacktraceDecorator(CallableDecorator):
     """
     Decorator for subprocess-based SUT calls with file input to extend issues
-    with 'backtrace' property.
+    with ``'backtrace'`` property.
 
-    Mandatory parameter of the decorator:
-      - 'command': string to pass to GDB as a command to run (all occurrences of
-        "{test}" in the string are replaced by the actual name of the test
+    **Mandatory parameter of the decorator:**
+
+      - ``command``: string to pass to GDB as a command to run (all occurrences
+        of ``{test}`` in the string are replaced by the actual name of the test
         file).
-    Optional parameters of the decorator:
-      - 'cwd': if not None, change working directory before GDB/command
+
+    **Optional parameters of the decorator:**
+
+      - ``cwd``: if not ``None``, change working directory before GDB/command
         invocation.
-      - 'env': if not None, a dictionary of variable names-values to update the
-        environment with.
+      - ``env``: if not ``None``, a dictionary of variable names-values to
+        update the environment with.
 
-    The new 'backtrace' issue property will contain the result of GDB's bt
-    command after the halt of the SUT.
+    The new ``'backtrace'`` issue property will contain the result of GDB's
+    ``bt`` command after the halt of the SUT.
 
-    Example configuration snippet:
-    [sut.foo]
-    call=fuzzinator.call.SubprocessCall
-    call.decorator(0)=fuzzinator.call.GdbBacktraceDecorator
+    **Example configuration snippet:**
 
-    [sut.foo.call]
-    # assuming that {test} is something that can be interpreted by foo as
-    # command line argument
-    command=./bin/foo {test}
-    cwd=/home/alice/foo
-    env={"BAR": "1"}
+        .. code-block:: ini
 
-    [sut.foo.call.decorator(0)]
-    command=${sut.foo.call:command}
-    cwd=${sut.foo.call:cwd}
-    env={"BAR": "1", "BAZ": "1"}
+            [sut.foo]
+            call=fuzzinator.call.SubprocessCall
+            call.decorate(0)=fuzzinator.call.GdbBacktraceDecorator
+
+            [sut.foo.call]
+            # assuming that {test} is something that can be interpreted by foo as
+            # command line argument
+            command=./bin/foo {test}
+            cwd=/home/alice/foo
+            env={"BAR": "1"}
+
+            [sut.foo.call.decorate(0)]
+            command=${sut.foo.call:command}
+            cwd=${sut.foo.call:cwd}
+            env={"BAR": "1", "BAZ": "1"}
     """
 
     def decorator(self, command, cwd=None, env=None, **kwargs):

@@ -7,12 +7,21 @@
 
 
 class EventListener(object):
+    """
+    A no-op base class for listeners that can get notified by
+    :class:`fuzzinator.Controller` on various events of a fuzz sessions.
+
+    .. note::
+
+        Subclasses should be aware that some notification methods may be called
+        from subprocesses.
+    """
 
     def update_load(self, load):
         """
         Invoked when the framework's load changes.
 
-        :param load: number between 0 and controller's capacity.
+        :param int load: number between 0 and controller's capacity.
         """
         pass
 
@@ -20,14 +29,15 @@ class EventListener(object):
         """
         Invoked when a new (still inactive) fuzz job is instantiated.
 
-        :param ident: a unique identifier of the new fuzz job.
-        :param fuzzer: short name of the new fuzz job (name of the coresponding
-            config section without the "fuzz." prefix).
-        :param sut: short name of the SUT of the new fuzz job (name of the
-            coresponding config section without the "sut." prefix).
-        :param cost: cost associated with the new fuzz job.
-        :param batch: batch size of the new fuzz job (number of test cases
-            requested from the fuzzer).
+        :param int ident: a unique identifier of the new fuzz job.
+        :param str fuzzer: short name of the new fuzz job (name of the
+            corresponding config section without the "fuzz." prefix).
+        :param str sut: short name of the SUT of the new fuzz job (name of the
+            corresponding config section without the "sut." prefix).
+        :param int cost: cost associated with the new fuzz job.
+        :param batch: batch size of the new fuzz job, i.e., number of test cases
+            requested from the fuzzer (may be ``inf``).
+        :type batch: int, float
         """
         pass
 
@@ -35,12 +45,12 @@ class EventListener(object):
         """
         Invoked when a new (still inactive) reduce job is instantiated.
 
-        :param ident: a unique identifier of the new reduce job.
-        :param sut: short name of the SUT used in the new reduce job (name of
-            the coresponding config section without the "sut." prefix).
-        :param cost: cost associated with the new reduce job.
-        :param issue_id: 'id' property of the issue to be reduced.
-        :param size: size of the test case associated with the issue to be
+        :param int ident: a unique identifier of the new reduce job.
+        :param str sut: short name of the SUT used in the new reduce job (name
+            of the corresponding config section without the "sut." prefix).
+        :param int cost: cost associated with the new reduce job.
+        :param Any issue_id: ``'id'`` property of the issue to be reduced.
+        :param int size: size of the test case associated with the issue to be
             reduced.
         """
         pass
@@ -49,9 +59,9 @@ class EventListener(object):
         """
         Invoked when a new (still inactive) update job is instantiated.
 
-        :param ident: a unique identifier of the new update job.
-        :param sut: short name of the SUT to be updated (name of the
-            coresponding config section without the "sut." prefix).
+        :param int ident: a unique identifier of the new update job.
+        :param str sut: short name of the SUT to be updated (name of the
+            corresponding config section without the "sut." prefix).
         """
         pass
 
@@ -59,7 +69,7 @@ class EventListener(object):
         """
         Invoked when a previously instantiated job is activated (started).
 
-        :param ident: unique identifier of the activated job.
+        :param int ident: unique identifier of the activated job.
         """
         pass
 
@@ -67,11 +77,11 @@ class EventListener(object):
         """
         Invoked when an activated job makes progress.
 
-        :param ident: unique identifier of the progressing job.
-        :param progress: for fuzz jobs, this is the number of already generated
-            tests (number between 0 and the job's batch size); for reduce jobs,
-            this is the current size of the test case being reduced (number
-            between the original test size and 0).
+        :param int ident: unique identifier of the progressing job.
+        :param int progress: for fuzz jobs, this is the number of already
+            generated tests (number between 0 and the job's batch size); for
+            reduce jobs, this is the current size of the test case being reduced
+            (number between the original test size and 0).
         """
         pass
 
@@ -79,7 +89,7 @@ class EventListener(object):
         """
         Invoked when an active job has finished.
 
-        :param ident: unique identifier of the finished job.
+        :param int ident: unique identifier of the finished job.
         """
         pass
 
@@ -87,10 +97,10 @@ class EventListener(object):
         """
         Invoked when a new issue is found.
 
-        :param issue: the issue that was found (all relevant information - e.g.,
-            the SUT that reported the issue, the test case that triggered the
-            issue, the fuzzer that generated the test case, the ID of the issue
-            - is stored in appropriate properties of the issue).
+        :param dict issue: the issue that was found (all relevant information -
+            e.g., the SUT that reported the issue, the test case that triggered
+            the issue, the fuzzer that generated the test case, the ID of the
+            issue - is stored in appropriate properties of the issue).
         """
         pass
 
@@ -98,7 +108,7 @@ class EventListener(object):
         """
         Invoked on unexpected events.
 
-        :param msg: a string representation of the problem.
+        :param str msg: a string representation of the problem.
         """
         pass
 

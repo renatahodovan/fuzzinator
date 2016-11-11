@@ -23,27 +23,31 @@ class TornadoDecorator(object):
     a http url as test input. The SUT is expected to access the returned url and
     the decorated fuzzer is invoked on every GET access to that url. The
     response to the GET contains the generated test input prepended by a html
-    meta tag to force continuous reloads in the SUT (or a 'window.close()'
+    meta tag to force continuous reloads in the SUT (or a ``window.close()``
     javascript content to force stopping the SUT if the decorated fuzzer cannot
     generate more tests). Useful for transporting fuzz tests to browser SUTs.
 
-    Mandatory parameter of the fuzzer decorator:
-      - 'port': first port to start binding the started http server to (keeps
+    **Mandatory parameter of the fuzzer decorator:**
+
+      - ``port``: first port to start binding the started http server to (keeps
         incrementing until a free port is found).
 
-    Example configuration snippet:
-    [sut.foo]
-    # assuming that foo expects a http url as input, which it tries to access
-    # afterwards
+    **Example configuration snippet:**
 
-    [fuzz.foo-with-bar-over-http]
-    sut=sut.foo
-    #fuzzer=...
-    fuzzer.decorate(0)=fuzzinator.fuzzer.TornadoDecorator
-    batch=5
+        .. code-block:: ini
 
-    [fuzz.foo-with-bar-over-http.fuzzer.decorate(0)]
-    port=8000
+            [sut.foo]
+            # assuming that foo expects a http url as input, which it tries to access
+            # afterwards
+
+            [fuzz.foo-with-bar-over-http]
+            sut=sut.foo
+            #fuzzer=...
+            fuzzer.decorate(0)=fuzzinator.fuzzer.TornadoDecorator
+            batch=5
+
+            [fuzz.foo-with-bar-over-http.fuzzer.decorate(0)]
+            port=8000
     """
 
     def __init__(self, port, **kwargs):

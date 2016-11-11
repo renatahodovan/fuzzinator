@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestRunnerSubprocessCall(object):
+    """ """
 
     def __init__(self, command, cwd=None, env=None, end_texts=None, init_wait=None, **kwargs):
         self.end_texts = json.loads(end_texts) if end_texts else []

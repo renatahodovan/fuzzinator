@@ -6,3 +6,4 @@ fuzzinator.egg-info
 .idea
 .cache
 .tox
+docs/_build

@@ -14,22 +14,27 @@ def TimestampUpdateCondition(path, age):
     """
     File timestamp-based SUT update condition.
 
-    Mandatory parameters of the SUT update condition:
-      - 'path': path to a file or directory to check for its last modification
-        time.
-      - 'age': maximum allowed age of 'path' given in HH:MM:SS format.
+    **Mandatory parameters of the SUT update condition:**
 
-    Result of the SUT update condition:
-      - Returns True if 'path' does not exist or is older than 'age'.
+      - ``path``: path to a file or directory to check for its last modification
+        time.
+      - ``age``: maximum allowed age of ``path`` given in HH:MM:SS format.
+
+    **Result of the SUT update condition:**
+
+      - Returns ``True`` if ``path`` does not exist or is older than ``age``.
 
     Example configuration snippet:
-    [sut.foo]
-    should_update=fuzzinator.update.TimestampUpdateCondition
-    #update=... will be triggered if file timestamp is too old
 
-    [sut.foo.update_condition]
-    path=/home/alice/foo/bin/foo
-    age=24:00:00
+        .. code-block:: ini
+
+            [sut.foo]
+            should_update=fuzzinator.update.TimestampUpdateCondition
+            #update=... will be triggered if file timestamp is too old
+
+            [sut.foo.update_condition]
+            path=/home/alice/foo/bin/foo
+            age=24:00:00
     """
 
     if not os.path.exists(path):

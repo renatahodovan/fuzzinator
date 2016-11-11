@@ -20,50 +20,57 @@ class AFLRunner(object):
     inputs to the SUT. (Thus, all AFL findings are processed, extended, and
     filtered by any and all SUT decorators, uniqueness is determined, etc.)
 
-    For AFL it is best not to run multiple instances in parallel.
+    For AFL, it is best not to run multiple instances in parallel.
 
-    Mandatory parameters of the fuzzer:
-      - 'afl_fuzz': path to the AFL fuzzer tool.
-      - 'sut_command': the string to append to the command string used to invoke
-        AFL, probably the same string that is used for SubprocessCall's command
-        parameter (the "{test}" substring is automatically replaced with the @@
-        input file placeholder used by AFL).
-      - 'input': the directory of initial test cases for AFL.
-      - 'output': the directory that will store the findings of AFL (all
-        occurrences of "{uid}" in the string are replaced by an identifier
+    **Mandatory parameters of the fuzzer:**
+
+      - ``afl_fuzz``: path to the AFL fuzzer tool.
+      - ``sut_command``: the string to append to the command string used to
+        invoke AFL, probably the same string that is used for
+        :func:`fuzzinator.call.SubprocessCall`'s command parameter (the
+        ``{test}`` substring is automatically replaced with the ``@@`` input
+        file placeholder used by AFL).
+      - ``input``: the directory of initial test cases for AFL.
+      - ``output``: the directory that will store the findings of AFL (all
+        occurrences of ``{uid}`` in the string are replaced by an identifier
         unique to this fuzz job).
-    Optional parameters of the fuzzer:
-      - 'cwd': if not None, change working directory before invoking AFL.
-      - 'env': if not None, a dictionary of variable names-values to update the
-        environment with (AFL_NO_UI=1 will be added automatically to suppress
-        AFL's own UI).
-      - 'timeout': if not None, pass its value as the '-t' timeout parameter to
-        AFL.
-      - 'dictionary': if not None, pass its value as the '-x' dictionary
+
+    **Optional parameters of the fuzzer:**
+
+      - ``cwd``: if not ``None``, change working directory before invoking AFL.
+      - ``env``: if not ``None``, a dictionary of variable names-values to
+        update the environment with (``AFL_NO_UI=1`` will be added automatically
+        to suppress AFL's own UI).
+      - ``timeout``: if not ``None``, pass its value as the ``-t`` timeout
+        parameter to AFL.
+      - ``dictionary``: if not ``None``, pass its value as the ``-x`` dictionary
         parameter to AFL.
 
-    Example configuration snippet:
-    [sut.foo]
-    call=fuzzinator.call.SubprocessCall
+    **Example configuration snippet:**
 
-    [sut.foo.call]
-    command=./bin/foo {test}
-    cwd=/home/alice/foo
-    env={"BAR": "1"}
+        .. code-block:: ini
 
-    [fuzz.foo-with-afl]
-    sut=sut.foo
-    fuzzer=fuzzinator.fuzzer.AFLRunner
-    batch=inf
-    instances=1
+            [sut.foo]
+            call=fuzzinator.call.SubprocessCall
 
-    [fuzz.foo-with-afl.fuzzer.init]
-    afl_fuzz=/home/alice/afl/afl-fuzz
-    sut_command=${sut.foo.call:command}
-    cwd=${sut.foo.call:cwd}
-    env=${sut.foo.call:env}
-    input=/home/alice/foo-inputs
-    output=${fuzzinator:work_dir}/afl-output/{uid}
+            [sut.foo.call]
+            command=./bin/foo {test}
+            cwd=/home/alice/foo
+            env={"BAR": "1"}
+
+            [fuzz.foo-with-afl]
+            sut=sut.foo
+            fuzzer=fuzzinator.fuzzer.AFLRunner
+            batch=inf
+            instances=1
+
+            [fuzz.foo-with-afl.fuzzer.init]
+            afl_fuzz=/home/alice/afl/afl-fuzz
+            sut_command=${sut.foo.call:command}
+            cwd=${sut.foo.call:cwd}
+            env=${sut.foo.call:env}
+            input=/home/alice/foo-inputs
+            output=${fuzzinator:work_dir}/afl-output/{uid}
     """
 
     def __init__(self, afl_fuzz, input, output, sut_command, cwd=None, env=None, timeout=None, dictionary=None, **kwargs):

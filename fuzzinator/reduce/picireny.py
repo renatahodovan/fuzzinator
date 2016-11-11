@@ -10,7 +10,6 @@ import json
 import logging
 import os
 import picire
-import picireny
 
 from .picire_tester import PicireTester
 
@@ -27,31 +26,42 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
     Test case reducer based on the Picireny Hierarchical Delta Debugging
     Framework.
 
-    Mandatory parameters of the reducer:
-      - 'grammar', 'start_rule'
-    Optional parameters of the reducer:
-      - 'replacements', 'islands', 'parallel', 'combine_loops', 'split_method',
-        'subset_first', 'subset_iterator', 'complement_iterator', 'jobs',
-        'max_utilization', 'encoding', 'disable_cache', 'cleanup'
+    **Mandatory parameters of the reducer:**
+
+      - ``grammar``, ``start_rule``
+
+    **Optional parameters of the reducer:**
+
+      - ``replacements``, ``islands``, ``parallel``, ``combine_loops``,
+        ``split_method``, ``subset_first``, ``subset_iterator``,
+        ``complement_iterator``, ``jobs``, ``max_utilization``, ``encoding``,
+        ``disable_cache``, ``cleanup``
+
     Refer to https://github.com/renatahodovan/picireny for configuring Picireny.
 
     Note: This reducer is capable of detecting new issues found during the test
     reduction (if any).
 
-    Example configuration snippet:
-    [sut.foo]
-    #call=...
-    cost=1
-    reduce=fuzzinator.reduce.Picireny
-    reduce_cost=4
+    **Example configuration snippet:**
 
-    [sut.foo.reduce]
-    grammar=/home/alice/grammars-v4/HTMLParser.g4 /home/alice/grammars-v4/HTMLLexer.g4
-    start_rule=htmlDocument
-    parallel=True
-    jobs=4
-    subset_iterator=skip
+        .. code-block:: ini
+
+            [sut.foo]
+            #call=...
+            cost=1
+            reduce=fuzzinator.reduce.Picireny
+            reduce_cost=4
+
+            [sut.foo.reduce]
+            grammar=/home/alice/grammars-v4/HTMLParser.g4 /home/alice/grammars-v4/HTMLLexer.g4
+            start_rule=htmlDocument
+            parallel=True
+            jobs=4
+            subset_iterator=skip
     """
+
+    # TODO: may be moved to start of file once picireny is available from pypi
+    import picireny
 
     def eval_arg(arg):
         return eval(arg) if isinstance(arg, str) else arg

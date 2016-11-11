@@ -23,26 +23,32 @@ def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
     """
     Test case reducer based on the Picire Parallel Delta Debugging Framework.
 
-    Optional parameters of the reducer:
-      - 'parallel', 'combine_loops', 'split_method', 'subset_first',
-        'subset_iterator', 'complement_iterator', 'jobs', 'max_utilization',
-        'encoding', 'atom', 'disable_cache', 'cleanup'
+    **Optional parameters of the reducer:**
+
+      - ``parallel``, ``combine_loops``, ``split_method``, ``subset_first``,
+        ``subset_iterator``, ``complement_iterator``, ``jobs``,
+        ``max_utilization``, ``encoding``, ``atom``, ``disable_cache``,
+        ``cleanup``
+
     Refer to https://github.com/renatahodovan/picire for configuring Picire.
 
     Note: This reducer is capable of detecting new issues found during the test
     reduction (if any).
 
-    Example configuration snippet:
-    [sut.foo]
-    #call=...
-    cost=1
-    reduce=fuzzinator.reduce.Picire
-    reduce_cost=4
+    **Example configuration snippet:**
 
-    [sut.foo.reduce]
-    parallel=True
-    jobs=4
-    subset_iterator=skip
+        .. code-block:: ini
+
+            [sut.foo]
+            #call=...
+            cost=1
+            reduce=fuzzinator.reduce.Picire
+            reduce_cost=4
+
+            [sut.foo.reduce]
+            parallel=True
+            jobs=4
+            subset_iterator=skip
     """
 
     def eval_arg(arg):

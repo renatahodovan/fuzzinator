@@ -7,3 +7,9 @@
 
 from .subprocess_update import SubprocessUpdate
 from .timestamp_update_condition import TimestampUpdateCondition
+
+
+__all__ = [
+    'SubprocessUpdate',
+    'TimestampUpdateCondition',
+]

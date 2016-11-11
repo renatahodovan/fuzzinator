@@ -132,7 +132,7 @@ release = version
 if release.endswith('r'):
     try:
         import subprocess
-        release = '%s+%s' % (version, subprocess.check_output('git show -s --date=format:"%Y%m%dT%H%M%S%z" --format="%cd-%h"',
+        release = '%s+%s' % (version, subprocess.check_output('git show -s --format="%h"',
                                                               shell=True, universal_newlines=True))
     except:
         pass

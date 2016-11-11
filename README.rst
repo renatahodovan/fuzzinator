@@ -3,6 +3,12 @@ Fuzzinator
 ==========
 *Random Testing Framework*
 
+.. image:: https://badge.fury.io/py/fuzzinator.svg
+   :target: https://badge.fury.io/py/fuzzinator
+.. image:: https://travis-ci.org/renatahodovan/fuzzinator.svg?branch=master
+   :target: https://travis-ci.org/renatahodovan/fuzzinator
+.. image:: https://readthedocs.org/projects/fuzzinator/badge/?version=latest
+   :target: http://fuzzinator.readthedocs.io/en/latest/
 
 .. start included documentation
 

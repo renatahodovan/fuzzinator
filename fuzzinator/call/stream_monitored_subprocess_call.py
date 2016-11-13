@@ -83,6 +83,7 @@ class StreamMonitoredSubprocessCall(object):
 
         try:
             os.kill(self.proc.pid, signal.SIGKILL)
+            self.proc.wait()
         except:
             pass
 

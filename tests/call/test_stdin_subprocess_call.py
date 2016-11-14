@@ -10,7 +10,7 @@ import os
 
 import fuzzinator
 
-from common_call import resources_dir
+from common_call import blinesep, resources_dir
 
 
 @pytest.mark.parametrize('command, cwd, env, test, exp', [
@@ -18,7 +18,7 @@ from common_call import resources_dir
     ('%s --echo-stdin --exit-code 1' % os.path.join(resources_dir, 'mock_tool.py'), None, None, b'foo', {'stdout': b'foo', 'stderr': b'', 'exit_code': 1}),
     ('%s --echo-stdin --to-stderr --exit-code 1' % os.path.join(resources_dir, 'mock_tool.py'), None, None, b'foo', {'stdout': b'', 'stderr': b'foo', 'exit_code': 1}),
     ('%s --echo-stdin --exit-code 1' % os.path.join('.', 'mock_tool.py'), resources_dir, None, b'foo', {'stdout': b'foo', 'stderr': b'', 'exit_code': 1}),
-    ('%s --print-env BAR --echo-stdin --exit-code 1' % os.path.join('.', 'mock_tool.py'), resources_dir, '{"BAR": "baz"}', b'foo', {'stdout': b'baz\nfoo', 'stderr': b'', 'exit_code': 1}),
+    ('%s --print-env BAR --echo-stdin --exit-code 1' % os.path.join('.', 'mock_tool.py'), resources_dir, '{"BAR": "baz"}', b'foo', {'stdout': b'baz' + blinesep + b'foo', 'stderr': b'', 'exit_code': 1}),
 ])
 def test_stdin_subprocess_call(command, cwd, env, test, exp):
     assert fuzzinator.call.StdinSubprocessCall(command, cwd=cwd, env=env, test=test) == exp

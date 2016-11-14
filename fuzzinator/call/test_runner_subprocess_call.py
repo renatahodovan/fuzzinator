@@ -18,7 +18,11 @@ logger = logging.getLogger(__name__)
 
 
 class TestRunnerSubprocessCall(object):
-    """ """
+    """
+    .. note::
+
+       Not available on platforms without fcntl support (e.g., Windows).
+    """
 
     def __init__(self, command, cwd=None, env=None, end_texts=None, init_wait=None, **kwargs):
         self.end_texts = json.loads(end_texts) if end_texts else []
@@ -52,7 +56,6 @@ class TestRunnerSubprocessCall(object):
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
                                      stdin=subprocess.PIPE,
-                                     close_fds=True,
                                      cwd=self.cwd,
                                      env=self.env)
         if init_wait:

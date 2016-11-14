@@ -12,11 +12,9 @@ from .file_writer_decorator import FileWriterDecorator
 from .gdb_backtrace_decorator import GdbBacktraceDecorator
 from .platform_info_decorator import PlatformInfoDecorator
 from .stdin_subprocess_call import StdinSubprocessCall
-from .stream_monitored_subprocess_call import StreamMonitoredSubprocessCall
 from .stream_regex_filter import StreamRegexFilter
 from .subprocess_call import SubprocessCall
 from .subprocess_property_decorator import SubprocessPropertyDecorator
-from .test_runner_subprocess_call import TestRunnerSubprocessCall
 from .unique_id_decorator import UniqueIdDecorator
 
 __all__ = [
@@ -27,10 +25,25 @@ __all__ = [
     'GdbBacktraceDecorator',
     'PlatformInfoDecorator',
     'StdinSubprocessCall',
-    'StreamMonitoredSubprocessCall',
     'StreamRegexFilter',
     'SubprocessCall',
     'SubprocessPropertyDecorator',
-    'TestRunnerSubprocessCall',
     'UniqueIdDecorator',
 ]
+
+try:
+    from .stream_monitored_subprocess_call import StreamMonitoredSubprocessCall
+    __all__.append('StreamMonitoredSubprocessCall')
+except ImportError:
+    pass
+
+try:
+    from .test_runner_subprocess_call import TestRunnerSubprocessCall
+    __all__.append('TestRunnerSubprocessCall')
+except ImportError:
+    pass
+
+# sorting __all__ has no functional use but seems to be needed to get
+# autodoc-generated sections in the correct alphabetical order
+# (autodoc_member_order='alphabetical' in docs/conf.py didn't do the job)
+__all__.sort()

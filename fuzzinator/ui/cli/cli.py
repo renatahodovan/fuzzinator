@@ -18,6 +18,7 @@ from .cli_listener import CliListener
 
 def execute(args=None, parser=None):
     parser = build_parser(parent=parser)
+    parser.add_argument('--max-cycles', metavar='N', default=None, type=int, help='limit number of fuzz job cycles to %(metavar)s (default is no limit)')
     arguments = parser.parse_args(args)
 
     logger = logging.getLogger('fuzzinator')
@@ -31,6 +32,6 @@ def execute(args=None, parser=None):
     controller.listener = CliListener()
 
     try:
-        controller.run()
+        controller.run(max_cycles=arguments.max_cycles)
     except KeyboardInterrupt:
         pass

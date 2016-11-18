@@ -7,6 +7,8 @@ Fuzzinator
    :target: https://badge.fury.io/py/fuzzinator
 .. image:: https://travis-ci.org/renatahodovan/fuzzinator.svg?branch=master
    :target: https://travis-ci.org/renatahodovan/fuzzinator
+.. image:: https://ci.appveyor.com/api/projects/status/mhdvgk65p0r7fkxr/branch/master?svg=true
+   :target: https://ci.appveyor.com/project/renatahodovan/fuzzinator/branch/master
 .. image:: https://readthedocs.org/projects/fuzzinator/badge/?version=latest
    :target: http://fuzzinator.readthedocs.io/en/latest/
 

@@ -54,7 +54,6 @@ def SubprocessCall(command, cwd=None, env=None, test=None, **kwargs):
                           shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE,
-                          close_fds=True,
                           cwd=cwd or os.getcwd(),
                           env=env) as proc:
         stdout, stderr = proc.communicate()

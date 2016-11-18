@@ -10,15 +10,15 @@ import os
 
 import fuzzinator
 
-from common_call import resources_dir
+from common_call import blinesep, resources_dir
 
 
 @pytest.mark.parametrize('command, cwd, env, test, exp', [
     ('%s --print-args {test}' % os.path.join(resources_dir, 'mock_tool.py'), None, None, 'foo', None),
-    ('%s --print-args --exit-code 1 {test}' % os.path.join(resources_dir, 'mock_tool.py'), None, None, 'foo', {'stdout': b'foo\n', 'stderr': b'', 'exit_code': 1}),
-    ('%s --print-args --to-stderr --exit-code 1 {test}' % os.path.join(resources_dir, 'mock_tool.py'), None, None, 'foo', {'stdout': b'', 'stderr': b'foo\n', 'exit_code': 1}),
-    ('%s --print-args --exit-code 1 {test}' % os.path.join('.', 'mock_tool.py'), resources_dir, None, 'foo', {'stdout': b'foo\n', 'stderr': b'', 'exit_code': 1}),
-    ('%s --print-env BAR --print-args --exit-code 1 {test}' % os.path.join('.', 'mock_tool.py'), resources_dir, '{"BAR": "baz"}', 'foo', {'stdout': b'foo\nbaz\n', 'stderr': b'', 'exit_code': 1}),
+    ('%s --print-args --exit-code 1 {test}' % os.path.join(resources_dir, 'mock_tool.py'), None, None, 'foo', {'stdout': b'foo' + blinesep, 'stderr': b'', 'exit_code': 1}),
+    ('%s --print-args --to-stderr --exit-code 1 {test}' % os.path.join(resources_dir, 'mock_tool.py'), None, None, 'foo', {'stdout': b'', 'stderr': b'foo' + blinesep, 'exit_code': 1}),
+    ('%s --print-args --exit-code 1 {test}' % os.path.join('.', 'mock_tool.py'), resources_dir, None, 'foo', {'stdout': b'foo' + blinesep, 'stderr': b'', 'exit_code': 1}),
+    ('%s --print-env BAR --print-args --exit-code 1 {test}' % os.path.join('.', 'mock_tool.py'), resources_dir, '{"BAR": "baz"}', 'foo', {'stdout': b'foo' + blinesep + b'baz' + blinesep, 'stderr': b'', 'exit_code': 1}),
 ])
 def test_subprocess_call(command, cwd, env, test, exp):
     assert fuzzinator.call.SubprocessCall(command, cwd=cwd, env=env, test=test) == exp

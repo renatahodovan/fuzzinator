@@ -17,9 +17,9 @@ from common_fuzzer import resources_dir
     ('{tmpdir}/tests-{{uid}}', {b'foo\n', b'bar\n', b'baz\n'})
 ])
 @pytest.mark.parametrize('command, cwd, env', [
-    ('cp -R %s/* {tmpdir}/tests-{{uid}}' % os.path.join(resources_dir, 'mock_tests'), None, None),
-    ('cp -R %s/* {tmpdir}/tests-{{uid}}' % os.path.join('.', 'mock_tests'), resources_dir, None),
-    ('cp -R %s/* {tmpdir}/tests-{{uid}}' % os.path.join('.', '$TESTS'), resources_dir, '{"TESTS": "mock_tests"}'),
+    ('%s -i %s -o {tmpdir}/tests-{{uid}}' % (os.path.join(resources_dir, 'mock_fuzzer.py'), os.path.join(resources_dir, 'mock_tests')), None, None),
+    ('%s -i %s -o {tmpdir}/tests-{{uid}}' % (os.path.join('.', 'mock_fuzzer.py'), 'mock_tests'), resources_dir, None),
+    ('%s -o {tmpdir}/tests-{{uid}}' % (os.path.join('.', 'mock_fuzzer.py')), resources_dir, '{"IDIR": "mock_tests"}'),
 ])
 def test_subprocess_runner(outdir, command, cwd, env, exp, tmpdir):
     fuzzer = fuzzinator.fuzzer.SubprocessRunner(outdir=outdir.format(tmpdir=tmpdir), command=command.format(tmpdir=tmpdir), cwd=cwd, env=env)

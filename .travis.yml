@@ -7,9 +7,8 @@ matrix:
       env: TOXENV=py35
 sudo: false
 
-# TODO: no tests for now, all tox is testing whether fuzzinator installs OK
-# TODO: start mongodb once tests are implemented
+# TODO: start mongodb once more complex tests are implemented
 # services: mongodb
 
 install: pip install -U tox
-script: tox
+script: tox -v

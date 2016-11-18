@@ -17,7 +17,11 @@ import subprocess
 
 
 class StreamMonitoredSubprocessCall(object):
-    """ """
+    """
+    .. note::
+
+       Not available on platforms without fcntl support (e.g., Windows).
+    """
 
     def __init__(self, command, cwd=None, env=None, end_patterns=None, **kwargs):
         self.command = command
@@ -35,7 +39,6 @@ class StreamMonitoredSubprocessCall(object):
         self.proc = subprocess.Popen(shlex.split(self.command.format(test=test)),
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
-                                     close_fds=True,
                                      cwd=self.cwd or os.getcwd(),
                                      env=self.env)
         return self.wait_til_end()

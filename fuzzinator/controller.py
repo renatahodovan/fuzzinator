@@ -156,12 +156,25 @@ class Controller(object):
         self._issue_queue = Queue()
         self._lock = Lock()
 
-    def run(self):
-        """Start the fuzz session."""
+    def run(self, *, max_cycles=None):
+        """
+        Start the fuzz session.
+
+        :param int max_cycles: maximum number to iterate through the fuzz jobs
+            defined in the configuration (defaults to ``inf``).
+        """
+        max_cycles = max_cycles if max_cycles is not None else float('inf')
+        cycle = 0
         running_jobs = dict()
         fuzz_idx = 0
         try:
             while True:
+                if fuzz_idx == 0:
+                    cycle += 1
+                if cycle > max_cycles or (not self.fuzzers and max_cycles != float('inf')):
+                    self._wait_for_load(self.capacity, running_jobs)
+                    break
+
                 next_job = None
                 if not self._issue_queue.empty():
 

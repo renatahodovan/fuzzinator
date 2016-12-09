@@ -37,7 +37,7 @@ class MongoDriver(object):
     def add_issue(self, issue):
         result = self._db.fuzzinator_issues.update_one(
             {'id': issue['id'], 'sut': issue['sut']},
-            {'$set': issue},
+            {'$setOnInsert': issue},
             upsert=True
         )
         issue['_id'] = result.upserted_id

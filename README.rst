@@ -56,12 +56,10 @@ Requirements
 * pip_ and setuptools Python packages (the latter is automatically installed by
   pip)
 * MongoDB_ (either local installation or access to remote database)
-* Picireny_ (see its documentation why manual installation is required)
 
 .. _Python: https://www.python.org
 .. _pip: https://pip.pypa.io
 .. _MongoDB: https://www.mongodb.com
-.. _Picireny: https://github.com/renatahodovan/picireny
 
 
 Install

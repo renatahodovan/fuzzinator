@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -10,6 +10,7 @@ import json
 import logging
 import os
 import picire
+import picireny
 
 from .picire_tester import PicireTester
 
@@ -17,7 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
-             grammar, start_rule, replacements=None, islands=None,
+             grammar, start_rule, replacements=None, islands=None, lang='python',
+             hdd_star=True,
              parallel=False, combine_loops=False,
              split_method='zeller', subset_first=True, subset_iterator='forward', complement_iterator='forward',
              jobs=os.cpu_count(), max_utilization=100, encoding=None, disable_cache=False, cleanup=True,
@@ -32,10 +34,10 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
 
     **Optional parameters of the reducer:**
 
-      - ``replacements``, ``islands``, ``parallel``, ``combine_loops``,
-        ``split_method``, ``subset_first``, ``subset_iterator``,
-        ``complement_iterator``, ``jobs``, ``max_utilization``, ``encoding``,
-        ``disable_cache``, ``cleanup``
+      - ``replacements``, ``islands``, ``lang``, ``hdd_star``, ``parallel``,
+        ``combine_loops``, ``split_method``, ``subset_first``,
+        ``subset_iterator``, ``complement_iterator``, ``jobs``,
+        ``max_utilization``, ``encoding``, ``disable_cache``, ``cleanup``
 
     Refer to https://github.com/renatahodovan/picireny for configuring Picireny.
 
@@ -59,9 +61,6 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
             jobs=4
             subset_iterator=skip
     """
-
-    # TODO: may be moved to start of file once picireny is available from pypi
-    import picireny
 
     def eval_arg(arg):
         return eval(arg) if isinstance(arg, str) else arg
@@ -134,11 +133,13 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
                        src=src,
                        encoding=encoding,
                        out=work_dir,
-                       antlr=os.path.join(os.path.expanduser('~'), '.picireny', 'antlr.jar'),
+                       antlr=picireny.cli.antlr_default_path,
                        grammar=json.loads(grammar),
-                       islands=islands,
                        start_rule=start_rule,
                        replacements=replacements,
+                       islands=islands,
+                       lang=lang,
+                       hdd_star=hdd_star,
                        parallel=parallel,
                        disable_cache=disable_cache,
                        cleanup=cleanup)

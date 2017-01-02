@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -23,7 +23,7 @@ setup(
     long_description=open('README.rst').read(),
     zip_safe=False,
     include_package_data=True,
-    install_requires=['chardet', 'pexpect', 'picire', 'psutil',
+    install_requires=['chardet', 'pexpect', 'picire==16.7', 'picireny==16.12', 'psutil',
                       'PyGithub', 'pymongo', 'pyperclip', 'python-bugzilla',
                       'rainbow_logging_handler', 'sphinx', 'sphinx_rtd_theme',
                       'tornado', 'urwid'],

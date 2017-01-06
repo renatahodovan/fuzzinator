@@ -14,7 +14,7 @@ from collections import OrderedDict
 from math import ceil
 from urwid import *
 
-from fuzzinator.config import config_get_name_from_section
+from fuzzinator.config import config_get_callable, config_get_name_from_section
 from fuzzinator.tracker.base import init_tracker
 
 from .decor_widgets import PatternBox
@@ -52,7 +52,7 @@ class MainWindow(PopUpLauncher):
 
         self.footer_btns = OrderedDict()
         self.footer_btns['about'] = AboutButton('F1 About')
-        self.footer_btns['menu'] = FormattedButton('F2')
+        self.footer_btns['validate'] = FormattedButton('F2 Validate', on_press=lambda btn: self.validate())
         self.footer_btns['view'] = ViewButton('F3 View', self.issues_table, self.config, self.trackers)
         self.footer_btns['edit'] = EditButton('F4 Edit', self.issues_table)
         self.footer_btns['copy'] = FormattedButton('F5 Copy', on_press=lambda btn: self.copy_selected())
@@ -74,6 +74,7 @@ class MainWindow(PopUpLauncher):
 
     def warning_popup(self, msg):
         self.warning_msg = msg
+
         width = max([len(line) for line in msg.splitlines()] + [20])
         height = msg.count('\n') + 4
         cols, rows = os.get_terminal_size()
@@ -92,6 +93,25 @@ class MainWindow(PopUpLauncher):
         if self.issues_table.selection:
             issue = self.issues_table.selection.data
             self.controller.add_reduce_job(issue=self.db.find_issue_by_id(issue['_id']))
+
+    def validate(self):
+        if self.issues_table.selection:
+            sut_section = 'sut.' + self.issues_table.selection.data['sut']
+
+            if self.config.has_option(sut_section, 'reduce_call'):
+                sut_call, sut_call_kwargs = config_get_callable(self.config, sut_section, 'reduce_call')
+            else:
+                sut_call, sut_call_kwargs = config_get_callable(self.config, sut_section, 'call')
+
+            with sut_call:
+                issue = sut_call(test=self.issues_table.selection.data['test'], **sut_call_kwargs)
+                expected_id = self.issues_table.selection.data['id']
+                if issue and issue['id'] == expected_id:
+                    msg = '{id} is still valid.'.format(id=expected_id.decode('utf-8', errors='ignore'))
+                    self.db.update_issue(issue=self.issues_table.selection.data, _set=issue)
+                else:
+                    msg = '{id} is not valid anymore.'.format(id=expected_id.decode('utf-8', errors='ignore'))
+                self.warning_popup(msg)
 
     def copy_selected(self):
         if self.issues_table.selection:
@@ -114,7 +134,7 @@ class MainWindow(PopUpLauncher):
         elif key == 'f1':
             self.footer_btns['about'].keypress((0, 0), 'enter')
         elif key == 'f2':
-            self.footer_btns['menu'].keypress((0, 0), 'enter')
+            self.footer_btns['validate'].keypress((0, 0), 'enter')
         elif key == 'f3':
             self.footer_btns['view'].keypress((0, 0), 'enter')
         elif key == 'f4':

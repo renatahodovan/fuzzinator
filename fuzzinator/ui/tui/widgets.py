@@ -98,7 +98,7 @@ class MainWindow(PopUpLauncher):
             sut = self.issues_table.selection.data['sut']
             sut_section = 'sut.' + sut
             if sut not in self.trackers:
-                self.trackers[sut] = init_tracker(self.config, sut_section, self.db)
+                self.trackers[sut] = init_tracker(self.config, sut_section)
             pyperclip.copy(self.trackers[sut].format_issue(self.db.find_issue_by_id(self.issues_table.selection.data['_id'])))
 
     def keypress(self, size, key):

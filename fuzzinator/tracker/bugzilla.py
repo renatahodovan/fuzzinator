@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -15,9 +15,9 @@ from .base import BaseTracker
 
 class BugzillaReport(BaseTracker):
 
-    def __init__(self, url, template, title=None):
+    def __init__(self, product, url, template, title=None):
         BaseTracker.__init__(self, template=template, title=title)
-        self.template = template
+        self.product = product
         self.bzapi = Bugzilla(url)
 
     @property
@@ -31,12 +31,8 @@ class BugzillaReport(BaseTracker):
         except BugzillaError:
             return False
 
-    def format_issue(self, issue):
-        with open(self.template, 'r') as f:
-            return Template(f.read()).substitute(self.decode_issue(issue))
-
     def find_issue(self, issue):
-        return self.bzapi.query(self.bzapi.build_query(product='WebKit',
+        return self.bzapi.query(self.bzapi.build_query(product=self.product,
                                                        status=['NEW', 'REOPENED', 'ASSIGNED'],
                                                        short_desc=self.title(issue),
                                                        include_fields=['id', 'summary', 'weburl']))
@@ -59,3 +55,6 @@ class BugzillaReport(BaseTracker):
 
     def __call__(self, issue):
         pass
+
+    def issue_url(self, issue):
+        return issue.weburl

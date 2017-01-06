@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -24,8 +24,6 @@ class SingletonMetaClass(type):
 
 
 class BaseTracker(object, metaclass=SingletonMetaClass):
-
-    db = None
 
     def __init__(self, template=None, title=None):
         self.template = template
@@ -57,15 +55,14 @@ class BaseTracker(object, metaclass=SingletonMetaClass):
     def report_issue(self, **kwargs):
         pass
 
-    def set_reported(self, issue, url):
-        self.db.update_issue(issue, {'reported': url})
+    def issue_url(self, issue):
+        return ''
 
 
-def init_tracker(config, sut_section, db):
+def init_tracker(config, sut_section):
     if config.has_option(sut_section, 'report'):
         tracker, _ = config_get_callable(config, sut_section, 'report')
     else:
         tracker = BaseTracker()
 
-    tracker.db = db
     return tracker

@@ -5,12 +5,11 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-from os import get_terminal_size
 from urwid import *
 
-from fuzzinator.tracker import BugzillaReport, GithubReport
+from fuzzinator.tracker import *
 from fuzzinator.tracker.base import init_tracker
-from .reporter_dialogs import BugzillaReportDialog, GithubReportDialog
+from .reporter_dialogs import *
 from .button import FormattedButton
 from .dialogs import AboutDialog, EditIssueDialog, FormattedIssueDialog
 
@@ -60,7 +59,7 @@ class ViewButton(FullScreenPopupLauncher):
         sut = focus.data['sut']
         sut_section = 'sut.' + sut
         if sut not in self.trackers:
-            self.trackers[sut] = init_tracker(self.config, sut_section, self.issues_table.db)
+            self.trackers[sut] = init_tracker(self.config, sut_section)
         pop_up = FormattedIssueDialog(issue=self.issues_table.db.find_issue_by_id(focus.data['_id']),
                                       tracker=self.trackers[sut])
 
@@ -104,19 +103,16 @@ class ReportButton(FullScreenPopupLauncher):
         sut = focus.data['sut']
         sut_section = 'sut.' + sut
         if sut not in self.trackers:
-            self.trackers[sut] = init_tracker(self.config, sut_section, self.issues_table.db)
+            self.trackers[sut] = init_tracker(self.config, sut_section)
 
-        self.get_pop_up_parameters = super(ReportButton, self).get_pop_up_parameters
         issue_details = self.issues_table.db.find_issue_by_id(focus.data['_id'])
-        if isinstance(self.trackers[sut], BugzillaReport):
-            popup_cls = BugzillaReportDialog
-        elif isinstance(self.trackers[sut], GithubReport):
-            popup_cls = GithubReportDialog
-        else:
+        try:
+            popup_cls = eval(self.trackers[sut].__class__.__name__ + 'Dialog')
+        except:
             # If there is no reporter interface for the given tracker
             # then we only display the formatted issue.
             popup_cls = FormattedIssueDialog
 
-        pop_up = popup_cls(issue=issue_details, tracker=self.trackers[sut])
+        pop_up = popup_cls(issue=issue_details, tracker=self.trackers[sut], db=self.issues_table.db)
         connect_signal(pop_up, 'close', lambda button: self.close_pop_up())
         return pop_up

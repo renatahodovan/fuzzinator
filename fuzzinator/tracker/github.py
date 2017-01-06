@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -24,32 +24,28 @@ from .base import BaseTracker
 class GithubReport(BaseTracker):
 
     def __init__(self, repository, template, title=None):
-        BaseTracker.__init__(self, template=title, title=title)
+        BaseTracker.__init__(self, template=template, title=title)
         self.repository = repository
-        self.template = template
         self.ghapi = Github().get_repo(self.repository)
+        self.gh = None
 
     @property
     def logged_in(self):
         try:
-            gh.get_user().id
+            self.gh.get_user().id
             return True
         except:
             return False
 
     def login(self, username, pwd):
         try:
-            gh = Github(username, pwd)
+            self.gh = Github(username, pwd)
             # This expression has no effect but will throw an exception if the authentication failed.
-            gh.get_user().id
-            self.ghapi = gh.get_repo(self.repository)
+            self.gh.get_user().id
+            self.ghapi = self.gh.get_repo(self.repository)
             return True
         except BadCredentialsException:
             return False
-
-    def format_issue(self, issue):
-        with open(self.template, 'r') as f:
-            return Template(f.read()).substitute(self.decode_issue(issue))
 
     def find_issue(self, issue):
         options = []
@@ -66,9 +62,11 @@ class GithubReport(BaseTracker):
                     options.append(entry)
         return options
 
-    def report_issue(self, report_details):
-        return self.ghapi.create_issue(title=report_details['title'],
-                                       body=report_details['body'])
+    def report_issue(self, title, body):
+        return self.ghapi.create_issue(title=title, body=body)
 
     def __call__(self, issue):
         pass
+
+    def issue_url(self, issue):
+        return issue.html_url

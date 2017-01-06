@@ -1,18 +1,18 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-from urwid import *
 from os import get_terminal_size
+from urwid import *
 
 from fuzzinator.tracker import BugzillaReport, GithubReport
 from fuzzinator.tracker.base import init_tracker
 from .reporter_dialogs import BugzillaReportDialog, GithubReportDialog
 from .button import FormattedButton
-from .dialogs import EditIssueDialog, FormattedIssueDialog
+from .dialogs import AboutDialog, EditIssueDialog, FormattedIssueDialog
 
 
 class FullScreenPopupLauncher(PopUpLauncher):
@@ -22,8 +22,27 @@ class FullScreenPopupLauncher(PopUpLauncher):
         return {'left': cols // 2, 'top': rows // 2, 'overlay_width': cols, 'overlay_height': rows}
 
 
+class AboutButton(PopUpLauncher):
+
+    def __init__(self, label):
+        super(AboutButton, self).__init__(FormattedButton(label))
+        self.about = AboutDialog()
+
+        width = max([len(line) for line in self.about.content.splitlines()]) + 10
+        height = self.about.content.count('\n') + 4
+        cols, rows = get_terminal_size()
+        self.get_pop_up_parameters = lambda: dict(left=max(cols // 2 - width // 2, 1),
+                                                  top=min(-rows // 2 - height // 2, -1),
+                                                  overlay_width=width,
+                                                  overlay_height=height)
+        connect_signal(self.original_widget, 'click', lambda btn: self.open_pop_up())
+
+    def create_pop_up(self):
+        connect_signal(self.about, 'close', lambda button: self.close_pop_up())
+        return self.about
+
+
 class ViewButton(FullScreenPopupLauncher):
-    signals = ['click']
 
     def __init__(self, label, issues_table, config, trackers):
         super(ViewButton, self).__init__(FormattedButton(label))
@@ -50,7 +69,6 @@ class ViewButton(FullScreenPopupLauncher):
 
 
 class EditButton(FullScreenPopupLauncher):
-    signals = ['click']
 
     def __init__(self, label, issues_table):
         super(EditButton, self).__init__(FormattedButton(label))
@@ -69,7 +87,6 @@ class EditButton(FullScreenPopupLauncher):
 
 
 class ReportButton(FullScreenPopupLauncher):
-    signals = ['click']
 
     def __init__(self, label, issues_table, config, trackers):
         super(ReportButton, self).__init__(FormattedButton(label))

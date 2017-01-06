@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -20,7 +20,7 @@ from fuzzinator.tracker.base import init_tracker
 from .decor_widgets import PatternBox
 from .button import FormattedButton
 from .dialogs import WarningDialog
-from .popup_buttons import EditButton, ReportButton, ViewButton
+from .popup_buttons import AboutButton, EditButton, ReportButton, ViewButton
 from .graphics import fz_box_pattern, fz_logo_4lines
 from .table import Table, TableColumn
 
@@ -51,7 +51,7 @@ class MainWindow(PopUpLauncher):
         ], dividechars=0)
 
         self.footer_btns = OrderedDict()
-        self.footer_btns['help'] = FormattedButton('F1')
+        self.footer_btns['about'] = AboutButton('F1 About')
         self.footer_btns['menu'] = FormattedButton('F2')
         self.footer_btns['view'] = ViewButton('F3 View', self.issues_table, self.config, self.trackers)
         self.footer_btns['edit'] = EditButton('F4 Edit', self.issues_table)
@@ -112,7 +112,7 @@ class MainWindow(PopUpLauncher):
                 else:
                     self.content_columns.focus_col = 0
         elif key == 'f1':
-            self.footer_btns['help'].keypress((0, 0), 'enter')
+            self.footer_btns['about'].keypress((0, 0), 'enter')
         elif key == 'f2':
             self.footer_btns['menu'].keypress((0, 0), 'enter')
         elif key == 'f3':

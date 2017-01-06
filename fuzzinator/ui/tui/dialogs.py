@@ -1,15 +1,18 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+from email import message_from_string
+from pkg_resources import get_distribution
 from urwid import *
 
 from .decor_widgets import PatternBox
 from .graphics import fz_box_pattern
 from .button import FormattedButton
+from fuzzinator.pkgdata import __version__
 
 
 class Dialog(PopUpTarget):
@@ -48,6 +51,31 @@ class Dialog(PopUpTarget):
                     self.listbox.focus_position = 0
         else:
             super(Dialog, self).keypress(size, key)
+
+
+class AboutDialog(Dialog):
+    def __init__(self, ):
+        self.content = self.compile_about_data()
+        super(AboutDialog, self).__init__(title='About',
+                                          body=[Text(self.content)],
+                                          footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))])
+
+    def compile_about_data(self, prop_width=15):
+        pkg_info = dict(message_from_string(get_distribution('fuzzinator').get_metadata('PKG-INFO')).items())
+        return '{name_prop}: {name}\n' \
+               '{version_prop}: {version}\n' \
+               '{authors_prop}: {authors}\n' \
+               '{mail_prop}: {email}\n' \
+               '{homepage_prop}: {homepage}\n'.format(name_prop='Name'.ljust(prop_width),
+                                                      name=pkg_info['Name'],
+                                                      version_prop='Version'.ljust(prop_width),
+                                                      version=__version__,
+                                                      authors_prop='Authors'.ljust(prop_width),
+                                                      authors=pkg_info['Author'],
+                                                      mail_prop='E-mail'.ljust(prop_width),
+                                                      email=pkg_info['Author-email'],
+                                                      homepage_prop='Homepage'.ljust(prop_width),
+                                                      homepage=pkg_info['Home-page'])
 
 
 class WarningDialog(Dialog):

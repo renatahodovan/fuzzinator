@@ -95,6 +95,10 @@ class ReportButton(FullScreenPopupLauncher):
 
         connect_signal(self.original_widget, 'click', lambda btn: self.open_pop_up())
 
+    def update_entry(self, ident):
+        self.issues_table.update_row(ident)
+        self.close_pop_up()
+
     def create_pop_up(self):
         focus = self.issues_table.listbox.focus
         if not focus:
@@ -114,5 +118,5 @@ class ReportButton(FullScreenPopupLauncher):
             popup_cls = FormattedIssueDialog
 
         pop_up = popup_cls(issue=issue_details, tracker=self.trackers[sut], db=self.issues_table.db)
-        connect_signal(pop_up, 'close', lambda button: self.close_pop_up())
+        connect_signal(pop_up, 'close', lambda button: self.update_entry(focus.data['_id']))
         return pop_up

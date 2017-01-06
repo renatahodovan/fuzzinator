@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -427,6 +427,7 @@ class Table(WidgetWrap):
 
     attr_map = {}
     focus_map = {}
+    row_dict = {}
 
     columns = []
     key_columns = None
@@ -524,16 +525,29 @@ class Table(WidgetWrap):
 
     def add_row(self, data, position=None, attr_map=None, focus_map=None):
         row = TableBodyRow(self, data, header=self.header.row, attr_map=attr_map, focus_map=focus_map)
+        if '_id' in data:
+            self.row_dict[data['_id']] = row
         if not position:
             self.walker.add(row)
         else:
             self.walker.insert(position, row)
         self.update_header()
 
-    def update_ui(self):
-        self._invalidate()
-        self.listbox._invalidate()
-        emit_signal(self, 'refresh', self)
+    def update_row_style(self, ident, attr_map, focus_map):
+        if not self.attr_map:
+            self.row_dict[ident].attr_map = attr_map
+        else:
+            self.row_dict[ident].attr_map = self.attr_map
+            self.row_dict[ident].attr_map.update(attr_map)
+
+        if not self.focus_map:
+            self.row_dict[ident].focus_map = focus_map
+        else:
+            self.row_dict[ident].focus_map = self.focus_map
+            self.row_dict[ident].focus_map.update(self.focus_map)
+
+        self.row_dict[ident]._wrapped_widget.set_attr_map(self.row_dict[ident].attr_map)
+        self.row_dict[ident]._wrapped_widget.set_focus_map(self.row_dict[ident].focus_map)
 
     def clear(self):
         self.listbox.body.clear()

@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -101,6 +101,14 @@ class EventListener(object):
             e.g., the SUT that reported the issue, the test case that triggered
             the issue, the fuzzer that generated the test case, the ID of the
             issue - is stored in appropriate properties of the issue).
+        """
+        pass
+
+    def update_issue(self, issue):
+        """
+        Invoked when the status of an issue changed.
+
+        :param dict issue: the issue object that has changed.
         """
         pass
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -46,6 +46,7 @@ class ReduceJob(CallJob):
             self.listener.warning(msg='Reduce of {ident} failed.'.format(ident=self.issue['id']))
         else:
             self.db.update_issue(self.issue, {'test': reduced_src, 'reduced': True})
+            self.listener.update_issue(issue=self.issue)
 
         issues = list()
         for issue in new_issues:

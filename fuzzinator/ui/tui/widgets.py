@@ -174,10 +174,7 @@ class IssuesTable(Table):
                 self.db.remove_issue_by_id(self[self.focus_position].data['_id'])
                 del self[self.focus_position]
         elif key in ["r", "ctrl r"]:
-            if self.all_issues:
-                self.show_all()
-            else:
-                self.show_less()
+            self._emit('refresh')
         else:
             return super(IssuesTable, self).keypress(size, key)
 
@@ -208,7 +205,12 @@ class IssuesTable(Table):
         self.requery(self.query_data)
         self.walker._modified()
 
-    def add_row(self, data, position=None, attr_map=None, focus_map=None):
+    def update_row(self, ident):
+        issue = self.db.find_issue_by_id(ident)
+        attr_map, focus_map = self.get_attr(issue)
+        super(IssuesTable, self).update_row_style(ident, attr_map, focus_map)
+
+    def get_attr(self, data):
         if data['reported']:
             attr_map = {None: 'issue_reported'}
             focus_map = {None: 'issue_reported_selected'}
@@ -218,6 +220,10 @@ class IssuesTable(Table):
         else:
             attr_map = {None: 'default'}
             focus_map = {None: 'selected'}
+        return attr_map, focus_map
+
+    def add_row(self, data, position=None, attr_map=None, focus_map=None):
+        attr_map, focus_map = self.get_attr(data)
         return super(IssuesTable, self).add_row(data, position=0, attr_map=attr_map, focus_map=focus_map)
 
 

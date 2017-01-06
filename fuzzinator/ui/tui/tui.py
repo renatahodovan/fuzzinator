@@ -93,6 +93,9 @@ class Tui(PopUpLauncher):
         self.loop.set_alarm_in(0.1, self.view.logo.animate, self.view.logo)
         self.view.issues_table.add_row(issue)
 
+    def update_issue(self, issue):
+        self.view.issues_table.update_row(ident=issue['_id'])
+
     def warning(self, msg):
         self.view._emit('warning', msg)
 

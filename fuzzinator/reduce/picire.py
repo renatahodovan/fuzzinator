@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
            parallel=False, combine_loops=False,
            split_method='zeller', subset_first=True, subset_iterator='forward', complement_iterator='forward',
-           jobs=os.cpu_count(), max_utilization=100, encoding=None, atom='line', disable_cache=False, cleanup=True,
+           jobs=os.cpu_count(), max_utilization=100, encoding=None, atom='line', cache_class='ContentCache', cleanup=True,
            **kwargs):
     """
     Test case reducer based on the Picire Parallel Delta Debugging Framework.
@@ -27,7 +27,7 @@ def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
 
       - ``parallel``, ``combine_loops``, ``split_method``, ``subset_first``,
         ``subset_iterator``, ``complement_iterator``, ``jobs``,
-        ``max_utilization``, ``encoding``, ``atom``, ``disable_cache``,
+        ``max_utilization``, ``encoding``, ``atom``, ``cache_class``,
         ``cleanup``
 
     Refer to https://github.com/renatahodovan/picire for configuring Picire.
@@ -61,7 +61,6 @@ def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
 
     parallel = eval_arg(parallel)
     jobs = 1 if not parallel else eval_arg(jobs)
-    disable_cache = eval_arg(disable_cache)
     encoding = encoding or chardet.detect(src)['encoding']
     cleanup = eval_arg(cleanup)
 
@@ -72,6 +71,9 @@ def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
     split_method = getattr(picire.config_splitters, split_method)
     subset_iterator = getattr(picire.config_iterators, subset_iterator)
     complement_iterator = getattr(picire.config_iterators, complement_iterator)
+    cache_class = getattr(picire, cache_class)
+    if parallel:
+        cache_class = picire.shared_cache_decorator(cache_class)
 
     # Choose the reducer class that will be used and its configuration.
     reduce_config = {'split': split_method}
@@ -113,13 +115,13 @@ def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
                        encoding=encoding,
                        out=work_dir,
                        atom=atom,
-                       parallel=parallel,
-                       disable_cache=disable_cache,
+                       cache_class=cache_class,
                        cleanup=cleanup)
 
     try:
         reduced_file = picire.call(**call_config)
-    except:
+    except Exception as e:
+        logger.warning('Exception in picire', exc_info=e)
         return None, list(issues.values())
 
     # Reduce by char if we used line based reduce earlier.

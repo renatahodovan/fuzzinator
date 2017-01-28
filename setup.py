@@ -23,7 +23,7 @@ setup(
     long_description=open('README.rst').read(),
     zip_safe=False,
     include_package_data=True,
-    install_requires=['chardet', 'pexpect', 'picire==16.7', 'picireny==16.12', 'psutil',
+    install_requires=['chardet', 'pexpect', 'picire==17.1', 'picireny==17.1', 'psutil',
                       'PyGithub', 'pymongo', 'pyperclip', 'python-bugzilla',
                       'rainbow_logging_handler', 'sphinx', 'sphinx_rtd_theme',
                       'tornado', 'urwid'],

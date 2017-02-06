@@ -5,7 +5,17 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-from github import Github, BadCredentialsException
+try:
+    # FIXME: very nasty, but a recent PyGithub version began to depend on
+    # pycrypto transitively, which is a PITA on Windows (can easily fail with an
+    # ``ImportError: No module named 'winrandom'``) -- so, we just don't care
+    # for now if we cannot load the github module at all. This workaround just
+    # postpones the error to the point when ``GithubReport`` is actually used,
+    # so be warned, don't do that on Windows!
+    from github import Github, BadCredentialsException
+except ImportError:
+    pass
+
 from string import Template
 
 from .base import BaseTracker
@@ -26,7 +36,7 @@ class GithubReport(BaseTracker):
             return True
         except:
             return False
-    
+
     def login(self, username, pwd):
         try:
             gh = Github(username, pwd)

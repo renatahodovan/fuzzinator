@@ -215,3 +215,10 @@ class GithubReportDialog(ReportDialog):
     def get_report_data(self):
         return dict(title=self.issue_title.edit_text,
                     body=self.issue_desc.edit_text)
+
+
+class MonorailReportDialog(ReportDialog):
+
+    def get_report_data(self):
+        return dict(title=self.issue_title.edit_text,
+                    body=self.issue_desc.edit_text)

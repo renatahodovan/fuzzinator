@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,9 +7,11 @@
 
 from .bugzilla import BugzillaReport
 from .github import GithubReport
+from .monorail import MonorailReport
 
 
 __all__ = [
     'BugzillaReport',
     'GithubReport',
+    'MonorailReport',
 ]

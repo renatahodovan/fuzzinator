@@ -24,7 +24,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     install_requires=['chardet', 'pexpect', 'picire==17.1', 'picireny==17.1', 'psutil',
-                      'PyGithub', 'pymongo', 'pyperclip', 'python-bugzilla',
+                      'PyGithub', 'pymongo', 'pyperclip', 'python-bugzilla', 'google-api-python-client',
                       'rainbow_logging_handler', 'sphinx', 'sphinx_rtd_theme',
                       'tornado', 'urwid'],
     entry_points={

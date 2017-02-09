@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -10,7 +10,7 @@ import os
 import subprocess
 
 
-def SubprocessCall(command, cwd=None, env=None, test=None, **kwargs):
+def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None, **kwargs):
     """
     Subprocess invocation-based call of a SUT that takes test input on its
     command line. (See :class:`fuzzinator.call.FileWriterDecorator` for SUTs
@@ -28,6 +28,8 @@ def SubprocessCall(command, cwd=None, env=None, test=None, **kwargs):
         invocation.
       - ``env``: if not ``None``, a dictionary of variable names-values to
         update the environment with.
+      - ``no_exit_code``: makes possible to force issue creation regardless of
+        the exit code.
 
     **Result of the SUT call:**
 
@@ -50,6 +52,7 @@ def SubprocessCall(command, cwd=None, env=None, test=None, **kwargs):
             env={"BAR": "1"}
     """
     env = dict(os.environ, **json.loads(env)) if env else None
+    no_exit_code = eval(no_exit_code) if no_exit_code else False
     with subprocess.Popen(command.format(test=test),
                           shell=True,
                           stdout=subprocess.PIPE,
@@ -57,7 +60,7 @@ def SubprocessCall(command, cwd=None, env=None, test=None, **kwargs):
                           cwd=cwd or os.getcwd(),
                           env=env) as proc:
         stdout, stderr = proc.communicate()
-        if proc.returncode != 0:
+        if no_exit_code or proc.returncode != 0:
             return {
                 'exit_code': proc.returncode,
                 'stdout': stdout,

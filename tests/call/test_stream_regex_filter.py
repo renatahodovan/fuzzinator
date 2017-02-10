@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -24,7 +24,7 @@ from common_call import mock_always_fail_call, mock_never_fail_call, MockAlwaysF
     (mock_always_fail_call, {'stderr_patterns': '["(?P<zyx>[A-Z]+)"]'}, {'foo': b'bar', 'stdout': b'42baz42', 'stderr': b'42QUX42', 'zyx': b'QUX'}),
     (mock_always_fail_call, {'stdout_patterns': '["(?P<xyz>[a-z]+)"]', 'stderr_patterns': '["(?P<zyx>[a-z]+)"]'}, {'foo': b'bar', 'stdout': b'42baz42', 'stderr': b'42QUX42', 'xyz': b'baz'}),
     (mock_always_fail_call, {'stdout_patterns': '["(?P<xyz>[A-Z]+)"]', 'stderr_patterns': '["(?P<zyx>[A-Z]+)"]'}, {'foo': b'bar', 'stdout': b'42baz42', 'stderr': b'42QUX42', 'zyx': b'QUX'}),
-    (mock_always_fail_call, {'stdout_patterns': '["(?P<xyz>[a-z]+)"]', 'stderr_patterns': '["(?P<zyx>[A-Z]+)"]'}, {'foo': b'bar', 'stdout': b'42baz42', 'stderr': b'42QUX42', 'xyz': b'baz'}),
+    (mock_always_fail_call, {'stdout_patterns': '["(?P<xyz>[a-z]+)"]', 'stderr_patterns': '["(?P<zyx>[A-Z]+)"]'}, {'foo': b'bar', 'stdout': b'42baz42', 'stderr': b'42QUX42', 'xyz': b'baz', 'zyx': b'QUX'}),
 
     (mock_never_fail_call, {'stdout_patterns': '["(?P<xyz>[a-z]+)"]', 'stderr_patterns': '["(?P<zyx>[A-Z]+)"]'}, None),
 
@@ -35,7 +35,7 @@ from common_call import mock_always_fail_call, mock_never_fail_call, MockAlwaysF
     (MockAlwaysFailCall, {'stderr_patterns': '["(?P<zyx>[A-Z]+)"]'}, {'init_foo': b'init_bar', 'foo': b'bar', 'stdout': b'42baz42', 'stderr': b'42QUX42', 'zyx': b'QUX'}),
     (MockAlwaysFailCall, {'stdout_patterns': '["(?P<xyz>[a-z]+)"]', 'stderr_patterns': '["(?P<zyx>[a-z]+)"]'}, {'init_foo': b'init_bar', 'foo': b'bar', 'stdout': b'42baz42', 'stderr': b'42QUX42', 'xyz': b'baz'}),
     (MockAlwaysFailCall, {'stdout_patterns': '["(?P<xyz>[A-Z]+)"]', 'stderr_patterns': '["(?P<zyx>[A-Z]+)"]'}, {'init_foo': b'init_bar', 'foo': b'bar', 'stdout': b'42baz42', 'stderr': b'42QUX42', 'zyx': b'QUX'}),
-    (MockAlwaysFailCall, {'stdout_patterns': '["(?P<xyz>[a-z]+)"]', 'stderr_patterns': '["(?P<zyx>[A-Z]+)"]'}, {'init_foo': b'init_bar', 'foo': b'bar', 'stdout': b'42baz42', 'stderr': b'42QUX42', 'xyz': b'baz'}),
+    (MockAlwaysFailCall, {'stdout_patterns': '["(?P<xyz>[a-z]+)"]', 'stderr_patterns': '["(?P<zyx>[A-Z]+)"]'}, {'init_foo': b'init_bar', 'foo': b'bar', 'stdout': b'42baz42', 'stderr': b'42QUX42', 'xyz': b'baz', 'zyx': b'QUX'}),
 
     (MockNeverFailCall, {'stdout_patterns': '["(?P<xyz>[a-z]+)"]', 'stderr_patterns': '["(?P<zyx>[A-Z]+)"]'}, None),
 ])

@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -43,8 +43,8 @@ class StreamRegexFilter(CallableDecorator):
     """
 
     def decorator(self, stdout_patterns=None, stderr_patterns=None, **kwargs):
-        stdout_patterns = [re.compile(pattern.encode('utf-8', errors='ignore')) for pattern in json.loads(stdout_patterns)] if stdout_patterns else []
-        stderr_patterns = [re.compile(pattern.encode('utf-8', errors='ignore')) for pattern in json.loads(stderr_patterns)] if stderr_patterns else []
+        stdout_patterns = [re.compile(pattern.encode('utf-8', errors='ignore'), flags=re.MULTILINE|re.DOTALL) for pattern in json.loads(stdout_patterns)] if stdout_patterns else []
+        stderr_patterns = [re.compile(pattern.encode('utf-8', errors='ignore'), flags=re.MULTILINE|re.DOTALL) for pattern in json.loads(stderr_patterns)] if stderr_patterns else []
 
         def wrapper(fn):
             def filter(*args, **kwargs):
@@ -52,19 +52,20 @@ class StreamRegexFilter(CallableDecorator):
                 if not issue:
                     return None
 
+                updated = False
                 for pattern in stdout_patterns:
                     match = pattern.search(issue['stdout'])
                     if match is not None:
                         issue.update(match.groupdict())
-                        return issue
+                        updated = True
 
                 for pattern in stderr_patterns:
                     match = pattern.search(issue['stderr'])
                     if match is not None:
                         issue.update(match.groupdict())
-                        return issue
+                        updated = True
 
-                return None
+                return issue if updated else None
 
             return filter
         return wrapper

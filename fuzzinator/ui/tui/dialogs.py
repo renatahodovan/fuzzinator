@@ -99,11 +99,13 @@ class EditIssueDialog(Dialog):
         self.db = db
 
         self.edit_boxes = dict()
+        self.type_dict = dict()
         rows = []
         for prop in issue:
             if prop == '_id':
                 continue
-            self.edit_boxes[prop] = Edit('', str(issue[prop]), multiline=True)
+
+            self.edit_boxes[prop] = Edit('', self._to_str(prop, issue[prop]), multiline=True)
             rows.append(Columns([('weight', 1, Text(('dialog_secondary', prop + ': '))),
                                  ('weight', 10, self.edit_boxes[prop])], dividechars=1))
 
@@ -112,9 +114,39 @@ class EditIssueDialog(Dialog):
                                               footer_btns=[FormattedButton('Save', self.save_modifications),
                                                            FormattedButton('Close', lambda button: self._emit('close'))])
 
+    def _to_str(self, prop, value):
+        t = type(value)
+        self.type_dict[prop] = t
+
+        if t == str:
+            return value
+        if t in [int, bool]:
+            return str(value)
+        if t == bytes:
+            return value.decode('utf-8', errors='ignore')
+        if value is None:
+            self.type_dict[prop] = None
+            return ''
+        assert False, 'Should never be reached ({prop}: {type}).'.format(prop=prop, type=str(t))
+
+    def _from_str(self, prop, value):
+        t = self.type_dict[prop]
+
+        if t == str:
+            return value
+        if t == int:
+            return int(value)
+        if t == bool:
+            return eval(value)
+        if t == bytes:
+            return value.encode('utf-8', errors='ignore')
+        if t is None:
+            return value or None
+        assert False, 'Should never be reached ({prop}: {type}).'.format(prop=prop, type=str(t))
+
     def save_modifications(self, btn):
         updated = dict()
         for prop, box in self.edit_boxes.items():
-            updated[prop] = box.edit_text.encode('utf-8', errors='ignore')
+            updated[prop] = self._from_str(prop, box.edit_text)
         self.db.update_issue(self.issue, updated)
         self._emit('close')

@@ -43,7 +43,7 @@ class ReduceJob(CallJob):
                                              **reduce_kwargs)
 
         if reduced_src is None:
-            self.listener.warning(msg='Reduce of {ident} failed.'.format(ident=self.issue['id']))
+            self.listener.warning(msg='Reduce of {ident} failed.'.format(ident=self.issue['id'].decode('utf-8', errors='ignore')))
         else:
             self.db.update_issue(self.issue, {'test': reduced_src, 'reduced': True})
             self.listener.update_issue(issue=self.issue)

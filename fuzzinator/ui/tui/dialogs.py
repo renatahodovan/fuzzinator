@@ -17,6 +17,7 @@ from fuzzinator.pkgdata import __version__
 
 class Dialog(PopUpTarget):
     signals = ['close']
+    exit_keys = ['esc']
 
     def __init__(self, title, body, footer_btns, warning=False):
         if not warning:
@@ -33,7 +34,7 @@ class Dialog(PopUpTarget):
                                              attr_map=style['border']))
 
     def keypress(self, size, key):
-        if key in ['esc']:
+        if key in self.exit_keys:
             self._emit('close')
         elif key in ['tab']:
             if self.frame.focus_part == 'body':
@@ -54,6 +55,8 @@ class Dialog(PopUpTarget):
 
 
 class AboutDialog(Dialog):
+    exit_keys = ['esc', 'f1']
+
     def __init__(self, ):
         self.content = self.compile_about_data()
         super(AboutDialog, self).__init__(title='About',
@@ -79,6 +82,8 @@ class AboutDialog(Dialog):
 
 
 class WarningDialog(Dialog):
+    exit_keys = ['esc', 'enter']
+
     def __init__(self, msg):
         super(WarningDialog, self).__init__(title='WARNING',
                                             body=[Text(msg)],
@@ -87,6 +92,8 @@ class WarningDialog(Dialog):
 
 
 class FormattedIssueDialog(Dialog):
+    exit_keys = ['esc', 'f3']
+
     def __init__(self, issue, tracker):
         super(FormattedIssueDialog, self).__init__(title=issue['id'],
                                                    body=[Padding(Text(line, wrap='clip'), left=2, right=2) for line in tracker.format_issue(issue).splitlines()],
@@ -94,6 +101,8 @@ class FormattedIssueDialog(Dialog):
 
 
 class EditIssueDialog(Dialog):
+    exit_keys = ['esc', 'f4']
+
     def __init__(self, issue, db):
         self.issue = issue
         self.db = db

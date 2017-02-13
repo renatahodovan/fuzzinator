@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,6 +6,7 @@
 # according to those terms.
 
 import json
+import shlex
 import shutil
 import subprocess
 import os
@@ -65,10 +66,9 @@ class SubprocessRunner(object):
     def __enter__(self):
         os.makedirs(self.outdir, exist_ok=True)
         with open(os.devnull, 'w') as FNULL:
-            with subprocess.Popen(self.command.format(uid=self.uid),
+            with subprocess.Popen(shlex.split(self.command.format(uid=self.uid)),
                                   cwd=self.cwd,
                                   env=self.env,
-                                  shell=True,
                                   stdout=FNULL,
                                   stderr=FNULL) as proc:
                 proc.wait()

@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,6 +7,7 @@
 
 import json
 import os
+import shlex
 import subprocess
 
 
@@ -46,8 +47,7 @@ def StdinSubprocessCall(command, cwd=None, env=None, test=None, **kwargs):
     """
 
     env = dict(os.environ, **json.loads(env)) if env else None
-    with subprocess.Popen(command,
-                          shell=True,
+    with subprocess.Popen(shlex.split(command),
                           stdin=subprocess.PIPE,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE,

@@ -7,6 +7,7 @@
 
 import json
 import os
+import shlex
 import subprocess
 
 
@@ -53,8 +54,7 @@ def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None, **
     """
     env = dict(os.environ, **json.loads(env)) if env else None
     no_exit_code = eval(no_exit_code) if no_exit_code else False
-    with subprocess.Popen(command.format(test=test),
-                          shell=True,
+    with subprocess.Popen(shlex.split(command.format(test=test)),
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE,
                           cwd=cwd or os.getcwd(),

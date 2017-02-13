@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -8,6 +8,7 @@
 import json
 import logging
 import os
+import shlex
 import subprocess
 
 logger = logging.getLogger(__name__)
@@ -42,8 +43,7 @@ def SubprocessUpdate(command, cwd=None, env=None):
             env={"BAR": "1"}
     """
 
-    with subprocess.Popen(command,
-                          shell=True,
+    with subprocess.Popen(shlex.split(command),
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE,
                           cwd=cwd or os.getcwd(),

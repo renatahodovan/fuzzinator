@@ -10,6 +10,7 @@ import shlex
 import shutil
 import subprocess
 import os
+import sys
 
 
 class SubprocessRunner(object):
@@ -66,7 +67,7 @@ class SubprocessRunner(object):
     def __enter__(self):
         os.makedirs(self.outdir, exist_ok=True)
         with open(os.devnull, 'w') as FNULL:
-            with subprocess.Popen(shlex.split(self.command.format(uid=self.uid)),
+            with subprocess.Popen(shlex.split(self.command.format(uid=self.uid), posix=sys.platform != 'win32'),
                                   cwd=self.cwd,
                                   env=self.env,
                                   stdout=FNULL,

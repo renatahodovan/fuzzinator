@@ -10,6 +10,7 @@ import logging
 import os
 import shlex
 import subprocess
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,7 @@ def SubprocessUpdate(command, cwd=None, env=None):
             env={"BAR": "1"}
     """
 
-    with subprocess.Popen(shlex.split(command),
+    with subprocess.Popen(shlex.split(command, posix=sys.platform != 'win32'),
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE,
                           cwd=cwd or os.getcwd(),

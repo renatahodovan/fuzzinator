@@ -9,6 +9,7 @@ import json
 import os
 import shlex
 import subprocess
+import sys
 
 
 def StdinSubprocessCall(command, cwd=None, env=None, test=None, **kwargs):
@@ -47,7 +48,7 @@ def StdinSubprocessCall(command, cwd=None, env=None, test=None, **kwargs):
     """
 
     env = dict(os.environ, **json.loads(env)) if env else None
-    with subprocess.Popen(shlex.split(command),
+    with subprocess.Popen(shlex.split(command, posix=sys.platform != 'win32'),
                           stdin=subprocess.PIPE,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE,

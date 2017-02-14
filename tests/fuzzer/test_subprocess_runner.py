@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,6 +7,7 @@
 
 import pytest
 import os
+import sys
 
 import fuzzinator
 
@@ -17,9 +18,9 @@ from common_fuzzer import resources_dir
     ('{tmpdir}/tests-{{uid}}', {b'foo\n', b'bar\n', b'baz\n'})
 ])
 @pytest.mark.parametrize('command, cwd, env', [
-    ('%s -i %s -o {tmpdir}/tests-{{uid}}' % (os.path.join(resources_dir, 'mock_fuzzer.py'), os.path.join(resources_dir, 'mock_tests')), None, None),
-    ('%s -i %s -o {tmpdir}/tests-{{uid}}' % (os.path.join('.', 'mock_fuzzer.py'), 'mock_tests'), resources_dir, None),
-    ('%s -o {tmpdir}/tests-{{uid}}' % (os.path.join('.', 'mock_fuzzer.py')), resources_dir, '{"IDIR": "mock_tests"}'),
+    ('%s %s -i %s -o {tmpdir}/tests-{{uid}}' % (sys.executable, os.path.join(resources_dir, 'mock_fuzzer.py'), os.path.join(resources_dir, 'mock_tests')), None, None),
+    ('%s %s -i %s -o {tmpdir}/tests-{{uid}}' % (sys.executable, os.path.join('.', 'mock_fuzzer.py'), 'mock_tests'), resources_dir, None),
+    ('%s %s -o {tmpdir}/tests-{{uid}}' % (sys.executable, os.path.join('.', 'mock_fuzzer.py')), resources_dir, '{"IDIR": "mock_tests"}'),
 ])
 def test_subprocess_runner(outdir, command, cwd, env, exp, tmpdir):
     fuzzer = fuzzinator.fuzzer.SubprocessRunner(outdir=outdir.format(tmpdir=tmpdir), command=command.format(tmpdir=tmpdir), cwd=cwd, env=env)

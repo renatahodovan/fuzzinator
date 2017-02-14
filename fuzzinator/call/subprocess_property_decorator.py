@@ -9,6 +9,7 @@ import json
 import os
 import shlex
 import subprocess
+import sys
 
 from . import CallableDecorator
 
@@ -56,7 +57,7 @@ class SubprocessPropertyDecorator(CallableDecorator):
                 if not issue:
                     return None
 
-                issue[property] = subprocess.check_output(shlex.split(command),
+                issue[property] = subprocess.check_output(shlex.split(command, posix=sys.platform != 'win32'),
                                                           cwd=cwd or os.getcwd(),
                                                           env=dict(os.environ, **json.loads(env or '{}')))
                 return issue

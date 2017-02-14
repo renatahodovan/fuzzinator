@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -14,6 +14,7 @@ import shlex
 import select
 import signal
 import subprocess
+import sys
 
 
 class StreamMonitoredSubprocessCall(object):
@@ -36,7 +37,7 @@ class StreamMonitoredSubprocessCall(object):
         return None
 
     def __call__(self, test, **kwargs):
-        self.proc = subprocess.Popen(shlex.split(self.command.format(test=test)),
+        self.proc = subprocess.Popen(shlex.split(self.command.format(test=test), posix=sys.platform != 'win32'),
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
                                      cwd=self.cwd or os.getcwd(),

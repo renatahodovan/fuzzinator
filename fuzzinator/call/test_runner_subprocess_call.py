@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -13,6 +13,7 @@ import os
 import select
 import shlex
 import subprocess
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,7 @@ class TestRunnerSubprocessCall(object):
             return None
 
     def start(self, init_wait=True):
-        self.proc = subprocess.Popen(shlex.split(self.command),
+        self.proc = subprocess.Popen(shlex.split(self.command, posix=sys.platform != 'win32'),
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
                                      stdin=subprocess.PIPE,

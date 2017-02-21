@@ -39,6 +39,6 @@ class PicireTester(object):
                 if 'test' not in issue or not issue['test']:
                     issue['test'] = test
 
-                self._issues['id'] = issue
+                self._issues[issue['id']] = issue
 
         return picire.AbstractDD.PASS

@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -11,8 +11,8 @@ from .exit_code_filter import ExitCodeFilter
 from .file_writer_decorator import FileWriterDecorator
 from .gdb_backtrace_decorator import GdbBacktraceDecorator
 from .platform_info_decorator import PlatformInfoDecorator
+from .regex_filter import RegexFilter
 from .stdin_subprocess_call import StdinSubprocessCall
-from .stream_regex_filter import StreamRegexFilter
 from .subprocess_call import SubprocessCall
 from .subprocess_property_decorator import SubprocessPropertyDecorator
 from .unique_id_decorator import UniqueIdDecorator
@@ -24,8 +24,8 @@ __all__ = [
     'FileWriterDecorator',
     'GdbBacktraceDecorator',
     'PlatformInfoDecorator',
+    'RegexFilter',
     'StdinSubprocessCall',
-    'StreamRegexFilter',
     'SubprocessCall',
     'SubprocessPropertyDecorator',
     'UniqueIdDecorator',

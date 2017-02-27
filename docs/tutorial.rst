@@ -53,7 +53,7 @@ again, you can implement your own version):
 
 * :class:`fuzzinator.call.ExitCodeFilter` for keeping issues only if the SUT
   exited with specific exit codes, and
-* :class:`fuzzinator.call.StreamRegexFilter` for keeping issues only if the SUT
+* :class:`fuzzinator.call.RegexFilter` for keeping issues only if the SUT
   printed messages on either *stdout* or *stderr* that matches some specific
   patterns.
 

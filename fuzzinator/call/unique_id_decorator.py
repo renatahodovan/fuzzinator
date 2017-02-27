@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -25,14 +25,14 @@ class UniqueIdDecorator(CallableDecorator):
 
            [sut.foo]
            call=fuzzinator.call.StdinSubprocessCall
-           call.decorate(0)=fuzzinator.call.StreamRegexFilter
+           call.decorate(0)=fuzzinator.call.RegexFilter
            call.decorate(1)=fuzzinator.call.UniqueIdDecorator
 
            [sut.foo.call]
            command=/home/alice/foo/bin/foo -
 
            [sut.foo.call.decorate(0)]
-           stderr_patterns=[": (?P<file>[^:]+):(?P<line>[0-9]+): (?P<func>[^:]+): (?P<msg>Assertion `.*' failed)"]
+           stderr=[": (?P<file>[^:]+):(?P<line>[0-9]+): (?P<func>[^:]+): (?P<msg>Assertion `.*' failed)"]
 
            [sut.foo.call.decorate(1)]
            properties=["msg", "file", "func"]

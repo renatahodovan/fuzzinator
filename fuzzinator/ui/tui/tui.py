@@ -181,7 +181,7 @@ def execute(args=None, parser=None):
 
     controller = Controller(config=config)
     tui = Tui(controller, style=style)
-    controller.listener = TuiListener(tui.pipe, tui.events, tui.lock)
+    controller.listener += TuiListener(tui.pipe, tui.events, tui.lock)
     fuzz_process = Process(target=controller.run, args=())
 
     try:

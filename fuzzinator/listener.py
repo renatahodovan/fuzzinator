@@ -5,6 +5,11 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+import inspect
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class EventListener(object):
     """
@@ -127,3 +132,49 @@ class EventListener(object):
         framework's database.
         """
         pass
+
+
+class ListenerManager(object):
+    """
+    Class that registers listeners to various events and executes all of them
+    when the event has triggered.
+    """
+
+    def __init__(self, listeners=None):
+        """
+        :param listeners: List of listener objects.
+        """
+        self.listeners = listeners or []
+
+        class Trampoline(object):
+
+            def __init__(self, manager, name):
+                self.manager = manager
+                self.name = name
+
+            def __call__(self, **kwargs):
+                for listener in self.manager.listeners:
+                    try:
+                        getattr(listener, self.name)(**kwargs)
+                    except Exception as e:
+                        logger.warning(e)
+
+        for fn, _ in inspect.getmembers(EventListener, predicate=inspect.isfunction):
+            setattr(self, fn, Trampoline(self, fn))
+
+    def __iadd__(self, listener):
+        """
+        Register a new listener in the manager (trampoline to :meth:`add`).
+
+        :param listener: The new listener to register.
+        """
+        self.add(listener)
+        return self
+
+    def add(self, listener):
+        """
+        Register a new listener in the manager.
+
+        :param listener: The new listener to register.
+        """
+        self.listeners.append(listener)

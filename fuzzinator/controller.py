@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -15,9 +15,9 @@ import traceback
 
 from multiprocessing import Lock, Process, Queue
 
-from .config import config_get_callable, config_get_name_from_section, config_get_with_writeback
+from .config import config_get_callable, config_get_kwargs, config_get_name_from_section, config_get_with_writeback, import_entity
 from .fuzz_job import FuzzJob
-from .listener import EventListener
+from .listener import ListenerManager
 from .mongo_driver import MongoDriver
 from .reduce_job import ReduceJob
 from .update_job import UpdateJob
@@ -136,7 +136,7 @@ class Controller(object):
         :param configparser.ConfigParser config: the configuration options of the
             fuzz session.
 
-        :ivar fuzzinator.EventListener listener: a listener object that is
+        :ivar fuzzinator.ListenerManager listener: a listener manager object that is
             called on various events during the fuzz session.
         """
         self.config = config
@@ -150,8 +150,10 @@ class Controller(object):
         self.db = MongoDriver(config_get_with_writeback(self.config, 'fuzzinator', 'db_uri', 'mongodb://localhost/fuzzinator'))
         self.db.init_db([(self.config.get(fuzzer, 'sut'), config_get_name_from_section(fuzzer)) for fuzzer in self.fuzzers])
 
-        # Init listener with a default value that is expected to be overridden later.
-        self.listener = EventListener()
+        self.listener = ListenerManager()
+        for name in config_get_kwargs(self.config, 'listeners'):
+            entity = import_entity(self.config.get('listeners', name))
+            self.listener += entity(**config_get_kwargs(config, 'listeners.' + name + '.init'))
 
         self._issue_queue = Queue()
         self._lock = Lock()

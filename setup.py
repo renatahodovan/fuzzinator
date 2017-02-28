@@ -23,10 +23,10 @@ setup(
     long_description=open('README.rst').read(),
     zip_safe=False,
     include_package_data=True,
-    install_requires=['chardet', 'pexpect', 'picire==17.1', 'picireny==17.1', 'psutil',
+    install_requires=['chardet', 'keyring', 'pexpect', 'picire==17.1', 'picireny==17.1', 'psutil',
                       'PyGithub', 'pymongo', 'pyperclip', 'python-bugzilla', 'google-api-python-client',
                       'rainbow_logging_handler', 'sphinx', 'sphinx_rtd_theme',
-                      'tornado', 'urwid'],
+                      'tornado', 'urwid', 'yagmail'],
     entry_points={
         'console_scripts': ['fuzzinator = fuzzinator.executor:execute']
     }

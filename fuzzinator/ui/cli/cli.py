@@ -30,7 +30,7 @@ def execute(args=None, parser=None):
     config.read(arguments.config)
 
     controller = Controller(config=config)
-    controller.listener = CliListener()
+    controller.listener += CliListener()
 
     try:
         controller.run(max_cycles=arguments.max_cycles)

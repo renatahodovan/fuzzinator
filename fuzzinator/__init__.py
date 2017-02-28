@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,7 +6,8 @@
 # according to those terms.
 
 from .controller import Controller
-from .listener import EventListener
+from .email_listener import EmailListener
+from .listener import EventListener, ListenerManager
 from .pkgdata import __version__
 
 from . import call
@@ -17,7 +18,9 @@ from . import update
 
 __all__ = [
     'Controller',
+    'EmailListener',
     'EventListener',
+    'ListenerManager',
     '__version__',
     'call',
     'fuzzer',

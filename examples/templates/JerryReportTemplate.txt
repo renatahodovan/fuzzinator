@@ -1,20 +1,20 @@
-Version: $version
-OS: $platform
+Version: {version}
+OS: {platform}
 
 Load the attached test with $sut:
 
 ```js
-$test
+{test}
 ```
 
 Output:
 
 ```
-$stderr
+{stderr}
 ```
 
 Backtrace:
 
 ```
-$backtrace
+{backtrace}
 ```

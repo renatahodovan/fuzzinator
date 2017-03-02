@@ -1,10 +1,10 @@
-Load the attached test with $sut:
+Load the attached test with {sut}:
 
-Checked version: $version
-OS: $platform
+Checked version: {version}
+OS: {platform}
 
-$test
+{test}
 
 Backtrace:
 
-$stderr
+{stderr}

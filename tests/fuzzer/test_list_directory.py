@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -13,11 +13,12 @@ import fuzzinator
 from common_fuzzer import resources_dir
 
 
-@pytest.mark.parametrize('outdir, exp', [
-    (os.path.join(resources_dir, 'mock_tests'), {b'foo\n', b'bar\n', b'baz\n'})
+@pytest.mark.parametrize('outdir, subdirs, exp', [
+    (os.path.join(resources_dir, 'mock_tests'), False, {b'foo\n', b'bar\n', b'baz\n'}),
+    (os.path.join(resources_dir, 'mock_tests'), True, {b'foo\n', b'bar\n', b'baz\n', b'qux\n'}),
 ])
-def test_list_directory(outdir, exp):
-    fuzzer = fuzzinator.fuzzer.ListDirectory(outdir=outdir)
+def test_list_directory(outdir, subdirs, exp):
+    fuzzer = fuzzinator.fuzzer.ListDirectory(outdir=outdir, subdirs=subdirs)
     with fuzzer:
         tests = set()
         index = 0

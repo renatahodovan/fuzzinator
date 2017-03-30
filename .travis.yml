@@ -5,6 +5,8 @@ matrix:
       env: TOXENV=py34
     - python: 3.5
       env: TOXENV=py35
+    - python: 3.6
+      env: TOXENV=py36
 sudo: false
 
 # TODO: start mongodb once more complex tests are implemented

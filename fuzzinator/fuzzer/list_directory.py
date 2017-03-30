@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -25,6 +25,11 @@ class ListDirectory(object):
       - ``outdir``: path to the directory containing the files that act as test
         inputs.
 
+    **Optional parameter of the fuzzer:**
+
+      - ``subdirs``: descend recursively into all subdirectories of ``outdir``
+        (boolean value, False by default).
+
     **Example configuration snippet:**
 
         .. code-block:: ini
@@ -42,8 +47,13 @@ class ListDirectory(object):
             outdir=/home/alice/foo-old-bugs/
     """
 
-    def __init__(self, outdir, **kwargs):
-        self.tests = [os.path.join(outdir, test) for test in os.listdir(outdir)]
+    def __init__(self, outdir, subdirs='False', **kwargs):
+        subdirs = subdirs in [1, '1', True, 'True', 'true']
+        self.tests = []
+        for dirpath, dirnames, filenames in os.walk(outdir):
+            if not subdirs:
+                dirnames[:] = []
+            self.tests.extend([os.path.join(dirpath, test) for test in filenames])
         self.tests.sort(reverse=True)
 
     def __enter__(self):

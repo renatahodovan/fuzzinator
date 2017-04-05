@@ -61,18 +61,22 @@ class GdbBacktraceDecorator(CallableDecorator):
                 if not issue:
                     return None
 
-                child = pexpect.spawn('gdb -ex "set width unlimited" -ex "set pagination off" --args {cmd}'.format(
-                    cmd=command.format(test=kwargs['test'])),
-                    cwd=cwd or os.getcwd(),
-                    env=dict(os.environ, **json.loads(env or '{}')))
-                child.expect_exact('(gdb) ')
-                child.sendline('run')
-                child.expect_exact('(gdb) ')
-                child.sendline('bt')
-                child.expect_exact('(gdb) ')
-                backtrace = child.before
-                child.terminate(force=True)
-                issue['backtrace'] = backtrace
+                try:
+                    child = pexpect.spawn('gdb -ex "set width unlimited" -ex "set pagination off" --args {cmd}'.format(
+                        cmd=command.format(test=kwargs['test'])),
+                        cwd=cwd or os.getcwd(),
+                        env=dict(os.environ, **json.loads(env or '{}')))
+                    child.expect_exact('(gdb) ')
+                    child.sendline('run')
+                    child.expect_exact('(gdb) ')
+                    child.sendline('bt')
+                    child.expect_exact('(gdb) ')
+                    backtrace = child.before
+                    child.terminate(force=True)
+                    issue['backtrace'] = backtrace
+                except:
+                    pass
+
                 return issue
 
             return filter

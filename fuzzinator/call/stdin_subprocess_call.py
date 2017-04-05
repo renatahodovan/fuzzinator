@@ -6,13 +6,16 @@
 # according to those terms.
 
 import json
+import logging
 import os
 import shlex
 import subprocess
 import sys
 
+logger = logging.getLogger(__name__)
 
-def StdinSubprocessCall(command, cwd=None, env=None, test=None, **kwargs):
+
+def StdinSubprocessCall(command, cwd=None, env=None, test=None, timeout=None, **kwargs):
     """
     Subprocess invocation-based call of a SUT that takes a test input on its
     stdin stream.
@@ -27,6 +30,7 @@ def StdinSubprocessCall(command, cwd=None, env=None, test=None, **kwargs):
         invocation.
       - ``env``: if not ``None``, a dictionary of variable names-values to
         update the environment with.
+      - ``timeout``: run subprocess with timeout.
 
     **Result of the SUT call:**
 
@@ -48,17 +52,21 @@ def StdinSubprocessCall(command, cwd=None, env=None, test=None, **kwargs):
     """
 
     env = dict(os.environ, **json.loads(env)) if env else None
-    with subprocess.Popen(shlex.split(command, posix=sys.platform != 'win32'),
-                          stdin=subprocess.PIPE,
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE,
-                          cwd=cwd or os.getcwd(),
-                          env=env) as proc:
-        stdout, stderr = proc.communicate(input=test)
+    timeout = int(timeout) if timeout else None
+    try:
+        proc = subprocess.Popen(shlex.split(command, posix=sys.platform != 'win32'),
+                                stdin=subprocess.PIPE,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                cwd=cwd or os.getcwd(),
+                                env=env)
+        stdout, stderr = proc.communicate(input=test, timeout=timeout)
         if proc.returncode != 0:
             return {
                 'exit_code': proc.returncode,
                 'stdout': stdout,
                 'stderr': stderr,
             }
+    except subprocess.TimeoutExpired:
+        logger.debug('Timeout expired in subprocess runner.')
     return None

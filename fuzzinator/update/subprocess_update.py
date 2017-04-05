@@ -15,7 +15,7 @@ import sys
 logger = logging.getLogger(__name__)
 
 
-def SubprocessUpdate(command, cwd=None, env=None):
+def SubprocessUpdate(command, cwd=None, env=None, timeout=None):
     """
     Subprocess invocation-based SUT update.
 
@@ -29,6 +29,7 @@ def SubprocessUpdate(command, cwd=None, env=None):
         invocation.
       - ``env``: if not ``None``, a dictionary of variable names-values to
         update the environment with.
+      - ``timeout``: run subprocess with timeout.
 
     **Example configuration snippet:**
 
@@ -44,13 +45,17 @@ def SubprocessUpdate(command, cwd=None, env=None):
             env={"BAR": "1"}
     """
 
-    with subprocess.Popen(shlex.split(command, posix=sys.platform != 'win32'),
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE,
-                          cwd=cwd or os.getcwd(),
-                          env=dict(os.environ, **json.loads(env or '{}'))) as proc:
-        stdout, stderr = proc.communicate()
+    timeout = int(timeout) if timeout else None
+    try:
+        proc = subprocess.Popen(shlex.split(command, posix=sys.platform != 'win32'),
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                cwd=cwd or os.getcwd(),
+                                env=dict(os.environ, **json.loads(env or '{}')))
+        stdout, stderr = proc.communicate(timeout=timeout)
         if proc.returncode != 0:
             logger.warn(stderr)
         else:
             logger.info(stdout)
+    except subprocess.TimeoutExpired:
+        logger.debug('Timeout expired while updating.')

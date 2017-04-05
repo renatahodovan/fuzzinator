@@ -6,13 +6,17 @@
 # according to those terms.
 
 import json
+import logging
 import os
 import shlex
 import subprocess
 import sys
 
+logger = logging.getLogger(__name__)
 
-def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None, **kwargs):
+
+def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None,
+                   timeout=None, **kwargs):
     """
     Subprocess invocation-based call of a SUT that takes test input on its
     command line. (See :class:`fuzzinator.call.FileWriterDecorator` for SUTs
@@ -32,6 +36,7 @@ def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None, **
         update the environment with.
       - ``no_exit_code``: makes possible to force issue creation regardless of
         the exit code.
+      - ``timeout``: run subprocess with timeout.
 
     **Result of the SUT call:**
 
@@ -55,16 +60,22 @@ def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None, **
     """
     env = dict(os.environ, **json.loads(env)) if env else None
     no_exit_code = eval(no_exit_code) if no_exit_code else False
-    with subprocess.Popen(shlex.split(command.format(test=test), posix=sys.platform != 'win32'),
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE,
-                          cwd=cwd or os.getcwd(),
-                          env=env) as proc:
-        stdout, stderr = proc.communicate()
+    timeout = int(timeout) if timeout else None
+
+    try:
+        proc = subprocess.Popen(shlex.split(command.format(test=test), posix=sys.platform != 'win32'),
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                cwd=cwd or os.getcwd(),
+                                env=env)
+        stdout, stderr = proc.communicate(timeout=timeout)
         if no_exit_code or proc.returncode != 0:
             return {
                 'exit_code': proc.returncode,
                 'stdout': stdout,
                 'stderr': stderr,
             }
+    except subprocess.TimeoutExpired:
+        logger.debug('Timeout expired in subprocess runner.')
+
     return None

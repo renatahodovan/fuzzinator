@@ -6,11 +6,15 @@
 # according to those terms.
 
 import json
+import logging
 import shlex
 import shutil
 import subprocess
 import os
 import sys
+
+
+logger = logging.getLogger(__name__)
 
 
 class SubprocessRunner(object):
@@ -35,6 +39,7 @@ class SubprocessRunner(object):
         invocation.
       - ``env``: if not ``None``, a dictionary of variable names-values to
         update the environment with.
+      - ``timeout``: run subprocess with timeout.
 
     **Example configuration snippet:**
 
@@ -53,7 +58,7 @@ class SubprocessRunner(object):
             command=barfuzzer -n ${fuzz.foo-with-bar:batch} -o ${outdir}
     """
 
-    def __init__(self, outdir, command, cwd=None, env=None, **kwargs):
+    def __init__(self, outdir, command, cwd=None, env=None, timeout=None, **kwargs):
         # uid is used to make sure we create unique directory for the generated test cases.
         self.uid = '{pid}-{id}'.format(pid=os.getpid(), id=id(self))
 
@@ -61,18 +66,22 @@ class SubprocessRunner(object):
         self.command = command
         self.cwd = cwd or os.getcwd()
         self.env = dict(os.environ, **json.loads(env)) if env else None
+        self.timeout = int(timeout) if timeout else None
 
         self.tests = []
 
     def __enter__(self):
         os.makedirs(self.outdir, exist_ok=True)
-        with open(os.devnull, 'w') as FNULL:
-            with subprocess.Popen(shlex.split(self.command.format(uid=self.uid), posix=sys.platform != 'win32'),
-                                  cwd=self.cwd,
-                                  env=self.env,
-                                  stdout=FNULL,
-                                  stderr=FNULL) as proc:
-                proc.wait()
+        try:
+            with open(os.devnull, 'w') as FNULL:
+                proc = subprocess.Popen(shlex.split(self.command.format(uid=self.uid), posix=sys.platform != 'win32'),
+                                        cwd=self.cwd,
+                                        env=self.env,
+                                        stdout=FNULL,
+                                        stderr=FNULL)
+                proc.communicate(timeout=self.timeout)
+        except subprocess.TimeoutExpired:
+            logger.debug('Timeout expired in subprocess runner.')
         self.tests = [os.path.join(self.outdir, test) for test in os.listdir(self.outdir)]
         return self
 

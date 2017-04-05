@@ -10,7 +10,7 @@ from urwid import *
 
 from .decor_widgets import PatternBox
 from .graphics import fz_box_pattern
-from .dialogs import Dialog
+from .dialogs import Dialog, BugEditor
 from .button import FormattedButton
 
 
@@ -68,10 +68,10 @@ class ReportDialog(PopUpTarget):
         self.db = db
         self.duplicate = None
 
-        self.edit_dups = Edit()
+        self.edit_dups = BugEditor()
         self.result = Text('')
-        self.issue_title = Edit(edit_text=self.tracker.title(issue))
-        self.issue_desc = Edit(edit_text=self.tracker.format_issue(issue), multiline=True, wrap='clip')
+        self.issue_title = BugEditor(edit_text=self.tracker.title(issue))
+        self.issue_desc = BugEditor(edit_text=self.tracker.format_issue(issue), multiline=True, wrap='clip')
         self.body = SimpleListWalker([Columns([('fixed', 13, Text(('dialog_secondary', 'Summary: '))),
                                                ('weight', 10, self.issue_title)], dividechars=1),
                                       Columns([('fixed', 13, Text(('dialog_secondary', 'Description: '))),
@@ -140,9 +140,9 @@ class ReportDialog(PopUpTarget):
 class BugzillaReportDialog(ReportDialog):
 
     def __init__(self, issue, tracker, db):
-        self.edit_blocks = Edit()
-        self.edit_cc = Edit(multiline=True)
-        self.edit_extension = Edit(edit_text='html')
+        self.edit_blocks = BugEditor()
+        self.edit_cc = BugEditor(multiline=True)
+        self.edit_extension = BugEditor(edit_text='html')
 
         self.product_info = tracker.bzapi.getproducts()
         self.product = None

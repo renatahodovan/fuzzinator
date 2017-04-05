@@ -100,7 +100,22 @@ class FormattedIssueDialog(Dialog):
                                                    footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))])
 
 
+class BugEditor(Edit):
+
+    def keypress(self, size, key):
+        if key == 'ctrl k':
+            lines = self._edit_text.splitlines(keepends=True)
+            line_cnt = self._edit_text[:self.edit_pos].count('\n')
+            before = ''.join(lines[:line_cnt])
+            after = ''.join(lines[line_cnt + 1:]) if line_cnt + 1 < len(lines) else ''
+            self.set_edit_text(before + after)
+            self.set_edit_pos(len(before))
+        else:
+            super(BugEditor, self).keypress(size, key)
+
+
 class EditIssueDialog(Dialog):
+
     exit_keys = ['esc', 'f4']
 
     def __init__(self, issue, db):
@@ -114,7 +129,7 @@ class EditIssueDialog(Dialog):
             if prop == '_id':
                 continue
 
-            self.edit_boxes[prop] = Edit('', self._to_str(prop, issue[prop]), multiline=True)
+            self.edit_boxes[prop] = BugEditor('', self._to_str(prop, issue[prop]), multiline=True)
             rows.append(Columns([('weight', 1, Text(('dialog_secondary', prop + ': '))),
                                  ('weight', 10, self.edit_boxes[prop])], dividechars=1))
 

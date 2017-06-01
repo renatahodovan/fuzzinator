@@ -113,13 +113,17 @@ class MainWindow(PopUpLauncher):
                     msg = '{id} is not valid anymore.'.format(id=expected_id.decode('utf-8', errors='ignore'))
                 self.warning_popup(msg)
 
-    def copy_selected(self):
+    def copy_selected(self, test_bytes=False):
         if self.issues_table.selection:
-            sut = self.issues_table.selection.data['sut']
-            sut_section = 'sut.' + sut
-            if sut not in self.trackers:
-                self.trackers[sut] = init_tracker(self.config, sut_section)
-            pyperclip.copy(self.trackers[sut].format_issue(self.db.find_issue_by_id(self.issues_table.selection.data['_id'])))
+            issue = self.db.find_issue_by_id(self.issues_table.selection.data['_id'])
+            if test_bytes:
+                pyperclip.copy(str(issue['test']))
+            else:
+                sut = self.issues_table.selection.data['sut']
+                sut_section = 'sut.' + sut
+                if sut not in self.trackers:
+                    self.trackers[sut] = init_tracker(self.config, sut_section)
+                pyperclip.copy(self.trackers[sut].format_issue(issue))
 
     def keypress(self, size, key):
         if key == 'tab':
@@ -141,6 +145,9 @@ class MainWindow(PopUpLauncher):
             self.footer_btns['edit'].keypress((0, 0), 'enter')
         elif key == 'f5':
             self.footer_btns['copy'].keypress((0, 0), 'enter')
+        # Copy the test content as bytes to the clipboard.
+        elif key == 'shift f5':
+            self.copy_selected(test_bytes=True)
         elif key == 'f6':
             self.footer_btns['reduce'].keypress((0, 0), 'enter')
         elif key == 'f7':

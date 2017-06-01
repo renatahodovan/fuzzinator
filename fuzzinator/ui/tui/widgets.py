@@ -14,12 +14,13 @@ from collections import OrderedDict
 from math import ceil
 from urwid import *
 
-from fuzzinator.config import config_get_callable, config_get_name_from_section
+from fuzzinator.config import config_get_name_from_section
 from fuzzinator.tracker.base import init_tracker
+from fuzzinator.validate_job import ValidateJob
 
 from .decor_widgets import PatternBox
 from .button import FormattedButton
-from .dialogs import WarningDialog
+from .dialogs import WarningDialog, YesNoDialog
 from .popup_buttons import AboutButton, EditButton, ReportButton, ViewButton
 from .graphics import fz_box_pattern, fz_logo_4lines
 from .table import Table, TableColumn
@@ -72,9 +73,7 @@ class MainWindow(PopUpLauncher):
         connect_signal(self.issues_table, 'refresh', lambda source: self._emit('refresh'))
         connect_signal(self.stat_table, 'refresh', lambda source: self._emit('refresh'))
 
-    def warning_popup(self, msg):
-        self.warning_msg = msg
-
+    def init_popup(self, msg):
         width = max([len(line) for line in msg.splitlines()] + [20])
         height = msg.count('\n') + 4
         cols, rows = os.get_terminal_size()
@@ -84,10 +83,24 @@ class MainWindow(PopUpLauncher):
                                                   overlay_height=height)
         return self.open_pop_up()
 
+    def warning_popup(self, msg):
+        self.pop_up = WarningDialog(msg)
+        connect_signal(self.pop_up, 'close', lambda button: self.close_pop_up())
+        self.init_popup(msg)
+
+    def remove_issue_popup(self, msg, ident):
+        self.pop_up = YesNoDialog(msg)
+        connect_signal(self.pop_up, 'yes', lambda button: self.remove_issue(ident))
+        connect_signal(self.pop_up, 'no', lambda button: self.close_pop_up())
+        self.init_popup(msg)
+
+    def remove_issue(self, ident):
+        self.db.remove_issue_by_id(ident)
+        del self.issues_table[self.issues_table.focus_position]
+        self.close_pop_up()
+
     def create_pop_up(self):
-        pop_up = WarningDialog(self.warning_msg)
-        connect_signal(pop_up, 'close', lambda button: self.close_pop_up())
-        return pop_up
+        return self.pop_up
 
     def add_reduce_job(self):
         if self.issues_table.selection:
@@ -97,21 +110,27 @@ class MainWindow(PopUpLauncher):
     def validate(self):
         if self.issues_table.selection:
             sut_section = 'sut.' + self.issues_table.selection.data['sut']
+            if not self.config.has_section(sut_section):
+                self.warning_popup('{section}: no such section in the config.'.format(section=sut_section))
+                return
 
-            if self.config.has_option(sut_section, 'reduce_call'):
-                sut_call, sut_call_kwargs = config_get_callable(self.config, sut_section, 'reduce_call')
-            else:
-                sut_call, sut_call_kwargs = config_get_callable(self.config, sut_section, 'call')
+            job = ValidateJob(config=self.config, db=self.db, listener=self.controller.listener, sut_section=sut_section,
+                              fuzzer_name=self.issues_table.selection.data['fuzzer'],
+                              test=self.issues_table.selection.data['test'])
+            issues = job.run()
+            expected_id = self.issues_table.selection.data['id']
 
-            with sut_call:
-                issue = sut_call(test=self.issues_table.selection.data['test'], **sut_call_kwargs)
-                expected_id = self.issues_table.selection.data['id']
-                if issue and issue['id'] == expected_id:
+            if issues:
+                assert len(issues) == 1, 'The length of issues must be 1.'
+                issue = issues[0]
+                # Remove the database identifier from the issue object since it'd conflict when updating.
+                del issue['_id']
+                if issue['id'] == expected_id:
                     msg = '{id} is still valid.'.format(id=expected_id.decode('utf-8', errors='ignore'))
                     self.db.update_issue(issue=self.issues_table.selection.data, _set=issue)
-                else:
-                    msg = '{id} is not valid anymore.'.format(id=expected_id.decode('utf-8', errors='ignore'))
-                self.warning_popup(msg)
+                    self.warning_popup(msg)
+                    return
+            self.remove_issue_popup(msg='The original issue is not valid anymore. Would you like to delete it?', ident=self.issues_table.selection.data['_id'])
 
     def copy_selected(self, test_bytes=False):
         if self.issues_table.selection:

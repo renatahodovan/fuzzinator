@@ -91,6 +91,18 @@ class WarningDialog(Dialog):
                                             warning=True)
 
 
+class YesNoDialog(Dialog):
+    signals = ['yes', 'no']
+
+    def __init__(self, msg):
+        super(YesNoDialog, self).__init__(title='Question',
+                                          body=[Text(msg)],
+                                          footer_btns=[
+                                              FormattedButton('Yes', lambda button: self._emit('yes')),
+                                              FormattedButton('No', lambda button: self._emit('no'))],
+                                          warning=True)
+
+
 class FormattedIssueDialog(Dialog):
     exit_keys = ['esc', 'f3']
 

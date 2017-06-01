@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -26,5 +26,8 @@ class TuiListener(EventListener):
 
         def __call__(self, **kwargs):
             with self.lock:
-                self.events.put({'fn': self.name, 'kwargs': kwargs})
-                os.write(self.pipe, b'x')
+                try:
+                    self.events.put_nowait({'fn': self.name, 'kwargs': kwargs})
+                    os.write(self.pipe, b'x')
+                except:
+                    pass

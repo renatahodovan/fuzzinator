@@ -21,7 +21,7 @@ sys.setrecursionlimit(max(sys.getrecursionlimit(), 3000))
 
 
 def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir, grammar, start_rule,
-             parallel=False, combine_loops=False,
+             hddmin=None, parallel=False, combine_loops=False,
              split_method='zeller', subset_first=True, subset_iterator='forward', complement_iterator='forward',
              jobs=os.cpu_count(), max_utilization=100, encoding=None,
              antlr=None, replacements=None, islands=None, lang='python',
@@ -37,7 +37,7 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir, gramma
 
     **Optional parameters of the reducer:**
 
-      - ``parallel``, ``combine_loops``, ``split_method``, ``subset_first``,
+      - ``hddmin``, ``parallel``, ``combine_loops``, ``split_method``, ``subset_first``,
         ``subset_iterator``, ``complement_iterator``, ``jobs``, ``max_utilization``, ``encoding``,
         ``antlr``, ``replacements``, ``islands``, ``lang``, ``hdd_star``,
         ``squeeze_tree``, ``skip_unremovable_tokens``, ``cache_class``, ``cleanup``
@@ -58,6 +58,7 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir, gramma
             reduce_cost=4
 
             [sut.foo.reduce]
+            hddmin=full
             grammar=/home/alice/grammars-v4/HTMLParser.g4 /home/alice/grammars-v4/HTMLLexer.g4
             start_rule=htmlDocument
             parallel=True
@@ -73,6 +74,7 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir, gramma
     src = issue['test']
     file_name = issue.get('filename', 'test')
 
+    hddmin = picireny.cli.args_hdd_choices[hddmin if hddmin else 'full']
     parallel = eval_arg(parallel)
     jobs = 1 if not parallel else eval_arg(jobs)
     encoding = encoding or chardet.detect(src)['encoding']
@@ -138,6 +140,7 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir, gramma
                        src=src,
                        encoding=encoding,
                        out=work_dir,
+                       hddmin=hddmin,
                        antlr=antlr or picireny.cli.antlr_default_path,
                        grammar=json.loads(grammar),
                        start_rule=start_rule,

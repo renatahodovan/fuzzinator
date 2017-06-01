@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
            parallel=False, combine_loops=False,
            split_method='zeller', subset_first=True, subset_iterator='forward', complement_iterator='forward',
-           jobs=os.cpu_count(), max_utilization=100, encoding=None, atom='line', cache_class='ContentCache', cleanup=True,
+           jobs=os.cpu_count(), max_utilization=100, encoding=None, atom='both', cache_class='ContentCache', cleanup=True,
            **kwargs):
     """
     Test case reducer based on the Picire Parallel Delta Debugging Framework.
@@ -123,17 +123,6 @@ def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
     except Exception as e:
         logger.warning('Exception in picire', exc_info=e)
         return None, list(issues.values())
-
-    # Reduce by char if we used line based reduce earlier.
-    if atom == 'line':
-        with open(reduced_file, 'rb') as f:
-            src = f.read()
-
-        call_config.update(dict(atom='char', src=src))
-        try:
-            reduced_file = picire.call(**call_config)
-        except:
-            return None, list(issues.values())
 
     with open(reduced_file, 'rb') as f:
         src = f.read()

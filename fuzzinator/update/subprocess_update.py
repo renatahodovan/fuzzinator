@@ -59,3 +59,4 @@ def SubprocessUpdate(command, cwd=None, env=None, timeout=None):
             logger.info(stdout)
     except subprocess.TimeoutExpired:
         logger.debug('Timeout expired while updating.')
+        proc.kill()

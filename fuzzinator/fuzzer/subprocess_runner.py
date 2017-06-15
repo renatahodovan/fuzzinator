@@ -82,6 +82,7 @@ class SubprocessRunner(object):
                 proc.communicate(timeout=self.timeout)
         except subprocess.TimeoutExpired:
             logger.debug('Timeout expired in subprocess runner.')
+            proc.kill()
         self.tests = [os.path.join(self.outdir, test) for test in os.listdir(self.outdir)]
         return self
 

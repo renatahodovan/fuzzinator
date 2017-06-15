@@ -77,5 +77,6 @@ def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None,
             }
     except subprocess.TimeoutExpired:
         logger.debug('Timeout expired in subprocess runner.')
+        proc.kill()
 
     return None

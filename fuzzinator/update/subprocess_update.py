@@ -54,7 +54,7 @@ def SubprocessUpdate(command, cwd=None, env=None, timeout=None):
                                 env=dict(os.environ, **json.loads(env or '{}')))
         stdout, stderr = proc.communicate(timeout=timeout)
         if proc.returncode != 0:
-            logger.warn(stderr)
+            logger.warning(stderr)
         else:
             logger.info(stdout)
     except subprocess.TimeoutExpired:

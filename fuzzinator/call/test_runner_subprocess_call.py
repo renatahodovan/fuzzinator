@@ -99,7 +99,7 @@ class TestRunnerSubprocessCall(object):
                 if self.proc.poll() is not None:
                     break
             except IOError as e:
-                logger.warn('[filter_streams] %s' % str(e))
+                logger.warning('[filter_streams] %s' % str(e))
 
         return {
             'exit_code': self.proc.returncode,

@@ -14,6 +14,7 @@ import select
 import shlex
 import subprocess
 import sys
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +26,10 @@ class TestRunnerSubprocessCall(object):
        Not available on platforms without fcntl support (e.g., Windows).
     """
 
-    def __init__(self, command, cwd=None, env=None, end_texts=None, init_wait=None, **kwargs):
+    def __init__(self, command, cwd=None, env=None, end_texts=None, init_wait=None, timeout_per_test=None, **kwargs):
         self.end_texts = json.loads(end_texts) if end_texts else []
         self.init_wait = eval(init_wait) if init_wait else False
+        self.timeout_per_test = int(timeout_per_test) if timeout_per_test else None
         self.cwd = cwd or os.getcwd()
         self.command = command
         self.env = dict(os.environ, **json.loads(env)) if env else None
@@ -71,10 +73,17 @@ class TestRunnerSubprocessCall(object):
             fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
         end_loop = False
+        start_time = time.time()
         while not end_loop:
             try:
+                time_left = self.timeout_per_test - (time.time() - start_time) if self.timeout_per_test else 0.5
+                if time_left <= 0:
+                    # Avoid waiting for the current test in the next iteration.
+                    self.proc.kill()
+                    break
+
                 try:
-                    read_fds = select.select(select_fds, [], select_fds, 0.5)[0]
+                    read_fds = select.select(select_fds, [], select_fds, time_left)[0]
                 except select.error as e:
                     if e.args[0] == errno.EINVAL:
                         continue

@@ -7,6 +7,7 @@
 
 from .afl_runner import AFLRunner
 from .byte_flip_decorator import ByteFlipDecorator
+from .file_writer_decorator import FileWriterDecorator
 from .list_directory import ListDirectory
 from .random_content import RandomContent
 from .subprocess_runner import SubprocessRunner
@@ -16,6 +17,7 @@ from .tornado_decorator import TornadoDecorator
 __all__ = [
     'AFLRunner',
     'ByteFlipDecorator',
+    'FileWriterDecorator',
     'ListDirectory',
     'RandomContent',
     'SubprocessRunner',

@@ -40,10 +40,12 @@ class TestRunnerSubprocessCall(object):
         return self
 
     def __exit__(self, *exc):
+        if self.proc and self.proc.poll() is None:
+            self.proc.kill()
         return None
 
     def __call__(self, test, **kwargs):
-        if not self.proc or self.proc.poll():
+        if not self.proc or self.proc.poll() is not None:
             self.start(self.init_wait)
 
         try:

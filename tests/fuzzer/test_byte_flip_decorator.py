@@ -45,3 +45,5 @@ def test_byte_flip_decorator(fuzzer, fuzzer_init_kwargs, dec_kwargs, exp_flip_cn
         orig_test = fuzzer_init_kwargs['test']
         flips = [i for i in range(min(len(orig_test), len(test))) if orig_test[i] != test[i]]
         assert len(flips) == exp_flip_cnt
+
+        index += 1

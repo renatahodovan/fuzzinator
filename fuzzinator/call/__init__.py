@@ -10,6 +10,7 @@ from .anonymize_decorator import AnonymizeDecorator
 from .exit_code_filter import ExitCodeFilter
 from .file_writer_decorator import FileWriterDecorator
 from .gdb_backtrace_decorator import GdbBacktraceDecorator
+from .lldb_backtrace_decorator import LldbBacktraceDecorator
 from .platform_info_decorator import PlatformInfoDecorator
 from .regex_filter import RegexFilter
 from .stdin_subprocess_call import StdinSubprocessCall
@@ -23,6 +24,7 @@ __all__ = [
     'ExitCodeFilter',
     'FileWriterDecorator',
     'GdbBacktraceDecorator',
+    'LldbBacktraceDecorator',
     'PlatformInfoDecorator',
     'RegexFilter',
     'StdinSubprocessCall',

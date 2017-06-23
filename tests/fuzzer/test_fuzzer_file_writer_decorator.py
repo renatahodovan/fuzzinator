@@ -22,7 +22,6 @@ from common_fuzzer import mock_exhausted_fuzzer, MockRepeatingFuzzer
     (MockRepeatingFuzzer, {'test': b'init_bar', 'n': 1}, {'filename': 'baz.txt'}, b'init_bar'),
     (MockRepeatingFuzzer, {'test': b'init_bar', 'n': 1}, {'filename': 'baz{uid}.txt'}, b'init_bar'),
 ])
-
 def test_file_writer_decorator(fuzzer, fuzzer_init_kwargs, dec_kwargs, exp, tmpdir):
     tmp_dec_kwargs = dict(dec_kwargs)
     tmp_dec_kwargs['filename'] = os.path.join('%s' % tmpdir, dec_kwargs['filename'])
@@ -41,5 +40,5 @@ def test_file_writer_decorator(fuzzer, fuzzer_init_kwargs, dec_kwargs, exp, tmpd
     if exp is None:
         assert out is None
     else:
-        assert re.fullmatch(pattern=tmp_dec_kwargs['filename'].format(uid='.*'), string=out) is not None
+        assert re.search(pattern=dec_kwargs['filename'].format(uid='.*') + '$', string=out) is not None
         assert not os.path.exists(out)

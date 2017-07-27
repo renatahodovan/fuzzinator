@@ -112,6 +112,8 @@ class TestRunnerSubprocessCall(object):
             except IOError as e:
                 logger.warning('[filter_streams] %s' % str(e))
 
+        logger.debug('{stdout}\n{stderr}'.format(stdout=streams['stdout'].decode('utf-8', errors='ignore'),
+                                                 stderr=streams['stderr'].decode('utf-8', errors='ignore')))
         return {
             'exit_code': self.proc.returncode,
             'stderr': streams['stderr'],

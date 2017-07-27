@@ -69,6 +69,8 @@ def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None,
                                 cwd=cwd or os.getcwd(),
                                 env=env)
         stdout, stderr = proc.communicate(timeout=timeout)
+        logger.debug('{stdout}\n{stderr}'.format(stdout=stdout.decode('utf-8', errors='ignore'),
+                                                 stderr=stderr.decode('utf-8', errors='ignore')))
         if no_exit_code or proc.returncode != 0:
             return {
                 'exit_code': proc.returncode,

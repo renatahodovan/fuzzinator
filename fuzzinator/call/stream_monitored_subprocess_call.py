@@ -8,6 +8,7 @@
 import errno
 import fcntl
 import json
+import logging
 import os
 import re
 import shlex
@@ -15,6 +16,8 @@ import select
 import signal
 import subprocess
 import sys
+
+logger = logging.getLogger(__name__)
 
 
 class StreamMonitoredSubprocessCall(object):
@@ -82,8 +85,8 @@ class StreamMonitoredSubprocessCall(object):
 
                 if self.proc.poll() is not None:
                     break
-            except IOError:
-                pass
+            except IOError as e:
+                logger.warning('[filter_streams] %s' % str(e))
 
         try:
             os.kill(self.proc.pid, signal.SIGKILL)
@@ -91,6 +94,8 @@ class StreamMonitoredSubprocessCall(object):
         except:
             pass
 
+        logger.debug('{stdout}\n{stderr}'.format(stdout=streams['stdout'].decode('utf-8', errors='ignore'),
+                                                 stderr=streams['stderr'].decode('utf-8', errors='ignore')))
         if issue:
             issue.update(dict(exit_code=self.proc.returncode,
                               stderr=streams['stderr'],

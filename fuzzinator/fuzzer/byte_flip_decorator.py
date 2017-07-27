@@ -57,7 +57,7 @@ class ByteFlipDecorator(CallableDecorator):
         def wrapper(fn):
             def filter(*args, **kwargs):
                 test = fn(*args, **kwargs)
-                if not test:
+                if test is None:
                     return None
 
                 test = bytearray(test)

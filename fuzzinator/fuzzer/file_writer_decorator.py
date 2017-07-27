@@ -70,7 +70,7 @@ class FileWriterDecorator(object):
                 call = super(Inherited, self).__call__ if isclass(callable) else callable
                 self.test = call(**kwargs)
 
-                if not self.test:
+                if self.test is None:
                     return None
 
                 with open(self.file_path, 'w' if not isinstance(self.test, bytes) else 'wb') as f:

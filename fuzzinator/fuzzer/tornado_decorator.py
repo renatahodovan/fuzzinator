@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -76,7 +76,7 @@ class TornadoDecorator(object):
             def __call__(self, **kwargs):
                 # Saving fuzzer args to make them available from the requesthandlers
                 # after passing a reference of ourselves.
-                if kwargs['index'] != 0 and not self.test:
+                if kwargs['index'] != 0 and self.test is None:
                     return None
 
                 self.fuzzer_kwargs = kwargs
@@ -131,7 +131,7 @@ class TornadoDecorator(object):
                     try:
                         self.wrapper.fuzzer_kwargs['index'] = self.wrapper.index
                         self.wrapper.test = self.fuzzer(**self.wrapper.fuzzer_kwargs)
-                        if self.wrapper.test:
+                        if self.wrapper.test is not None:
                             self.wrapper.index += 1
                             content = Template('<meta http-equiv="refresh" content="1;url=?&{% raw request %}">{% raw test %}'). \
                                 generate(request='index={index}'.format(index=self.wrapper.index), test=self.wrapper.test)

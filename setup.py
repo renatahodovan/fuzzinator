@@ -26,7 +26,7 @@ setup(
     install_requires=['chardet', 'keyring', 'pexpect', 'picire==17.6', 'picireny==17.7', 'psutil',
                       'PyGithub', 'pymongo', 'pyperclip', 'python-bugzilla', 'google-api-python-client',
                       'rainbow_logging_handler', 'sphinx', 'sphinx_rtd_theme',
-                      'tornado', 'urwid', 'yagmail'],
+                      'tornado', 'urwid'],
     entry_points={
         'console_scripts': ['fuzzinator = fuzzinator.executor:execute']
     }

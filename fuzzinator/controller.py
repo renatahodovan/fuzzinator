@@ -200,6 +200,7 @@ class Controller(object):
                 if not next_job:
                     if not self.fuzzers:
                         self._wait_for_load(0, running_jobs)
+                        time.sleep(1)
                         continue
 
                     fuzzer_name = config_get_name_from_section(self.fuzzers[fuzz_idx])

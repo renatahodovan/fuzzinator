@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -45,6 +45,12 @@ class AFLRunner(object):
         parameter to AFL.
       - ``dictionary``: if not ``None``, pass its value as the ``-x`` dictionary
         parameter to AFL.
+      - ``master_name``: the name of the master fuzzer instance which will perform
+        deterministic checks.
+      - ``slave_name``: the name of a slave fuzzer instance which will proceed to
+        random tweaks.
+        For further details check:
+        https://github.com/mirrorer/afl/blob/master/docs/parallel_fuzzing.txt
 
     **Example configuration snippet:**
 
@@ -73,7 +79,8 @@ class AFLRunner(object):
             output=${fuzzinator:work_dir}/afl-output/{uid}
     """
 
-    def __init__(self, afl_fuzz, input, output, sut_command, cwd=None, env=None, timeout=None, dictionary=None, **kwargs):
+    def __init__(self, afl_fuzz, input, output, sut_command, cwd=None, env=None, timeout=None, dictionary=None,
+                 master_name=None, slave_name=None, **kwargs):
         self.afl_fuzz = afl_fuzz
         self.input = input
         self.output = output.format(uid=str(id(self)))
@@ -83,6 +90,8 @@ class AFLRunner(object):
         self.env.update({'AFL_NO_UI': '1'})
         self.timeout = timeout
         self.dictionary = dictionary
+        self.master_name = master_name
+        self.slave_name = slave_name
 
         self.iteration = 1
         self.checked = set()
@@ -96,7 +105,7 @@ class AFLRunner(object):
         return None
 
     def __call__(self, **kwargs):
-        crash_dir = os.path.join(self.output, 'crashes')
+        crash_dir = os.path.join(self.output, '{name}'.format(name=self.master_name or self.slave_name or ''), 'crashes')
 
         while True:
             if self.tests:
@@ -105,12 +114,14 @@ class AFLRunner(object):
                 with open(test, 'rb') as f:
                     return f.read()
 
-            command = '{afl} {input} {output} {timeout} {dictionary} {sut_command}'.format(
+            command = '{afl} {input} {output} {timeout} {dictionary} {master_name} {slave_name} {sut_command}'.format(
                 afl=self.afl_fuzz,
                 input='-i {i}'.format(i=self.input) if self.iteration == 1 else '-i-',
                 output='-o {o}'.format(o=self.output),
                 timeout='-t {t}'.format(t=self.timeout) if self.timeout else '',
                 dictionary='-x {x}'.format(x=self.dictionary) if self.dictionary else '',
+                master_name='-M {n}'.format(n=self.master_name) if self.master_name else '',
+                slave_name='-S {n}'.format(n=self.slave_name) if self.slave_name else '',
                 sut_command=self.sut_command.format(test='@@'))
 
             child = pexpect.spawn(command, cwd=self.cwd, env=self.env)

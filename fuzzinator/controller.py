@@ -21,6 +21,7 @@ from .listener import ListenerManager
 from .mongo_driver import MongoDriver
 from .reduce_job import ReduceJob
 from .update_job import UpdateJob
+from .validate_job import ValidateJob
 
 
 class Controller(object):
@@ -295,6 +296,17 @@ class Controller(object):
     def add_reduce_job(self, issue):
         with self._lock:
             self._issue_queue.put(issue)
+
+    def reduce_all(self):
+        for issue in self.db.find_issues_by_suts([section for section in self.config.sections() if section.startswith('sut.') and section.count('.') == 1]):
+            if not issue['reported'] and not issue['reduced']:
+                self.add_reduce_job(issue)
+
+    def validate(self, issue):
+        ValidateJob(config=self.config,
+                    issue=issue,
+                    db=self.db,
+                    listener=self.listener).run()
 
     @staticmethod
     def kill_child_processes(sig=signal.SIGTERM):

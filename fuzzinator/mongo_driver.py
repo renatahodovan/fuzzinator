@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -48,6 +48,9 @@ class MongoDriver(object):
 
     def find_issue_by_id(self, id):
         return self._db.fuzzinator_issues.find_one({'_id': id})
+
+    def find_issues_by_suts(self, suts):
+        return list(self._db.fuzzinator_issues.find({'sut': {'$in': suts}}))
 
     def update_issue(self, issue, _set):
         sut = issue['sut'] if issue['sut'].startswith('sut.') else 'sut.' + issue['sut']

@@ -94,6 +94,12 @@ class WarningDialog(Dialog):
 class YesNoDialog(Dialog):
     signals = ['yes', 'no']
 
+    def keypress(self, size, key):
+        if key == 'enter':
+            self._emit('yes')
+        elif key == 'esc':
+            self._emit('no')
+
     def __init__(self, msg):
         super(YesNoDialog, self).__init__(title='Question',
                                           body=[Text(msg)],

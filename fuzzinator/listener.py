@@ -109,6 +109,16 @@ class EventListener(object):
         """
         pass
 
+    def invalid_issue(self, issue):
+        """
+        Invoked when an issue seems invalid.
+
+        :param dict issue: the issue object that did not pass re-validation
+            (listener is free to decide how to react, an option is to remove the
+            issue from the database).
+        """
+        pass
+
     def update_issue(self, issue):
         """
         Invoked when the status of an issue changed.

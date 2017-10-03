@@ -9,6 +9,7 @@ import os
 
 from .call_job import CallJob
 from .config import config_get_callable
+from .validate_job import ValidateJob
 
 
 class ReduceJob(CallJob):
@@ -27,6 +28,12 @@ class ReduceJob(CallJob):
         self.cost = int(self.config.get(self.sut_section, 'reduce_cost', fallback=self.config.get(self.sut_section, 'cost', fallback=1)))
 
     def run(self):
+        if not ValidateJob(config=self.config,
+                           issue=self.issue,
+                           db=self.db,
+                           listener=self.listener).run():
+            return []
+
         if self.config.has_option(self.sut_section, 'reduce_call'):
             sut_call, sut_call_kwargs = config_get_callable(self.config, self.sut_section, 'reduce_call')
         else:

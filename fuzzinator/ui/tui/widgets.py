@@ -16,7 +16,6 @@ from urwid import *
 
 from fuzzinator.config import config_get_name_from_section
 from fuzzinator.tracker.base import init_tracker
-from fuzzinator.validate_job import ValidateJob
 
 from .decor_widgets import PatternBox
 from .button import FormattedButton
@@ -88,7 +87,8 @@ class MainWindow(PopUpLauncher):
         connect_signal(self.pop_up, 'close', lambda button: self.close_pop_up())
         self.init_popup(msg)
 
-    def remove_issue_popup(self, msg, ident):
+    def remove_issue_popup(self, ident):
+        msg = '{ident}: not valid anymore. Delete?'.format(ident=self.issues_table.row_dict[ident]['id'].decode('utf-8', errors='utf-8'))
         self.pop_up = YesNoDialog(msg)
         connect_signal(self.pop_up, 'yes', lambda button: self.remove_issue(ident))
         connect_signal(self.pop_up, 'no', lambda button: self.close_pop_up())
@@ -96,7 +96,8 @@ class MainWindow(PopUpLauncher):
 
     def remove_issue(self, ident):
         self.db.remove_issue_by_id(ident)
-        del self.issues_table[self.issues_table.focus_position]
+        if ident in self.issues_table.row_dict:
+            del self.issues_table[self.issues_table.body.rows.index(self.issues_table.row_dict[ident])]
         self.close_pop_up()
 
     def create_pop_up(self):
@@ -107,30 +108,16 @@ class MainWindow(PopUpLauncher):
             issue = self.issues_table.selection.data
             self.controller.add_reduce_job(issue=self.db.find_issue_by_id(issue['_id']))
 
+    def reduce_all(self):
+        self.controller.reduce_all()
+
     def validate(self):
         if self.issues_table.selection:
-            sut_section = 'sut.' + self.issues_table.selection.data['sut']
-            if not self.config.has_section(sut_section):
-                self.warning_popup('{section}: no such section in the config.'.format(section=sut_section))
-                return
-
-            job = ValidateJob(config=self.config, db=self.db, listener=self.controller.listener, sut_section=sut_section,
-                              fuzzer_name=self.issues_table.selection.data['fuzzer'],
-                              test=self.issues_table.selection.data['test'])
-            issues = job.run()
-            expected_id = self.issues_table.selection.data['id']
-
-            if issues:
-                assert len(issues) == 1, 'The length of issues must be 1.'
-                issue = issues[0]
-                # Remove the database identifier from the issue object since it'd conflict when updating.
-                del issue['_id']
-                if issue['id'] == expected_id:
-                    msg = '{id} is still valid.'.format(id=expected_id.decode('utf-8', errors='ignore'))
-                    self.db.update_issue(issue=self.issues_table.selection.data, _set=issue)
-                    self.warning_popup(msg)
-                    return
-            self.remove_issue_popup(msg='The original issue is not valid anymore. Would you like to delete it?', ident=self.issues_table.selection.data['_id'])
+            issue = self.db.find_issue_by_id(self.issues_table.selection.data['_id'])
+            if not self.config.has_section(issue['sut']):
+                self.warning_popup(msg='{sut} is not defined.'.format(sut=issue['sut']))
+            else:
+                self.controller.validate(issue)
 
     def copy_selected(self, test_bytes=False):
         if self.issues_table.selection:
@@ -169,6 +156,8 @@ class MainWindow(PopUpLauncher):
             self.copy_selected(test_bytes=True)
         elif key == 'f6':
             self.footer_btns['reduce'].keypress((0, 0), 'enter')
+        elif key == 'shift f6':
+            self.reduce_all()
         elif key == 'f7':
             self.footer_btns['report'].keypress((0, 0), 'enter')
         elif key == 'f8':

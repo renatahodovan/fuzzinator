@@ -15,21 +15,25 @@ class ValidateJob(CallJob):
     Class for running test case validation jobs.
     """
 
-    def __init__(self, config, db, listener, sut_section=None, fuzzer_name=None, test=None):
+    def __init__(self, config, issue, db, listener):
         super(ValidateJob, self).__init__(config=config, db=db, listener=listener)
-        self.sut_section = sut_section
-        self.fuzzer_name = fuzzer_name
-        self.test = test
+        self.issue = issue
+        self.sut_section = issue['sut']
+        self.fuzzer_name = issue['fuzzer']
+        self.cost = 0
 
     def run(self):
-        sut_call, sut_call_kwargs = config_get_callable(self.config, self.sut_section,
-                                                        'reduce_call' if self.config.has_option(self.sut_section, 'reduce_call') else 'call')
+        sut_call, sut_call_kwargs = config_get_callable(self.config, self.issue['sut'],
+                                                        'reduce_call' if self.config.has_option(self.issue['sut'], 'reduce_call') else 'call')
 
         with sut_call:
-            issues = []
-            issue = sut_call(test=self.test, **sut_call_kwargs)
+            issue = sut_call(test=self.issue['test'], **sut_call_kwargs)
             if issue:
-                issue['test'] = self.test
+                issue['test'] = self.issue['test']
+                if issue['id'] == self.issue['id']:
+                    self.db.update_issue(self.issue, issue)
+                    return [issue]
+
                 self.add_issue(issue, new_issues=[])
-                issues.append(issue)
-            return issues
+        self.listener.invalid_issue(issue=self.issue)
+        return []

@@ -80,9 +80,6 @@ class StreamMonitoredSubprocessCall(object):
                                 end_loop = True
                                 issue = match.groupdict()
 
-                        if self.proc.poll() is not None:
-                            break
-
                 if self.proc.poll() is not None:
                     break
             except IOError as e:

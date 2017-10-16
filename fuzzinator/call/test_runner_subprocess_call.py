@@ -104,9 +104,6 @@ class TestRunnerSubprocessCall(object):
                                 end_loop = True
                                 break
 
-                        if self.proc.poll() is not None:
-                            break
-
                 if self.proc.poll() is not None:
                     break
             except IOError as e:

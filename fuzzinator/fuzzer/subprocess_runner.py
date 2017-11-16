@@ -40,6 +40,8 @@ class SubprocessRunner(object):
       - ``env``: if not ``None``, a dictionary of variable names-values to
         update the environment with.
       - ``timeout``: run subprocess with timeout.
+      - ``contents``: if it's true then the content of the files will be returned
+         instead of their path (boolean value, True by default).
 
     **Example configuration snippet:**
 
@@ -58,7 +60,7 @@ class SubprocessRunner(object):
             command=barfuzzer -n ${fuzz.foo-with-bar:batch} -o ${outdir}
     """
 
-    def __init__(self, outdir, command, cwd=None, env=None, timeout=None, **kwargs):
+    def __init__(self, outdir, command, cwd=None, env=None, timeout=None, contents='True', **kwargs):
         # uid is used to make sure we create unique directory for the generated test cases.
         self.uid = '{pid}-{id}'.format(pid=os.getpid(), id=id(self))
 
@@ -67,7 +69,7 @@ class SubprocessRunner(object):
         self.cwd = cwd or os.getcwd()
         self.env = dict(os.environ, **json.loads(env)) if env else None
         self.timeout = int(timeout) if timeout else None
-
+        self.contents = contents in [1, '1', True, 'True', 'true']
         self.tests = []
 
     def __enter__(self):
@@ -97,5 +99,8 @@ class SubprocessRunner(object):
             return None
 
         test = self.tests.pop()
+        if not self.contents:
+            return test
+
         with open(test, 'rb') as f:
             return f.read()

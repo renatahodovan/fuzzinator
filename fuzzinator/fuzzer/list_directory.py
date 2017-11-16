@@ -5,6 +5,7 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+import glob
 import os
 
 
@@ -22,13 +23,12 @@ class ListDirectory(object):
 
     **Mandatory parameter of the fuzzer:**
 
-      - ``outdir``: path to the directory containing the files that act as test
-        inputs.
+      - ``pattern``: shell-like pattern to the test files.
 
     **Optional parameter of the fuzzer:**
 
-      - ``subdirs``: descend recursively into all subdirectories of ``outdir``
-        (boolean value, False by default).
+      - ``subdirs``: if it's true, the '**' characters in ``pattern`` will match
+         any files and zero or more subdirectories (boolean value, False by default).
 
     **Example configuration snippet:**
 
@@ -44,16 +44,13 @@ class ListDirectory(object):
             batch=inf
 
             [fuzz.foo-with-oldbugs.fuzzer.init]
-            outdir=/home/alice/foo-old-bugs/
+            pattern=/home/alice/foo-old-bugs/**/*.js
+            subdirs=True
     """
 
-    def __init__(self, outdir, subdirs='False', **kwargs):
+    def __init__(self, pattern, subdirs='False', **kwargs):
         subdirs = subdirs in [1, '1', True, 'True', 'true']
-        self.tests = []
-        for dirpath, dirnames, filenames in os.walk(outdir):
-            if not subdirs:
-                dirnames[:] = []
-            self.tests.extend([os.path.join(dirpath, test) for test in filenames])
+        self.tests = [fn for fn in glob.glob(pattern, recursive=subdirs) if os.path.isfile(fn)]
         self.tests.sort(reverse=True)
 
     def __enter__(self):

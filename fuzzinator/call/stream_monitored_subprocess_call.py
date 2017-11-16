@@ -16,6 +16,7 @@ import select
 import signal
 import subprocess
 import sys
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -27,11 +28,12 @@ class StreamMonitoredSubprocessCall(object):
        Not available on platforms without fcntl support (e.g., Windows).
     """
 
-    def __init__(self, command, cwd=None, env=None, end_patterns=None, **kwargs):
+    def __init__(self, command, cwd=None, env=None, end_patterns=None, timeout=None, **kwargs):
         self.command = command
         self.cwd = cwd or os.getcwd()
-        self.end_patterns = [re.compile(pattern.encode('utf-8', errors='ignore')) for pattern in json.loads(end_patterns)] if end_patterns else []
+        self.end_patterns = [re.compile(pattern.encode('utf-8', errors='ignore'), flags=re.MULTILINE | re.DOTALL) for pattern in json.loads(end_patterns)] if end_patterns else []
         self.env = dict(os.environ, **json.loads(env)) if env else None
+        self.timeout = int(timeout) if timeout else None
 
     def __enter__(self):
         return self
@@ -40,18 +42,19 @@ class StreamMonitoredSubprocessCall(object):
         return None
 
     def __call__(self, test, **kwargs):
-        self.proc = subprocess.Popen(shlex.split(self.command.format(test=test), posix=sys.platform != 'win32'),
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     cwd=self.cwd or os.getcwd(),
-                                     env=self.env)
-        return self.wait_til_end()
+        if self.timeout:
+            start_time = time.time()
 
-    def wait_til_end(self):
+        proc = subprocess.Popen(shlex.split(self.command.format(test=test), posix=sys.platform != 'win32'),
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                cwd=self.cwd or os.getcwd(),
+                                env=self.env)
+
         streams = {'stdout': b'', 'stderr': b''}
         issue = None
 
-        select_fds = [stream.fileno() for stream in [self.proc.stderr, self.proc.stdout]]
+        select_fds = [stream.fileno() for stream in [proc.stderr, proc.stdout]]
         for fd in select_fds:
             fl = fcntl.fcntl(fd, fcntl.F_GETFL)
             fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
@@ -67,9 +70,9 @@ class StreamMonitoredSubprocessCall(object):
                     raise
 
                 for stream, _ in streams.items():
-                    if getattr(self.proc, stream).fileno() in read_fds:
+                    if getattr(proc, stream).fileno() in read_fds:
                         while True:
-                            chunk = getattr(self.proc, stream).read(512)
+                            chunk = getattr(proc, stream).read(512)
                             if not chunk:
                                 break
                             streams[stream] += chunk
@@ -80,21 +83,21 @@ class StreamMonitoredSubprocessCall(object):
                                 end_loop = True
                                 issue = match.groupdict()
 
-                if self.proc.poll() is not None:
+                if proc.poll() is not None or (self.timeout and time.time() - start_time > self.timeout):
                     break
             except IOError as e:
                 logger.warning('[filter_streams] %s' % str(e))
 
         try:
-            os.kill(self.proc.pid, signal.SIGKILL)
-            self.proc.wait()
+            os.kill(proc.pid, signal.SIGKILL)
+            proc.wait()
         except:
             pass
 
         logger.debug('{stdout}\n{stderr}'.format(stdout=streams['stdout'].decode('utf-8', errors='ignore'),
                                                  stderr=streams['stderr'].decode('utf-8', errors='ignore')))
         if issue:
-            issue.update(dict(exit_code=self.proc.returncode,
+            issue.update(dict(exit_code=proc.returncode,
                               stderr=streams['stderr'],
                               stdout=streams['stdout']))
         return issue

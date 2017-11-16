@@ -6,19 +6,24 @@
 # according to those terms.
 
 import pytest
-import os
 
 import fuzzinator
 
+from os.path import join
+
 from common_fuzzer import resources_dir
 
+mock_tests = join(resources_dir, 'mock_tests')
 
-@pytest.mark.parametrize('pattern, exp', [
-    (os.path.join(resources_dir, 'mock_tests', '*'), {b'foo\n', b'bar\n', b'baz\n'}),
-    (os.path.join(resources_dir, 'mock_tests', '**', '*'), {b'foo\n', b'bar\n', b'baz\n', b'qux\n'}),
+
+@pytest.mark.parametrize('pattern, contents, exp', [
+    (join(mock_tests, '*'), True, {b'foo\n', b'bar\n', b'baz\n'}),
+    (join(mock_tests, '**', '*'), True, {b'foo\n', b'bar\n', b'baz\n', b'qux\n'}),
+    (join(mock_tests, '*'), False, {join(mock_tests, 'baz.txt'), join(mock_tests, 'bar.txt'), join(mock_tests, 'foo.txt')}),
+    (join(mock_tests, '**', '*'), False, {join(mock_tests, 'baz.txt'), join(mock_tests, 'bar.txt'), join(mock_tests, 'foo.txt'), join(mock_tests, 'subdir', 'qux.txt')}),
 ])
-def test_list_directory(pattern, exp):
-    fuzzer = fuzzinator.fuzzer.ListDirectory(pattern=pattern)
+def test_list_directory(pattern, contents, exp):
+    fuzzer = fuzzinator.fuzzer.ListDirectory(pattern=pattern, contents=contents)
     with fuzzer:
         tests = set()
         index = 0

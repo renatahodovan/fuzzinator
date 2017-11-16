@@ -26,6 +26,11 @@ class ListDirectory(object):
 
       - ``pattern``: shell-like pattern to the test files.
 
+    **Optional parameter of the fuzzer:**
+
+      - ``contents``: if it's true then the content of the files will be returned
+         instead of their path (boolean value, True by default).
+
     **Example configuration snippet:**
 
         .. code-block:: ini
@@ -42,7 +47,8 @@ class ListDirectory(object):
             [fuzz.foo-with-oldbugs.fuzzer.init]
             pattern=/home/alice/foo-old-bugs/**/*.js
     """
-    def __init__(self, pattern, **kwargs):
+    def __init__(self, pattern, contents='True', **kwargs):
+        self.contents = contents in [1, '1', True, 'True', 'true']
         path = Path(pattern)
         anchor, pattern = ('.', pattern) if not path.anchor else (path.anchor, str(path.relative_to(path.anchor)))
         self.tests = [str(fn) for fn in Path(anchor).glob(pattern) if os.path.isfile(str(fn))]
@@ -59,5 +65,8 @@ class ListDirectory(object):
             return None
 
         test = self.tests.pop()
+        if not self.contents:
+            return test
+
         with open(test, 'rb') as f:
             return f.read()

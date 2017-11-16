@@ -8,6 +8,7 @@
 from .callable_decorator import CallableDecorator
 from .anonymize_decorator import AnonymizeDecorator
 from .exit_code_filter import ExitCodeFilter
+from .file_reader_decorator import FileReaderDecorator
 from .file_writer_decorator import FileWriterDecorator
 from .gdb_backtrace_decorator import GdbBacktraceDecorator
 from .lldb_backtrace_decorator import LldbBacktraceDecorator
@@ -22,6 +23,7 @@ __all__ = [
     'AnonymizeDecorator',
     'CallableDecorator',
     'ExitCodeFilter',
+    'FileReaderDecorator',
     'FileWriterDecorator',
     'GdbBacktraceDecorator',
     'LldbBacktraceDecorator',

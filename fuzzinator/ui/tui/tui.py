@@ -162,7 +162,7 @@ def execute(args=None, parser=None):
                         help='alternative style file for TUI')
     arguments = parser.parse_args(args)
 
-    config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
+    config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(), strict=False)
     config.read(arguments.config)
 
     # Redirect or suppress errors to spare tui from superfluous messages.

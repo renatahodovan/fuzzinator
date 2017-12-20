@@ -26,7 +26,7 @@ def execute(args=None, parser=None):
     logger.addHandler(RainbowLoggingHandler(sys.stdout))
     logger.setLevel(arguments.log_level)
 
-    config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
+    config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(), strict=False)
     config.read(arguments.config)
 
     controller = Controller(config=config)

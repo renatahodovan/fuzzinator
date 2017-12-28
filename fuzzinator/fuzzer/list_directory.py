@@ -5,8 +5,9 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import glob
 import os
+
+from pathlib import Path
 
 
 class ListDirectory(object):
@@ -25,11 +26,6 @@ class ListDirectory(object):
 
       - ``pattern``: shell-like pattern to the test files.
 
-    **Optional parameter of the fuzzer:**
-
-      - ``subdirs``: if it's true, the '**' characters in ``pattern`` will match
-         any files and zero or more subdirectories (boolean value, False by default).
-
     **Example configuration snippet:**
 
         .. code-block:: ini
@@ -45,12 +41,11 @@ class ListDirectory(object):
 
             [fuzz.foo-with-oldbugs.fuzzer.init]
             pattern=/home/alice/foo-old-bugs/**/*.js
-            subdirs=True
     """
-
-    def __init__(self, pattern, subdirs='False', **kwargs):
-        subdirs = subdirs in [1, '1', True, 'True', 'true']
-        self.tests = [fn for fn in glob.glob(pattern, recursive=subdirs) if os.path.isfile(fn)]
+    def __init__(self, pattern, **kwargs):
+        path = Path(pattern)
+        anchor, pattern = ('.', pattern) if not path.anchor else (path.anchor, str(path.relative_to(path.anchor)))
+        self.tests = [str(fn) for fn in Path(anchor).glob(pattern) if os.path.isfile(str(fn))]
         self.tests.sort(reverse=True)
 
     def __enter__(self):

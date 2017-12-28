@@ -13,12 +13,12 @@ import fuzzinator
 from common_fuzzer import resources_dir
 
 
-@pytest.mark.parametrize('pattern, subdirs, exp', [
-    (os.path.join(resources_dir, 'mock_tests', '*'), False, {b'foo\n', b'bar\n', b'baz\n'}),
-    (os.path.join(resources_dir, 'mock_tests', '**', '*'), True, {b'foo\n', b'bar\n', b'baz\n', b'qux\n'}),
+@pytest.mark.parametrize('pattern, exp', [
+    (os.path.join(resources_dir, 'mock_tests', '*'), {b'foo\n', b'bar\n', b'baz\n'}),
+    (os.path.join(resources_dir, 'mock_tests', '**', '*'), {b'foo\n', b'bar\n', b'baz\n', b'qux\n'}),
 ])
-def test_list_directory(pattern, subdirs, exp):
-    fuzzer = fuzzinator.fuzzer.ListDirectory(pattern=pattern, subdirs=subdirs)
+def test_list_directory(pattern, exp):
+    fuzzer = fuzzinator.fuzzer.ListDirectory(pattern=pattern)
     with fuzzer:
         tests = set()
         index = 0

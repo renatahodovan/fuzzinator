@@ -17,12 +17,13 @@ from .picire_tester import PicireTester
 logger = logging.getLogger(__name__)
 
 
-def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir, grammar, start_rule,
+def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
              hddmin=None, parallel=False, combine_loops=False,
              split_method='zeller', subset_first=True, subset_iterator='forward', complement_iterator='forward',
              jobs=os.cpu_count(), max_utilization=100, encoding=None,
-             antlr=None, replacements=None, islands=None, lang='python',
-             hdd_star=True, squeeze_tree=True, skip_unremovable_tokens=True, cache_class='ContentCache', cleanup=True,
+             antlr=None, format=None, grammar=None, start=None, replacements=None, lang='python',
+             hdd_star=True, flatten_recursion=False, squeeze_tree=True, skip_unremovable=True, skip_whitespace=False,
+             build_hidden_tokens=False, granularity=2, cache_class='ContentCache', cleanup=True,
              **kwargs):
     """
     Test case reducer based on the Picireny Hierarchical Delta Debugging
@@ -30,14 +31,15 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir, gramma
 
     **Mandatory parameters of the reducer:**
 
-      - ``grammar``, ``start_rule``
+      - Either ``format`` or ``grammar`` and ``start`` must be defined.
 
     **Optional parameters of the reducer:**
 
       - ``hddmin``, ``parallel``, ``combine_loops``, ``split_method``, ``subset_first``,
         ``subset_iterator``, ``complement_iterator``, ``jobs``, ``max_utilization``, ``encoding``,
-        ``antlr``, ``replacements``, ``islands``, ``lang``, ``hdd_star``,
-        ``squeeze_tree``, ``skip_unremovable_tokens``, ``cache_class``, ``cleanup``
+        ``antlr``, ``format``, ``grammar``, ``start``, ``replacements``, ``lang``,
+        ``hdd_star``, ``flatten_recursion``, ``squeeze_tree``, ``skip_unremovable``, ``skip_whitespace``,
+        ``build_hidden_tokens``, ``granularity``, ``cache_class``, ``cleanup``
 
     Refer to https://github.com/renatahodovan/picireny for configuring Picireny.
 
@@ -57,7 +59,7 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir, gramma
             [sut.foo.reduce]
             hddmin=full
             grammar=/home/alice/grammars-v4/HTMLParser.g4 /home/alice/grammars-v4/HTMLLexer.g4
-            start_rule=htmlDocument
+            start=htmlDocument
             parallel=True
             jobs=4
             subset_iterator=skip
@@ -68,13 +70,23 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir, gramma
 
     logging.getLogger('picireny').setLevel(logger.level)
 
+    antlr = picireny.process_antlr4_path(antlr)
+    if antlr is None:
+        return None, []
+
+    input_format, start = picireny.process_antlr4_format(format=format, grammar=json.loads(grammar), start=start, replacements=replacements)
+
+    if not (input_format and start):
+        logger.warning('Processing the arguments of picireny failed.')
+        return None, []
+
     src = issue['test']
     file_name = issue.get('filename', 'test')
 
     hddmin = picireny.cli.args_hdd_choices[hddmin if hddmin else 'full']
     parallel = eval_arg(parallel)
     jobs = 1 if not parallel else eval_arg(jobs)
-    encoding = encoding or chardet.detect(src)['encoding']
+    encoding = encoding or chardet.detect(src)['encoding'] or 'utf-8'
     cleanup = eval_arg(cleanup)
 
     combine_loops = eval_arg(combine_loops)
@@ -87,14 +99,6 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir, gramma
     cache_class = getattr(picire, cache_class)
     if parallel:
         cache_class = picire.shared_cache_decorator(cache_class)
-
-    if islands:
-        with open(islands, 'rb') as f:
-            islands_src = f.read()
-        try:
-            islands = json.loads(islands_src.decode(), object_hook=picireny.antlr4.IslandDescriptor.json_load_object_hook)
-        except Exception as err:
-            listener.warning(msg='Exception in island descriptor: ' % err)
 
     # Choose the reducer class that will be used and its configuration.
     reduce_config = {'split': split_method}
@@ -116,8 +120,6 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir, gramma
             reduce_config['complement_iterator'] = complement_iterator
             reduce_config['subset_first'] = subset_first
 
-    replacements = replacements or dict()
-
     issues = dict()
     tester_config = dict(
         sut_call=sut_call,
@@ -129,29 +131,36 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir, gramma
         issues=issues
     )
 
-    call_config = dict(reduce_class=reduce_class,
-                       reduce_config=reduce_config,
-                       tester_class=PicireTester,
-                       tester_config=tester_config,
-                       input=file_name,
-                       src=src,
-                       encoding=encoding,
-                       out=work_dir,
-                       hddmin=hddmin,
-                       antlr=antlr or picireny.cli.antlr_default_path,
-                       grammar=json.loads(grammar),
-                       start_rule=start_rule,
-                       replacements=replacements,
-                       islands=islands,
-                       lang=lang,
-                       hdd_star=hdd_star,
-                       squeeze_tree=squeeze_tree,
-                       skip_unremovable_tokens=skip_unremovable_tokens,
-                       cache_class=cache_class,
-                       cleanup=cleanup)
-
     try:
-        reduced_file = picireny.call(**call_config)
+        hdd_tree = picireny.build_with_antlr4(input=file_name,
+                                              src=src,
+                                              encoding=encoding,
+                                              out=work_dir,
+                                              input_format=input_format,
+                                              start=start,
+                                              antlr=antlr,
+                                              lang=lang,
+                                              build_hidden_tokens=build_hidden_tokens,
+                                              cleanup=cleanup)
+
+        reduced_file = picireny.reduce(hdd_tree=hdd_tree,
+                                       reduce_class=reduce_class,
+                                       reduce_config=reduce_config,
+                                       tester_class=PicireTester,
+                                       tester_config=tester_config,
+                                       input=file_name,
+                                       encoding=encoding,
+                                       out=work_dir,
+                                       hddmin=hddmin,
+                                       hdd_star=hdd_star,
+                                       flatten_recursion=flatten_recursion,
+                                       squeeze_tree=squeeze_tree,
+                                       skip_unremovable=skip_unremovable,
+                                       skip_whitespace=skip_whitespace,
+                                       unparse_with_whitespace=not build_hidden_tokens,
+                                       granularity=granularity,
+                                       cache_class=cache_class,
+                                       cleanup=cleanup)
     except Exception as e:
         logger.warning('Exception in picireny', exc_info=e)
         return None, list(issues.values())

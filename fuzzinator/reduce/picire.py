@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
            parallel=False, combine_loops=False,
            split_method='zeller', subset_first=True, subset_iterator='forward', complement_iterator='forward',
-           jobs=os.cpu_count(), max_utilization=100, encoding=None, atom='both', cache_class='ContentCache', cleanup=True,
+           jobs=os.cpu_count(), max_utilization=100, encoding=None, atom='both', granularity=2, cache_class='ContentCache', cleanup=True,
            **kwargs):
     """
     Test case reducer based on the Picire Parallel Delta Debugging Framework.
@@ -27,8 +27,8 @@ def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
 
       - ``parallel``, ``combine_loops``, ``split_method``, ``subset_first``,
         ``subset_iterator``, ``complement_iterator``, ``jobs``,
-        ``max_utilization``, ``encoding``, ``atom``, ``cache_class``,
-        ``cleanup``
+        ``max_utilization``, ``encoding``, ``atom``, ``granularity``,
+        ``cache_class``, ``cleanup``
 
     Refer to https://github.com/renatahodovan/picire for configuring Picire.
 
@@ -62,6 +62,7 @@ def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
     parallel = eval_arg(parallel)
     jobs = 1 if not parallel else eval_arg(jobs)
     encoding = encoding or chardet.detect(src)['encoding']
+    granularity = eval_arg(granularity)
     cleanup = eval_arg(cleanup)
 
     combine_loops = eval_arg(combine_loops)
@@ -115,6 +116,7 @@ def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
                        encoding=encoding,
                        out=work_dir,
                        atom=atom,
+                       granularity=granularity,
                        cache_class=cache_class,
                        cleanup=cleanup)
 

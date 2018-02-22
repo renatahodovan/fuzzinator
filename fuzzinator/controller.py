@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -246,7 +246,7 @@ class Controller(object):
         except Exception as e:
             self.listener.warning(msg='{msg}\n{trace}'.format(msg=str(e), trace=traceback.format_exc()))
         finally:
-            Controller.kill_child_processes()
+            Controller.kill_process_tree(os.getpid(), kill_root=False)
             if os.path.exists(self.work_dir):
                 shutil.rmtree(self.work_dir, ignore_errors=True)
 
@@ -309,9 +309,21 @@ class Controller(object):
                     listener=self.listener).run()
 
     @staticmethod
-    def kill_child_processes(sig=signal.SIGTERM):
-        for process in psutil.Process(os.getpid()).children(recursive=True):
-            try:
-                process.send_signal(sig)
-            except psutil.NoSuchProcess:
-                pass
+    def kill_process_tree(pid, kill_root=True, sig=signal.SIGTERM):
+        try:
+            root_proc = psutil.Process(pid)
+            children = root_proc.children(recursive=True)
+            if kill_root:
+                children.append(root_proc)
+            for proc in children:
+                # Would be easier to use proc.terminate() here but psutils
+                # (up to version 5.4.0) on Windows terminates processes with
+                # the 0 signal/code, making the outcome of the terminated
+                # process indistinguishable from a successful execution.
+                try:
+                    os.kill(proc.pid, sig)
+                except OSError:
+                    pass
+            psutil.wait_procs(children, timeout=1)
+        except psutil.NoSuchProcess:
+            pass

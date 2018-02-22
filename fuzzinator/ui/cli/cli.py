@@ -6,6 +6,7 @@
 # according to those terms.
 
 import logging
+import os
 import sys
 
 from rainbow_logging_handler import RainbowLoggingHandler
@@ -31,4 +32,4 @@ def execute(args=None, parser=None):
     try:
         controller.run(max_cycles=arguments.max_cycles)
     except KeyboardInterrupt:
-        pass
+        Controller.kill_process_tree(os.getpid(), kill_root=False)

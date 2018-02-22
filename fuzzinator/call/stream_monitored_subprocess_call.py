@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -17,6 +17,8 @@ import signal
 import subprocess
 import sys
 import time
+
+from fuzzinator import Controller
 
 logger = logging.getLogger(__name__)
 
@@ -88,11 +90,7 @@ class StreamMonitoredSubprocessCall(object):
             except IOError as e:
                 logger.warning('[filter_streams] %s' % str(e))
 
-        try:
-            os.kill(proc.pid, signal.SIGKILL)
-            proc.wait()
-        except:
-            pass
+        Controller.kill_process_tree(proc.pid, sig=signal.SIGKILL)
 
         logger.debug('{stdout}\n{stderr}'.format(stdout=streams['stdout'].decode('utf-8', errors='ignore'),
                                                  stderr=streams['stderr'].decode('utf-8', errors='ignore')))

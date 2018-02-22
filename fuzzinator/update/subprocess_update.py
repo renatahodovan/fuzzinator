@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -11,6 +11,8 @@ import os
 import shlex
 import subprocess
 import sys
+
+from fuzzinator import Controller
 
 logger = logging.getLogger(__name__)
 
@@ -58,5 +60,5 @@ def SubprocessUpdate(command, cwd=None, env=None, timeout=None):
         else:
             logger.info(stdout)
     except subprocess.TimeoutExpired:
-        logger.debug('Timeout expired while updating.')
-        proc.kill()
+        logger.debug('Timeout expired in the subprocess update.')
+        Controller.kill_process_tree(proc.pid)

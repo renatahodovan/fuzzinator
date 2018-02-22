@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -15,6 +15,8 @@ import shlex
 import subprocess
 import sys
 import time
+
+from fuzzinator import Controller
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +43,7 @@ class TestRunnerSubprocessCall(object):
 
     def __exit__(self, *exc):
         if self.proc and self.proc.poll() is None:
-            self.proc.kill()
+            Controller.kill_process_tree(self.proc.pid)
         return None
 
     def __call__(self, test, **kwargs):
@@ -81,7 +83,7 @@ class TestRunnerSubprocessCall(object):
                 time_left = self.timeout_per_test - (time.time() - start_time) if self.timeout_per_test else 0.5
                 if time_left <= 0:
                     # Avoid waiting for the current test in the next iteration.
-                    self.proc.kill()
+                    Controller.kill_process_tree(self.proc.pid)
                     break
 
                 try:

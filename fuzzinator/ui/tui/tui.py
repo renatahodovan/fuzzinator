@@ -188,6 +188,5 @@ def execute(args=None, parser=None):
         fuzz_process.start()
         tui.loop.run()
     finally:
-        controller.kill_child_processes()
-        fuzz_process.terminate()
+        Controller.kill_process_tree(fuzz_process.pid)
         raise ExitMainLoop()

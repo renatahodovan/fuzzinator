@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -13,6 +13,7 @@ import subprocess
 import os
 import sys
 
+from fuzzinator import Controller
 
 logger = logging.getLogger(__name__)
 
@@ -83,8 +84,8 @@ class SubprocessRunner(object):
                                         stderr=FNULL)
                 proc.communicate(timeout=self.timeout)
         except subprocess.TimeoutExpired:
-            logger.debug('Timeout expired in subprocess runner.')
-            proc.kill()
+            logger.debug('Timeout expired in the fuzzer\'s subprocess runner.')
+            Controller.kill_process_tree(proc.pid)
         self.tests = [os.path.join(self.outdir, test) for test in os.listdir(self.outdir)]
         return self
 

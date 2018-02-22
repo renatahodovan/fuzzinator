@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -11,6 +11,8 @@ import os
 import shlex
 import subprocess
 import sys
+
+from fuzzinator import Controller
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +72,6 @@ def StdinSubprocessCall(command, cwd=None, env=None, test=None, timeout=None, **
                 'stderr': stderr,
             }
     except subprocess.TimeoutExpired:
-        logger.debug('Timeout expired in subprocess runner.')
-        proc.kill()
+        logger.debug('Timeout expired in the SUT\'s stdin subprocess runner.')
+        Controller.kill_process_tree(proc.pid)
     return None

@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -26,7 +26,9 @@ def execute(args=None, parser=None):
     logger.addHandler(RainbowLoggingHandler(sys.stdout))
     logger.setLevel(arguments.log_level)
 
-    config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(), strict=False)
+    config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(),
+                                       strict=False,
+                                       allow_no_value=True)
     config.read(arguments.config)
 
     controller = Controller(config=config)

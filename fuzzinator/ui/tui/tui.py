@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -162,7 +162,9 @@ def execute(args=None, parser=None):
                         help='alternative style file for TUI')
     arguments = parser.parse_args(args)
 
-    config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(), strict=False)
+    config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(),
+                                       strict=False,
+                                       allow_no_value=True)
     config.read(arguments.config)
 
     # Redirect or suppress errors to spare tui from superfluous messages.

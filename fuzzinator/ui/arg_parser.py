@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,7 +6,9 @@
 # according to those terms.
 
 import argparse
+import configparser
 import logging
+import sys
 
 from fuzzinator import __version__
 
@@ -19,5 +21,19 @@ def build_parser(parent=None):
                         help='set log level')
     parser.add_argument('-v', dest='log_level', action='store_const', const='DEBUG', default=argparse.SUPPRESS,
                         help='verbose mode (alias for -l %(const)s)')
+    parser.add_argument('--sys-recursion-limit', metavar='NUM', type=int, default=sys.getrecursionlimit(),
+                        help='override maximum depth of the Python interpreter stack (default: %(default)d)')
     parser.add_argument('--version', action='version', version='%(prog)s {version}'.format(version=__version__))
     return parser
+
+
+def process_args(args):
+    config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(),
+                                       strict=False,
+                                       allow_no_value=True)
+    args.config = config.read(args.config)
+
+    logger = logging.getLogger('fuzzinator')
+    logger.setLevel(args.log_level)
+
+    sys.setrecursionlimit(args.sys_recursion_limit)

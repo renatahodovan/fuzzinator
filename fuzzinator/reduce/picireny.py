@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -11,13 +11,10 @@ import logging
 import os
 import picire
 import picireny
-import sys
 
 from .picire_tester import PicireTester
 
 logger = logging.getLogger(__name__)
-# Make sure that the JSON representation of deep HDD objects won't cause stackoverflow.
-sys.setrecursionlimit(max(sys.getrecursionlimit(), 3000))
 
 
 def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir, grammar, start_rule,

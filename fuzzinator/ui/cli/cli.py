@@ -5,14 +5,13 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import configparser
 import logging
 import sys
 
 from rainbow_logging_handler import RainbowLoggingHandler
 
 from fuzzinator import Controller
-from fuzzinator.ui import build_parser
+from fuzzinator.ui import build_parser, process_args
 from .cli_listener import CliListener
 
 
@@ -21,17 +20,12 @@ def execute(args=None, parser=None):
     parser.add_argument('--max-cycles', metavar='N', default=None, type=int,
                         help='limit number of fuzz job cycles to %(metavar)s (default: no limit)')
     arguments = parser.parse_args(args)
+    process_args(arguments)
 
     logger = logging.getLogger('fuzzinator')
     logger.addHandler(RainbowLoggingHandler(sys.stdout))
-    logger.setLevel(arguments.log_level)
 
-    config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(),
-                                       strict=False,
-                                       allow_no_value=True)
-    config.read(arguments.config)
-
-    controller = Controller(config=config)
+    controller = Controller(config=arguments.config)
     controller.listener += CliListener()
 
     try:

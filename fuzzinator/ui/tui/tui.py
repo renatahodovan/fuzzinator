@@ -6,7 +6,6 @@
 # according to those terms.
 
 import argparse
-import configparser
 import json
 import os
 import pkgutil
@@ -17,7 +16,7 @@ from multiprocessing import Lock, Process, Queue
 from urwid import connect_signal, raw_display, util, ExitMainLoop, MainLoop, PopUpLauncher
 
 from fuzzinator import Controller
-from fuzzinator.ui import arg_parser
+from fuzzinator.ui import build_parser, process_args
 from fuzzinator.config import config_get_name_from_section
 from .tui_listener import TuiListener
 from .widgets import MainWindow
@@ -151,7 +150,7 @@ def load_style(style):
 
 
 def execute(args=None, parser=None):
-    parser = arg_parser.build_parser(parent=parser)
+    parser = build_parser(parent=parser)
     parser.add_argument('--force-encoding', metavar='NAME', default=None, choices=['utf-8', 'ascii'],
                         help='force text encoding used for TUI widgets (%(choices)s; default: autodetect)')
     parser.add_argument('-U', dest='force_encoding', action='store_const', const='utf-8', default=argparse.SUPPRESS,
@@ -161,11 +160,7 @@ def execute(args=None, parser=None):
     parser.add_argument('-s', '--style', metavar='FILE',
                         help='alternative style file for TUI')
     arguments = parser.parse_args(args)
-
-    config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(),
-                                       strict=False,
-                                       allow_no_value=True)
-    config.read(arguments.config)
+    process_args(arguments)
 
     # Redirect or suppress errors to spare tui from superfluous messages.
     if arguments.log_file:
@@ -184,7 +179,7 @@ def execute(args=None, parser=None):
     if arguments.force_encoding:
         util.set_encoding(arguments.force_encoding)
 
-    controller = Controller(config=config)
+    controller = Controller(config=arguments.config)
     tui = Tui(controller, style=style)
     controller.listener += TuiListener(tui.pipe, tui.events, tui.lock)
     fuzz_process = Process(target=controller.run, args=())

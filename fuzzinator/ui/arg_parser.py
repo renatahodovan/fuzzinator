@@ -31,7 +31,8 @@ def process_args(args):
     config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(),
                                        strict=False,
                                        allow_no_value=True)
-    args.config = config.read(args.config)
+    config.read(args.config)
+    args.config = config
 
     logger = logging.getLogger('fuzzinator')
     logger.setLevel(args.log_level)

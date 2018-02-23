@@ -19,6 +19,12 @@ class BugzillaReport(BaseTracker):
         self.product = product
         self.bzapi = Bugzilla(url)
 
+        # Remove old token and cookie files since they may be outdated.
+        if os.path.exists(self.bzapi.tokenfile):
+            os.remove(self.bzapi.tokenfile)
+        if os.path.exists(self.bzapi.cookiefile):
+            os.remove(self.bzapi.cookiefile)
+
     @property
     def logged_in(self):
         return self.bzapi.user

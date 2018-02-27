@@ -1,7 +1,8 @@
 __pycache__
+*.py[co]
 build
 dist
-fuzzinator.egg-info
+*.egg-info
 .DS_Store
 .idea
 .cache

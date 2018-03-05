@@ -85,17 +85,23 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
 
     hddmin = picireny.cli.args_hdd_choices[hddmin if hddmin else 'full']
     parallel = eval_arg(parallel)
-    jobs = 1 if not parallel else eval_arg(jobs)
-    encoding = encoding or chardet.detect(src)['encoding'] or 'utf-8'
-    cleanup = eval_arg(cleanup)
-
     combine_loops = eval_arg(combine_loops)
-    subset_first = eval_arg(subset_first)
-    max_utilization = eval_arg(max_utilization)
-
     split_method = getattr(picire.config_splitters, split_method)
+    subset_first = eval_arg(subset_first)
     subset_iterator = getattr(picire.config_iterators, subset_iterator)
     complement_iterator = getattr(picire.config_iterators, complement_iterator)
+    jobs = 1 if not parallel else eval_arg(jobs)
+    max_utilization = eval_arg(max_utilization)
+    encoding = encoding or chardet.detect(src)['encoding'] or 'utf-8'
+    hdd_star = eval_arg(hdd_star)
+    flatten_recursion = eval_arg(flatten_recursion)
+    squeeze_tree = eval_arg(squeeze_tree)
+    skip_unremovable = eval_arg(skip_unremovable)
+    skip_whitespace = eval_arg(skip_whitespace)
+    build_hidden_tokens = eval_arg(build_hidden_tokens)
+    granularity = eval_arg(granularity) if granularity != 'inf' else float('inf')
+    cleanup = eval_arg(cleanup)
+
     cache_class = getattr(picire, cache_class)
     if parallel:
         cache_class = picire.shared_cache_decorator(cache_class)

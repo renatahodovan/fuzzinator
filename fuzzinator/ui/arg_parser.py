@@ -14,7 +14,7 @@ from fuzzinator import __version__
 
 
 def build_parser(parent=None):
-    parser = argparse.ArgumentParser(description='Fuzzinator Random Testing Framework', parents=[parent])
+    parser = argparse.ArgumentParser(description='Fuzzinator Random Testing Framework', fromfile_prefix_chars='@', parents=[parent])
     parser.add_argument('config', default=list(), nargs='*',
                         help='config files describing the fuzz jobs to run (if no config is provided and TUI is enabled, then the framework starts in issue viewer mode)')
     parser.add_argument('-l', '--log-level', metavar='LEVEL', default=logging.INFO,

@@ -25,7 +25,7 @@ class FileReaderDecorator(CallableDecorator):
 
             [sut.foo]
             call=fuzzinator.call.SubprocessCall
-            call.decorate(0)=fuzzionator.call.FileReaderDecorator
+            call.decorate(0)=fuzzinator.call.FileReaderDecorator
 
             [sut.foo.call]
             # assuming that foo takes one file as input specified on command line

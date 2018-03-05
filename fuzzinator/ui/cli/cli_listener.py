@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -31,6 +31,9 @@ class CliListener(EventListener):
 
     def new_issue(self, issue):
         logger.info('New issue: {msg}'.format(msg=issue['id']))
+
+    def invalid_issue(self, issue):
+        logger.debug('{ident} issue is invalid.'.format(ident=issue['id'].decode('utf-8', errors='ignore')))
 
     def activate_job(self, ident):
         logger.debug('Activate job: {ident}'.format(ident=ident))

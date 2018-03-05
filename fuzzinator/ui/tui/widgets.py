@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -88,7 +88,7 @@ class MainWindow(PopUpLauncher):
         self.init_popup(msg)
 
     def remove_issue_popup(self, ident):
-        msg = '{ident}: not valid anymore. Delete?'.format(ident=self.issues_table.row_dict[ident]['id'].decode('utf-8', errors='utf-8'))
+        msg = '{ident}: not valid anymore. Delete?'.format(ident=self.issues_table.row_dict[ident]['id'].decode('utf-8', errors='ignore'))
         self.pop_up = YesNoDialog(msg)
         connect_signal(self.pop_up, 'yes', lambda button: self.remove_issue(ident))
         connect_signal(self.pop_up, 'no', lambda button: self.close_pop_up())

@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -38,8 +38,8 @@ class FileReaderDecorator(CallableDecorator):
                 issue = fn(*args, **kwargs)
 
                 if issue is not None:
-                    with open(issue['test'], 'rb') as f:
-                        issue['filename'] = os.path.basename(issue['test'])
+                    with open(kwargs['test'], 'rb') as f:
+                        issue['filename'] = os.path.basename(kwargs['test'])
                         issue['test'] = f.read()
 
                 return issue

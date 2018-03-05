@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -85,7 +85,7 @@ def config_get_with_writeback(config, section, option, fallback):
     if not config.has_section(section):
         config.add_section(section)
 
-    if not config.has_option(section, option):
+    if not config.has_option(section, option) or not config.get(section, option):
         config.set(section, option, fallback)
 
     return config.get(section, option)

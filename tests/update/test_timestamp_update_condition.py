@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -16,9 +16,11 @@ import fuzzinator
     (-60*60*24*31, '0:0:10', True),
     (-60*60*24*31, '0:10:0', True),
     (-60*60*24*31, '10:0:0', True),
+    (-60*60*24*31, '1:0:0:0', True),
     (0, '0:0:10', False),
     (0, '0:10:0', False),
     (0, '10:0:0', False),
+    (0, '1:0:0:0', False),
 ])
 def test_timestamp_update_condition(touch, age, exp, tmpdir):
     path = os.path.join('%s' % tmpdir, 'foo.txt')

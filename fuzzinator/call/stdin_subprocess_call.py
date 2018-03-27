@@ -17,7 +17,7 @@ from fuzzinator import Controller
 logger = logging.getLogger(__name__)
 
 
-def StdinSubprocessCall(command, cwd=None, env=None, test=None, timeout=None, **kwargs):
+def StdinSubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None, timeout=None, **kwargs):
     """
     Subprocess invocation-based call of a SUT that takes a test input on its
     stdin stream.
@@ -32,6 +32,8 @@ def StdinSubprocessCall(command, cwd=None, env=None, test=None, timeout=None, **
         invocation.
       - ``env``: if not ``None``, a dictionary of variable names-values to
         update the environment with.
+      - ``no_exit_code``: makes possible to force issue creation regardless of
+        the exit code.
       - ``timeout``: run subprocess with timeout.
 
     **Result of the SUT call:**
@@ -65,7 +67,7 @@ def StdinSubprocessCall(command, cwd=None, env=None, test=None, timeout=None, **
         stdout, stderr = proc.communicate(input=test, timeout=timeout)
         logger.debug('{stdout}\n{stderr}'.format(stdout=stdout.decode('utf-8', errors='ignore'),
                                                  stderr=stderr.decode('utf-8', errors='ignore')))
-        if proc.returncode != 0:
+        if no_exit_code or proc.returncode != 0:
             return {
                 'exit_code': proc.returncode,
                 'stdout': stdout,

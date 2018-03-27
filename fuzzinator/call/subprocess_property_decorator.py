@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,12 +6,16 @@
 # according to those terms.
 
 import json
+import logging
 import os
 import shlex
 import subprocess
 import sys
 
 from . import CallableDecorator
+from fuzzinator import Controller
+
+logger = logging.getLogger(__name__)
 
 
 class SubprocessPropertyDecorator(CallableDecorator):
@@ -30,6 +34,7 @@ class SubprocessPropertyDecorator(CallableDecorator):
         invocation.
       - ``env``: if not ``None``, a dictionary of variable names-values to
         update the environment with.
+      - ``timeout``: run subprocess with timeout.
 
     **Example configuration snippet:**
 
@@ -50,16 +55,31 @@ class SubprocessPropertyDecorator(CallableDecorator):
             env={"GIT_FLUSH": "1"}
     """
 
-    def decorator(self, property, command, cwd=None, env=None, **kwargs):
+    def decorator(self, property, command, cwd=None, env=None, timeout=None, **kwargs):
         def wrapper(fn):
             def filter(*args, **kwargs):
                 issue = fn(*args, **kwargs)
                 if not issue:
                     return None
 
-                issue[property] = subprocess.check_output(shlex.split(command, posix=sys.platform != 'win32'),
-                                                          cwd=cwd or os.getcwd(),
-                                                          env=dict(os.environ, **json.loads(env or '{}')))
+                try:
+                    proc = subprocess.Popen(shlex.split(command, posix=sys.platform != 'win32'),
+                                            cwd=cwd or os.getcwd(),
+                                            stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE,
+                                            env=dict(os.environ, **json.loads(env or '{}')))
+                    stdout, stderr = proc.communicate(timeout=timeout)
+                    if proc.returncode == 0:
+                        issue[property] = stdout
+                    else:
+                        logger.debug('SubprocessPropertyDecorator exited with non-zero exit code while setting the {property} property.\n'
+                                     '{stdout}\n{stderr}'.format(property=property,
+                                                                 stdout=stdout.decode('utf-8', errors='ignore'),
+                                                                 stderr=stderr.decode('utf-8', errors='ignore')))
+                except subprocess.TimeoutExpired:
+                    logger.debug('Timeout expired in the SubprocessPropertyDecorator while setting the {property} property.'.format(property=property))
+                    Controller.kill_process_tree(proc.pid)
+
                 return issue
 
             return filter

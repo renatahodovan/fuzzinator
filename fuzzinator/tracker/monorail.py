@@ -13,7 +13,7 @@ from oauth2client.client import GoogleCredentials
 from .base import BaseTracker
 
 
-# https://chromium.googlesource.com/infra/infra/+/c42e31c31ce689ca73ceb56c6d0b13daa6908dba/appengine/monorail/doc/api.md
+# https://chromium.googlesource.com/infra/infra/+/master/appengine/monorail/doc/api.md
 class MonorailReport(BaseTracker):
 
     def __init__(self, project_id, template, title=None):

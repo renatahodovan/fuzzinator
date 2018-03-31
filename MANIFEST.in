@@ -2,7 +2,7 @@ include README.rst
 include LICENSE.rst
 include RELNOTES.rst
 include MANIFEST.in
-include fuzzinator/VERSION
+include fuzzinator/PKGDATA.json
 recursive-include fuzzinator/ui/tui/resources *
 global-exclude __pycache__
 global-exclude *.py[co]

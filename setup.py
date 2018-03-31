@@ -5,20 +5,22 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+import json
+
 from os.path import dirname, join
 from setuptools import setup, find_packages
 
-with open(join(dirname(__file__), 'fuzzinator/VERSION'), 'rb') as f:
-    version = f.read().decode('ascii').strip()
+with open(join(dirname(__file__), 'fuzzinator', 'PKGDATA.json'), 'r') as f:
+    data = json.load(f)
 
 setup(
-    name='fuzzinator',
-    version=version,
+    name=data['name'],
+    version=data['version'],
     packages=find_packages(),
-    url='https://github.com/renatahodovan/fuzzinator',
+    url=data['url'],
     license='BSD',
-    author='Renata Hodovan, Akos Kiss',
-    author_email='hodovan@inf.u-szeged.hu, akiss@inf.u-szeged.hu',
+    author=data['author'],
+    author_email=data['author_email'],
     description='Fuzzinator Random Testing Framework',
     long_description=open('README.rst').read(),
     zip_safe=False,

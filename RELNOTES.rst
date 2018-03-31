@@ -4,6 +4,14 @@
 
 .. start included documentation
 
+18.3.1
+======
+
+Summary of changes:
+
+* Fixed the way package metadata is accessed to ensure wheel compatibility.
+
+
 18.3
 ====
 

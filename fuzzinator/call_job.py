@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -32,7 +32,7 @@ class CallJob(object):
         # Generate default hash ID for the test if does not exist.
         if 'id' not in issue or not issue['id']:
             hasher = hashlib.md5()
-            hasher.update(test)
+            hasher.update(test if isinstance(test, bytes) else str(test).encode('utf-8'))
             issue['id'] = hasher.hexdigest()
 
         # Save new issues.

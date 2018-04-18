@@ -159,14 +159,12 @@ class EditIssueDialog(Dialog):
 
         if t == str:
             return value
-        if t in [int, bool]:
-            return str(value)
         if t == bytes:
             return value.decode('utf-8', errors='ignore')
         if value is None:
             self.type_dict[prop] = None
             return ''
-        assert False, 'Should never be reached ({prop}: {type}).'.format(prop=prop, type=str(t))
+        return str(value)
 
     def _from_str(self, prop, value):
         t = self.type_dict[prop]
@@ -175,13 +173,11 @@ class EditIssueDialog(Dialog):
             return value
         if t == int:
             return int(value)
-        if t == bool:
-            return eval(value)
         if t == bytes:
             return value.encode('utf-8', errors='ignore')
         if t is None:
             return value or None
-        assert False, 'Should never be reached ({prop}: {type}).'.format(prop=prop, type=str(t))
+        return eval(value)
 
     def save_modifications(self, btn):
         updated = dict()

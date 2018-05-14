@@ -23,7 +23,7 @@ def execute(args=None, parser=None):
     arguments = parser.parse_args(args)
     process_args(arguments)
 
-    logger = logging.getLogger('fuzzinator')
+    logger = logging.getLogger()
     logger.addHandler(RainbowLoggingHandler(sys.stdout))
 
     controller = Controller(config=arguments.config)

@@ -34,7 +34,7 @@ def process_args(args):
     config.read(args.config)
     args.config = config
 
-    logger = logging.getLogger('fuzzinator')
+    logger = logging.getLogger()
     logger.setLevel(args.log_level)
 
     sys.setrecursionlimit(args.sys_recursion_limit)

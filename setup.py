@@ -27,7 +27,7 @@ setup(
     include_package_data=True,
     install_requires=['chardet', 'keyring', 'keyrings.alt', 'pexpect', 'picire==18.1', 'picireny==18.2', 'psutil',
                       'PyGithub', 'pymongo', 'pyperclip', 'python-bugzilla', 'google-api-python-client',
-                      'rainbow_logging_handler', 'sphinx', 'sphinx_rtd_theme',
+                      'oauth2client', 'rainbow_logging_handler', 'sphinx', 'sphinx_rtd_theme',
                       'tornado', 'urwid'],
     entry_points={
         'console_scripts': ['fuzzinator = fuzzinator.executor:execute']

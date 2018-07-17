@@ -1,4 +1,4 @@
-# Copyright (c) 2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -23,11 +23,16 @@ class ValidateJob(CallJob):
         self.cost = 0
 
     def run(self):
-        sut_call, sut_call_kwargs = config_get_callable(self.config, self.issue['sut'],
-                                                        'reduce_call' if self.config.has_option(self.issue['sut'], 'reduce_call') else 'call')
+        if self.config.has_option(self.sut_section, 'validate_call'):
+            call_type = 'validate_call'
+        elif self.config.has_option(self.sut_section, 'reduce_call'):
+            call_type = 'reduce_call'
+        else:
+            call_type = 'call'
 
+        sut_call, sut_call_kwargs = config_get_callable(self.config, self.sut_section, call_type)
         with sut_call:
-            issue = sut_call(test=self.issue['test'], **sut_call_kwargs)
+            issue = sut_call(**self.issue, **sut_call_kwargs)
             if issue:
                 issue['test'] = self.issue['test']
                 if issue['id'] == self.issue['id']:
@@ -35,5 +40,6 @@ class ValidateJob(CallJob):
                     return [issue]
 
                 self.add_issue(issue, new_issues=[])
+
         self.listener.invalid_issue(issue=self.issue)
         return []

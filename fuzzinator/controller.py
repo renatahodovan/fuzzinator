@@ -79,6 +79,11 @@ class Controller(object):
         - Option ``reduce_cost``: (Optional, default: the value of option
           ``cost``)
 
+        - Option ``validate_call``: Fully qualified name of a python callable
+          that acts as the SUT's ``call`` option during test case validation.
+          (Optional, default: the value of option ``reduce_call`` if defined,
+          otherwise the value of option ``call``)
+
         - Option ``update_condition``: Fully qualified name of a python callable
           that must return ``True`` if and only if the SUT should be updated.
           (Optional, SUT is never updated if option is missing.)

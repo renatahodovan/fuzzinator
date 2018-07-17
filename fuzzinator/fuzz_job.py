@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -24,6 +24,7 @@ class FuzzJob(CallJob):
         self.fuzzer_name = config_get_name_from_section(self.fuzz_section)
         self.cost = int(self.config.get(self.sut_section, 'cost', fallback=1))
         self.batch = float(self.config.get(self.fuzz_section, 'batch', fallback=1))
+        self.refresh = float(self.config.get(self.fuzz_section, 'refresh', fallback=self.batch))
 
     def run(self):
         fuzzer, fuzzer_kwargs = config_get_callable(self.config, self.fuzz_section, 'fuzzer')
@@ -37,6 +38,7 @@ class FuzzJob(CallJob):
 
         index = 0
         issue_count = 0
+        stat_updated = 0
         new_issues = []
 
         self.listener.update_fuzz_stat()
@@ -62,6 +64,13 @@ class FuzzJob(CallJob):
                         if issue:
                             issue_count += 1
 
+                        if index - stat_updated >= self.refresh:
+                            self.db.update_stat(self.sut_section, self.fuzzer_name, index - stat_updated, issue_count)
+                            self.listener.update_fuzz_stat()
+                            issue_count = 0
+                            stat_updated = index
+
+                        if issue:
                             # Check if fuzzer has its own test.
                             if hasattr(fuzzer, 'test'):
                                 test = fuzzer.test
@@ -77,6 +86,6 @@ class FuzzJob(CallJob):
                             break
 
         # Update statistics.
-        self.db.update_stat(self.sut_section, self.fuzzer_name, self.batch, issue_count)
+        self.db.update_stat(self.sut_section, self.fuzzer_name, index - stat_updated, issue_count)
         self.listener.update_fuzz_stat()
         return new_issues

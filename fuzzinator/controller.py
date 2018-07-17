@@ -113,6 +113,9 @@ class Controller(object):
         - Option ``instances``: Number of instances of this fuzz job allowed to
           run in parallel. (Optional, default: ``inf``)
 
+        - Option ``refresh``: Statistic update frequency in terms of executed
+          test cases. (Optional, default: ``batch`` size)
+
       - Callable options can be implemented as functions or classes with
         ``__call__`` method (the latter are instantiated first to get a callable
         object). Both constructor calls (if any) and the "real" calls can be

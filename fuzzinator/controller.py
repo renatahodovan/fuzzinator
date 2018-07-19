@@ -36,8 +36,10 @@ class Controller(object):
 
       - Section ``fuzzinator``: Global settings of the framework.
 
-        - Option ``work_dir``: Work directory for temporary files. (Optional,
-          default: ``~/.fuzzinator``)
+        - Option ``work_dir``: Pattern of work directory for temporary files,
+          which may contain the substring ``{uid}`` as a placeholder for a
+          unique string (replaced by the framework). (Optional, default:
+          ``~/.fuzzinator-{uid}``)
 
         - Option ``db_uri``: URI to a MongoDB database to store found issues and
           execution statistics. (Optional, default:
@@ -154,7 +156,8 @@ class Controller(object):
         self.fuzzers = [section for section in config.sections() if section.startswith('fuzz.') and section.count('.') == 1]
 
         self.capacity = int(config_get_with_writeback(self.config, 'fuzzinator', 'cost_budget', str(os.cpu_count())))
-        self.work_dir = config_get_with_writeback(self.config, 'fuzzinator', 'work_dir', os.path.join(os.getcwd(), '.fuzzinator'))
+        self.work_dir = config_get_with_writeback(self.config, 'fuzzinator', 'work_dir', os.path.join(os.getcwd(), '.fuzzinator-{uid}')).format(uid=os.getpid())
+        self.config.set('fuzzinator', 'work_dir', self.work_dir)
 
         self.db = MongoDriver(config_get_with_writeback(self.config, 'fuzzinator', 'db_uri', 'mongodb://localhost/fuzzinator'))
         self.db.init_db([(self.config.get(fuzzer, 'sut'), config_get_name_from_section(fuzzer)) for fuzzer in self.fuzzers])

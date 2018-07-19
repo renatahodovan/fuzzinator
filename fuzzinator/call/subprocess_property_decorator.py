@@ -60,7 +60,7 @@ class SubprocessPropertyDecorator(CallableDecorator):
             def filter(*args, **kwargs):
                 issue = fn(*args, **kwargs)
                 if not issue:
-                    return None
+                    return issue
 
                 try:
                     proc = subprocess.Popen(shlex.split(command, posix=sys.platform != 'win32'),

@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -28,10 +28,10 @@ class PicireTester(object):
             issue = self._sut_call(test=test, filename=self._test_pattern % config_id, **self._sut_call_kwargs)
 
             # Second chance for flaky tests in case of 'assert' check.
-            if config_id == 'assert' and issue is None:
+            if config_id == 'assert' and not issue:
                 issue = self._sut_call(test=test, filename=self._test_pattern % config_id, **self._sut_call_kwargs)
 
-            if issue is not None:
+            if issue:
                 if self._expected == issue['id']:
                     self._listener.job_progress(ident=self._ident, progress=len(test))
                     return picire.AbstractDD.FAIL

@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -8,6 +8,7 @@
 import json
 
 from . import CallableDecorator
+from . import NonIssue
 
 
 class ExitCodeFilter(CallableDecorator):
@@ -41,7 +42,10 @@ class ExitCodeFilter(CallableDecorator):
         def wrapper(fn):
             def filter(*args, **kwargs):
                 issue = fn(*args, **kwargs)
-                return issue if issue is not None and issue['exit_code'] in json.loads(exit_codes) else None
+                if not issue:
+                    return issue
+
+                return issue if issue['exit_code'] in json.loads(exit_codes) else NonIssue(issue)
 
             return filter
         return wrapper

@@ -59,11 +59,26 @@ class FuzzJob(CallJob):
                             index = fuzzer.index
                         else:
                             index += 1
-                        self.listener.job_progress(ident=id(self), progress=index)
+
+                        # Check if fuzzer has its own test.
+                        if hasattr(fuzzer, 'test'):
+                            test = fuzzer.test
+
+                        if issue and test is None:
+                            self.batch = index
+                            self.listener.warning(msg='{sut} crashed before the first test.'.format(sut=config_get_name_from_section(self.sut_section)))
+                            break
+
+                        if issue is not None and ('test' not in issue or not issue['test']):
+                            issue['test'] = test
+
+                        if hasattr(fuzzer, 'feedback'):
+                            fuzzer.feedback(issue)
 
                         if issue:
                             issue_count += 1
 
+                        self.listener.job_progress(ident=id(self), progress=index)
                         if index - stat_updated >= self.refresh:
                             self.db.update_stat(self.sut_section, self.fuzzer_name, index - stat_updated, issue_count)
                             self.listener.update_fuzz_stat()
@@ -71,17 +86,6 @@ class FuzzJob(CallJob):
                             stat_updated = index
 
                         if issue:
-                            # Check if fuzzer has its own test.
-                            if hasattr(fuzzer, 'test'):
-                                test = fuzzer.test
-                                if test is None:
-                                    self.batch = index
-                                    self.listener.warning(msg='{sut} crashed before the first test.'.format(sut=config_get_name_from_section(self.sut_section)))
-                                    break
-
-                            if 'test' not in issue or not issue['test']:
-                                issue['test'] = test
-
                             self.add_issue(issue, new_issues=new_issues)
                             break
 

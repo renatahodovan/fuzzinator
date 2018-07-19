@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,6 +6,7 @@
 # according to those terms.
 
 from .callable_decorator import CallableDecorator
+from .non_issue import NonIssue
 from .anonymize_decorator import AnonymizeDecorator
 from .exit_code_filter import ExitCodeFilter
 from .file_reader_decorator import FileReaderDecorator
@@ -27,6 +28,7 @@ __all__ = [
     'FileWriterDecorator',
     'GdbBacktraceDecorator',
     'LldbBacktraceDecorator',
+    'NonIssue',
     'PlatformInfoDecorator',
     'RegexFilter',
     'StdinSubprocessCall',

@@ -51,10 +51,12 @@ class Controller(object):
 
         - Option ``call``: Fully qualified name of a python callable that must
           accept a ``test`` keyword argument representing the input to the SUT
-          and must return a dictionary object if the input triggered an issue in
-          the SUT, or ``None`` otherwise. The returned issue dictionary (if any)
-          *should* contain an ``'id'`` field that equals for issues that are not
-          considered unique. (Mandatory)
+          and must return a dictionary object if the input triggered an issue
+          in the SUT, or a value considered false otherwise (which can be a
+          simple ``None``, but can also be a ``NonIssue`` in complex cases).
+          The returned issue dictionary (if any) *should* contain an ``'id'``
+          field that equals for issues that are not considered unique.
+          (Mandatory)
 
           See package :mod:`fuzzinator.call` for potential callables.
 

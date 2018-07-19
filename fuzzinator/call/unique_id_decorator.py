@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -45,7 +45,7 @@ class UniqueIdDecorator(CallableDecorator):
             def filter(*args, **kwargs):
                 issue = fn(*args, **kwargs)
                 if not issue:
-                    return None
+                    return issue
 
                 issue['id'] = b' '.join(issue.get(x, b'') for x in properties)
                 return issue

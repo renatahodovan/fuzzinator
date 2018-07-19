@@ -32,7 +32,8 @@ class ValidateJob(CallJob):
 
         sut_call, sut_call_kwargs = config_get_callable(self.config, self.sut_section, call_type)
         with sut_call:
-            issue = sut_call(**self.issue, **sut_call_kwargs)
+            sut_call_kwargs.update(self.issue)
+            issue = sut_call(**sut_call_kwargs)
             if issue:
                 issue['test'] = self.issue['test']
                 if issue['id'] == self.issue['id']:

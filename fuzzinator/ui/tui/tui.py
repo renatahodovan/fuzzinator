@@ -10,6 +10,7 @@ import json
 import os
 import pkgutil
 import time
+import signal
 import sys
 
 from multiprocessing import Lock, Process, Queue
@@ -187,6 +188,19 @@ def execute(args=None, parser=None):
     try:
         fuzz_process.start()
         tui.loop.run()
+    except KeyboardInterrupt:
+        # No need to handle CTRL+C as SIGINT is sent by the terminal to all
+        # (sub)processes.
+        pass
+    except Exception:
+        # Handle every kind of TUI exceptions except for KeyboardInterrupt.
+        # SIGINT will trigger a KeyboardInterrupt exception in controller,
+        # thus allowing it to perform proper cleanup.
+        os.kill(fuzz_process.pid, signal.SIGINT)
+    else:
+        # Handle normal exit after 'Q' or F10. SIGINT will trigger a
+        # KeyboardInterrupt exception in controller, thus allowing it to
+        # perform proper cleanup.
+        os.kill(fuzz_process.pid, signal.SIGINT)
     finally:
-        Controller.kill_process_tree(fuzz_process.pid)
         raise ExitMainLoop()

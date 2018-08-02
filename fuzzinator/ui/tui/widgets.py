@@ -268,7 +268,7 @@ class StatTable(Table):
 
     columns = [
         TableColumn('fuzzer', width=('weight', 3), label='Fuzzer'),
-        TableColumn('crashes', width=('weight', 1), label='Crashes'),
+        TableColumn('issues', width=('weight', 1), label='Issues'),
         TableColumn('unique', width=('weight', 1), label='Unique'),
         TableColumn('exec', width=('weight', 1), label='Exec')
     ]
@@ -300,7 +300,7 @@ class StatTable(Table):
         snapshot = self.db.stat_snapshot([fuzzer for fuzzer in self.stat_baseline])
         current_progress = dict((fuzzer, dict(fuzzer=fuzzer,
                                               exec=snapshot[fuzzer]['exec'] - self.stat_baseline[fuzzer]['exec'],
-                                              crashes=snapshot[fuzzer]['crashes'] - self.stat_baseline[fuzzer]['crashes'],
+                                              issues=snapshot[fuzzer]['issues'] - self.stat_baseline[fuzzer]['issues'],
                                               unique=snapshot[fuzzer]['unique'] - self.stat_baseline[fuzzer]['unique'], )) for fuzzer in self.stat_baseline)
         self.query_data = list(current_progress.values())
         self.requery(self.query_data)

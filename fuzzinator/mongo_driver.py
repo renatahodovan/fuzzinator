@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -19,9 +19,9 @@ class MongoDriver(object):
 
     def init_db(self, sut_fuzzer_pairs):
         """
-        Creates an 'fuzzinator_issues' collection with appropriate indexes (if
+        Creates a 'fuzzinator_issues' collection with appropriate indexes (if
         not existing already), and initializes a 'fuzzinator_stats' collection
-        for (sut, fuzzer) pairs (with 0 exec and crash counts if not existing
+        for (sut, fuzzer) pairs (with 0 exec and issue counts if not existing
         already).
         """
         db = self._db
@@ -77,7 +77,7 @@ class MongoDriver(object):
                 fuzzer = document['_id']['fuzzer']
                 stat[fuzzer] = dict(fuzzer=fuzzer,
                                     unique=document['unique'],
-                                    crashes=0,
+                                    issues=0,
                                     exec=0)
 
         fuzzers_stat = db.fuzzinator_stats.aggregate([
@@ -91,7 +91,7 @@ class MongoDriver(object):
             fuzzer = document['_id']['fuzzer']
             data = dict(fuzzer=fuzzer,
                         exec=document['exec'],
-                        crashes=document['crashes'])
+                        issues=document['crashes'])
 
             if fuzzer in stat:
                 stat[fuzzer].update(data)
@@ -99,7 +99,7 @@ class MongoDriver(object):
                 stat[fuzzer] = dict(unique=0, **data)
         return stat
 
-    def update_stat(self, sut, fuzzer, batch, crashes):
+    def update_stat(self, sut, fuzzer, batch, issues):
         self._db.fuzzinator_stats.find_one_and_update({'sut': sut, 'fuzzer': fuzzer},
-                                                      {'$inc': {'exec': int(batch), 'crashes': crashes}},
+                                                      {'$inc': {'exec': int(batch), 'crashes': issues}},
                                                       upsert=True)

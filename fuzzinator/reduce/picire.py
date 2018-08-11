@@ -62,7 +62,7 @@ def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
     parallel = eval_arg(parallel)
     jobs = 1 if not parallel else eval_arg(jobs)
     encoding = encoding or chardet.detect(src)['encoding']
-    granularity = eval_arg(granularity)
+    granularity = eval_arg(granularity) if granularity != 'inf' else float('inf')
     cleanup = eval_arg(cleanup)
 
     combine_loops = eval_arg(combine_loops)

@@ -74,7 +74,7 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
     if antlr is None:
         return None, []
 
-    input_format, start = picireny.process_antlr4_format(format=format, grammar=json.loads(grammar), start=start, replacements=replacements)
+    input_format, start = picireny.process_antlr4_format(format=format, grammar=json.loads(grammar) if grammar else None, start=start, replacements=replacements)
 
     if not (input_format and start):
         logger.warning('Processing the arguments of picireny failed.')

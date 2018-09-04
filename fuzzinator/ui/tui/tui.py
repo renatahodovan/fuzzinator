@@ -161,7 +161,9 @@ def execute(args=None, parser=None):
     parser.add_argument('-s', '--style', metavar='FILE',
                         help='alternative style file for TUI')
     arguments = parser.parse_args(args)
-    process_args(arguments)
+    error_msg = process_args(arguments)
+    if error_msg:
+        parser.error(error_msg)
 
     # Redirect or suppress errors to spare tui from superfluous messages.
     if arguments.log_file:

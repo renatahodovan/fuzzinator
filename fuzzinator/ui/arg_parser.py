@@ -31,7 +31,9 @@ def process_args(args):
     config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(),
                                        strict=False,
                                        allow_no_value=True)
-    config.read(args.config)
+    parsed_fn = config.read(args.config)
+    if len(parsed_fn) != len(args.config):
+        return 'Config file(s) do(es) not exist: {fn}'.format(fn=', '.join(fn for fn in args.config if fn not in parsed_fn))
     args.config = config
 
     logger = logging.getLogger()

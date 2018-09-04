@@ -21,7 +21,9 @@ def execute(args=None, parser=None):
     parser.add_argument('--max-cycles', metavar='N', default=None, type=int,
                         help='limit number of fuzz job cycles to %(metavar)s (default: no limit)')
     arguments = parser.parse_args(args)
-    process_args(arguments)
+    error_msg = process_args(arguments)
+    if error_msg:
+        parser.error(error_msg)
 
     logger = logging.getLogger()
     logger.addHandler(RainbowLoggingHandler(sys.stdout))

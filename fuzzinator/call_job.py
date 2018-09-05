@@ -26,7 +26,7 @@ class CallJob(object):
         issue.update(dict(sut=self.sut_section,
                           fuzzer=self.fuzzer_name,
                           test=test,
-                          reduced=False,
+                          reduced=None,
                           reported=False))
 
         # Generate default hash ID for the test if does not exist.

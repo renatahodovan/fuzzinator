@@ -251,7 +251,7 @@ class IssuesTable(Table):
         if data['reported']:
             attr_map = {None: 'issue_reported'}
             focus_map = {None: 'issue_reported_selected'}
-        elif data['reduced']:
+        elif data['reduced'] is not None:
             attr_map = {None: 'issue_reduced'}
             focus_map = {None: 'issue_reduced_selected'}
         else:

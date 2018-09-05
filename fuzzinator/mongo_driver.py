@@ -42,7 +42,8 @@ class MongoDriver(object):
         result = self._db.fuzzinator_issues.find_one_and_update(
             {'id': issue['id'], 'sut': issue['sut']},
             {'$setOnInsert': dict(issue, first_seen=now),
-             '$set': dict(last_seen=now)},
+             '$set': dict(last_seen=now),
+             '$inc': dict(count=1)},
             upsert=True,
             return_document=ReturnDocument.AFTER,
         )

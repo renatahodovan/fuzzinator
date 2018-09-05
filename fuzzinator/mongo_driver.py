@@ -5,7 +5,8 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-from pymongo import ASCENDING, MongoClient
+from datetime import datetime
+from pymongo import ASCENDING, MongoClient, ReturnDocument
 
 
 class MongoDriver(object):
@@ -35,13 +36,21 @@ class MongoDriver(object):
                 stats.insert_one({'sut': sut, 'fuzzer': fuzzer, 'exec': 0, 'crashes': 0})
 
     def add_issue(self, issue):
-        result = self._db.fuzzinator_issues.update_one(
+        # MongoDB assumes that dates and times are in UTC, hence it must
+        # be used in the `first_seen` field, too.
+        now = datetime.utcnow()
+        result = self._db.fuzzinator_issues.find_one_and_update(
             {'id': issue['id'], 'sut': issue['sut']},
-            {'$setOnInsert': issue},
-            upsert=True
+            {'$setOnInsert': dict(issue, first_seen=now),
+             '$set': dict(last_seen=now)},
+            upsert=True,
+            return_document=ReturnDocument.AFTER,
         )
-        issue['_id'] = result.upserted_id
-        return result.matched_count == 0
+        issue.update(result)
+        # `first_seen` and `last_seen` values cannot be compared to `now` due
+        # to some rounding in pymongo, the returning values can be slightly
+        # different from the value stored in `now` (on nanosecond level).
+        return issue['first_seen'] == issue['last_seen']
 
     def all_issues(self):
         return list(self._db.fuzzinator_issues.find({}))

@@ -39,3 +39,5 @@ class CallJob(object):
         if self.db.add_issue(issue):
             new_issues.append(issue)
             self.listener.new_issue(issue=issue)
+        else:
+            self.listener.update_issue(issue=issue)

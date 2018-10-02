@@ -185,6 +185,8 @@ class Controller(object):
         fuzz_idx = 0
         try:
             while True:
+                self._wait_for_load(0, running_jobs)
+
                 if fuzz_idx == 0:
                     cycle += 1
                 if cycle > max_cycles or (not self.fuzzers and max_cycles != float('inf')):
@@ -213,7 +215,6 @@ class Controller(object):
 
                 if not next_job:
                     if not self.fuzzers:
-                        self._wait_for_load(0, running_jobs)
                         time.sleep(1)
                         continue
 

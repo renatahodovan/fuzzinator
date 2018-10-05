@@ -12,18 +12,21 @@ from string import Formatter
 from fuzzinator.config import config_get_callable
 
 
-class SingletonMetaClass(type):
+class MultitonMetaClass(type):
+    def __init__(cls, name, bases, dct):
+        super().__init__(name, bases, dct)
+        cls._instances = dict()
 
-    def __init__(cls, name, bases, dict):
-        _instances = {}
+    def __call__(cls, *args):
+        key = tuple(args)
+        instance = cls._instances.get(key, None)
+        if instance is None:
+            instance = super().__call__(*args)
+            cls._instances[key] = instance
+        return instance
 
-        def __call__(cls, *args, **kwargs):
-            if cls not in cls._instances:
-                cls._instances[cls] = super(SingletonMetaClass, cls).__call__(*args, **kwargs)
-            return cls._instances[cls]
 
-
-class BaseTracker(object, metaclass=SingletonMetaClass):
+class BaseTracker(object, metaclass=MultitonMetaClass):
 
     def __init__(self, template=None, title=None):
         self.template = template

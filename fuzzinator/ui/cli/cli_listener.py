@@ -7,7 +7,7 @@
 
 import logging
 
-from fuzzinator import EventListener
+from fuzzinator.listener import EventListener
 
 logger = logging.getLogger(__name__)
 

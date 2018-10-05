@@ -19,7 +19,7 @@ except ImportError:
 from .base import BaseTracker
 
 
-class GithubReport(BaseTracker):
+class GithubTracker(BaseTracker):
 
     def __init__(self, repository, template, title=None):
         BaseTracker.__init__(self, template=template, title=title)

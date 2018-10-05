@@ -6,14 +6,14 @@
 # according to those terms.
 
 from .base import BaseTracker
-from .bugzilla import BugzillaReport
-from .github import GithubReport
-from .monorail import MonorailReport
+from .bugzilla import BugzillaTracker
+from .github import GithubTracker
+from .monorail import MonorailTracker
 
 
 __all__ = [
     'BaseTracker',
-    'BugzillaReport',
-    'GithubReport',
-    'MonorailReport',
+    'BugzillaTracker',
+    'GithubTracker',
+    'MonorailTracker',
 ]

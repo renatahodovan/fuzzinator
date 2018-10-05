@@ -12,7 +12,7 @@ from bugzilla import *
 from .base import BaseTracker
 
 
-class BugzillaReport(BaseTracker):
+class BugzillaTracker(BaseTracker):
 
     def __init__(self, product, url, template, title=None):
         BaseTracker.__init__(self, template=template, title=title)

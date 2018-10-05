@@ -14,7 +14,7 @@ from .base import BaseTracker
 
 
 # https://chromium.googlesource.com/infra/infra/+/master/appengine/monorail/doc/api.md
-class MonorailReport(BaseTracker):
+class MonorailTracker(BaseTracker):
 
     def __init__(self, project_id, template, title=None):
         BaseTracker.__init__(self, template=template, title=title)

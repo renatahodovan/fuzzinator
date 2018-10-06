@@ -7,8 +7,6 @@
 
 from urwid import *
 
-from fuzzinator.tracker import *
-from fuzzinator.tracker.base import init_tracker
 from .reporter_dialogs import *
 from .button import FormattedButton
 from .dialogs import AboutDialog, EditIssueDialog, FormattedIssueDialog
@@ -56,13 +54,9 @@ class ViewButton(FullScreenPopupLauncher):
         if not focus:
             return None
 
-        sut = focus.data['sut']
-        if sut not in self.trackers:
-            self.trackers[sut] = init_tracker(self.config, sut)
-        pop_up = FormattedIssueDialog(issue=self.issues_table.db.find_issue_by_id(focus.data['_id']),
-                                      tracker=self.trackers[sut],
+        pop_up = FormattedIssueDialog(config=self.config,
+                                      issue=self.issues_table.db.find_issue_by_id(focus.data['_id']),
                                       db=self.issues_table.db)
-
         connect_signal(pop_up, 'close', lambda button: self.close_pop_up())
         return pop_up
 
@@ -104,18 +98,15 @@ class ReportButton(FullScreenPopupLauncher):
         if not focus:
             return None
 
-        sut = focus.data['sut']
-        if sut not in self.trackers:
-            self.trackers[sut] = init_tracker(self.config, sut)
-
-        issue_details = self.issues_table.db.find_issue_by_id(focus.data['_id'])
+        issue = self.issues_table.db.find_issue_by_id(focus.data['_id'])
         try:
-            popup_cls = eval(self.trackers[sut].__class__.__name__ + 'Dialog')
+            tracker_cls = self.config.get('sut.' + issue['sut'], 'tracker').split('.')[-1]
+            popup_cls = eval(tracker_cls.replace('Tracker', 'ReportDialog'))
         except:
             # If there is no reporter interface for the given tracker
             # then we only display the formatted issue.
             popup_cls = FormattedIssueDialog
 
-        pop_up = popup_cls(issue=issue_details, tracker=self.trackers[sut], db=self.issues_table.db)
+        pop_up = popup_cls(issue=issue, config=self.config, db=self.issues_table.db)
         connect_signal(pop_up, 'close', lambda button: self.update_entry(focus.data['_id']))
         return pop_up

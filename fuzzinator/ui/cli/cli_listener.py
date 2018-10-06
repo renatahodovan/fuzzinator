@@ -14,6 +14,10 @@ logger = logging.getLogger(__name__)
 
 class CliListener(EventListener):
 
+    # Override the ancestor's constructor to avoid the need for passing an unused config parameter.
+    def __init__(self):
+        pass
+
     def new_fuzz_job(self, ident, fuzzer, sut, cost, batch):
         logger.debug('[{sut}] New fuzzer jobb added: {fuzzer} [{batch}]'.format(sut=sut, fuzzer=fuzzer, batch=batch))
 

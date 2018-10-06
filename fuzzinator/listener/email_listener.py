@@ -12,6 +12,7 @@ import smtplib
 
 from email.mime.text import MIMEText
 
+from ..config import config_get_callable
 from .listener import EventListener
 
 logger = logging.getLogger(__name__)
@@ -23,22 +24,20 @@ class EmailListener(EventListener):
     various events.
     """
 
-    def __init__(self, event, param_name, from_address, to_address, subject, content, smtp_host, smtp_port):
+    def __init__(self, config, event, param_name, from_address, to_address, smtp_host, smtp_port):
         """
+        :param config: ConfigParser object containing information about the fuzz session.
         :param event: The name of the event to send notification about.
         :param param_name: The name of the event's parameter containing the information to send.
         :param from_address: E-mail address to send notifications from.
         :param to_address: Target e-mail address to send the notification to.
-        :param subject: Subject of the e-mail (it may contain placeholders, that will be filled by parameter information).
-        :param content: Content of the e-mail (it may contain placeholders, that will be filled by parameter information).
         :param smtp_host: Host of the smtp server to send e-mails from.
         :param smtp_port: Port of the smtp server to send e-mails from.
         """
+        super(EmailListener, self).__init__(config)
         self.param_name = param_name
         self.from_address = from_address
         self.to_address = to_address
-        self.subject = subject
-        self.content = content
         self.smtp_host = smtp_host
         self.smtp_port = smtp_port
 
@@ -69,8 +68,11 @@ class EmailListener(EventListener):
             data = dict((self.param_name, data.decode('utf-8', 'ignore')))
         data = dict((name, raw.decode('utf-8', 'ignore') if type(raw) == bytes else raw) for name, raw in data.items())
 
-        subject = self.subject.format(**data)
-        content = self.content.format(**data)
+        from fuzzinator.formatter import JsonFormatter
+        formatter = config_get_callable(self.config, 'sut.' + data['sut'], ['email_formatter', 'formatter'])[0] or JsonFormatter
+
+        subject = formatter(issue=data, format='short')
+        content = formatter(issue=data)
 
         msg = MIMEText(content)
         msg['From'] = self.from_address

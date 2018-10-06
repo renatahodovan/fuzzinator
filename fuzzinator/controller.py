@@ -101,6 +101,35 @@ class Controller(object):
 
           See package :mod:`fuzzinator.update` for potential callables.
 
+        - Option ``formatter``: Fully qualified name of a python callable that
+          formats the issue dictionary of the SUT and returns a custom string
+          representation. It must accept ``issue`` and ``format`` keyword
+          arguments representing an issue to be formatted and a formatting
+          instruction. If ``format`` is ``'long'`` or not specified, the issue
+          should be formatted in full, while if ``'short'`` is given, a
+          summary description (preferably a single line of text) should be
+          returned.
+          (Optional, default: :mod:`fuzzinator.formatter.JsonFormatter`.)
+
+          See package :mod:`fuzzinator.formatter` for further potential
+          callables.
+
+        - Option ``tui_formatter``: Fully qualified name of a python
+          callable that formats the issue dictionary of the SUT to display
+          it in the TUI issue viewer interface.
+          (Optional, default: the value of option ``formatter``)
+
+          See package :mod:`fuzzinator.formatter` for further potential
+          callables.
+
+        - Option ``email_formatter``: Fully qualified name of a python
+          callable that formats the issue dictionary of the SUT to insert
+          it into an e-mail notification.
+          (Optional, default: the value of option ``formatter``)
+
+          See package :mod:`fuzzinator.formatter` for further potential
+          callables.
+
       - Sections ``fuzz.NAME``: Definitions of a fuzz job named *NAME*
 
         - Option ``sut``: Name of the SUT that describes the subject of
@@ -125,6 +154,14 @@ class Controller(object):
 
         - Option ``refresh``: Statistic update frequency in terms of executed
           test cases. (Optional, default: ``batch`` size)
+
+      - Section ``listeners``: Definitions of custom event listeners.
+        This section is optional.
+
+        - Options ``OPT``: Fully qualified name of python class that
+          executes custom actions to selected events.
+
+        See package :mod:`fuzzinator.listeners` for potential listeners.
 
       - Callable options can be implemented as functions or classes with
         ``__call__`` method (the latter are instantiated first to get a callable
@@ -168,7 +205,7 @@ class Controller(object):
         self.listener = ListenerManager()
         for name in config_get_kwargs(self.config, 'listeners'):
             entity = import_entity(self.config.get('listeners', name))
-            self.listener += entity(**config_get_kwargs(config, 'listeners.' + name + '.init'))
+            self.listener += entity(config=config, **config_get_kwargs(config, 'listeners.' + name + '.init'))
 
         self._issue_queue = Queue()
         self._lock = Lock()

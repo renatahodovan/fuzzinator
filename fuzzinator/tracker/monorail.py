@@ -16,8 +16,7 @@ from .base import BaseTracker
 # https://chromium.googlesource.com/infra/infra/+/master/appengine/monorail/doc/api.md
 class MonorailTracker(BaseTracker):
 
-    def __init__(self, project_id, template, title=None):
-        BaseTracker.__init__(self, template=template, title=title)
+    def __init__(self, project_id):
         self.project_id = project_id
         self.monorail = None
         self.login()
@@ -36,9 +35,8 @@ class MonorailTracker(BaseTracker):
                                         http=http,
                                         version='v1')
 
-    def find_issue(self, issue):
-        return self.monorail.issues().list(projectId=self.project_id, can='open',
-                                           q=issue['id'].decode('utf-8', errors='ignore')).execute().get('items', [])
+    def find_issue(self, query):
+        return self.monorail.issues().list(projectId=self.project_id, can='open', q=query).execute().get('items', [])
 
     def report_issue(self, title, body):
         return self.monorail.issues().insert(projectId=self.project_id,

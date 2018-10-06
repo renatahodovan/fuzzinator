@@ -22,6 +22,12 @@ class EventListener(object):
         from subprocesses.
     """
 
+    def __init__(self, config):
+        """
+        :param configparser.ConfigParser config: Fuzzinator settings.
+        """
+        self.config = config
+
     def update_load(self, load):
         """
         Invoked when the framework's load changes.

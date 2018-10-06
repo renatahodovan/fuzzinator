@@ -19,7 +19,6 @@ from urwid import connect_signal, raw_display, util, ExitMainLoop, MainLoop, Pop
 
 from fuzzinator import Controller
 from fuzzinator.ui import build_parser, process_args
-from fuzzinator.config import config_get_name_from_section
 from .tui_listener import TuiListener
 from .widgets import MainWindow
 

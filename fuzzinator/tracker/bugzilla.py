@@ -14,8 +14,7 @@ from .base import BaseTracker
 
 class BugzillaTracker(BaseTracker):
 
-    def __init__(self, product, url, template, title=None):
-        BaseTracker.__init__(self, template=template, title=title)
+    def __init__(self, product, url):
         self.product = product
         self.bzapi = Bugzilla(url)
 
@@ -36,10 +35,10 @@ class BugzillaTracker(BaseTracker):
         except BugzillaError:
             return False
 
-    def find_issue(self, issue):
+    def find_issue(self, query):
         return self.bzapi.query(self.bzapi.build_query(product=self.product,
                                                        status=['NEW', 'REOPENED', 'ASSIGNED'],
-                                                       short_desc=self.title(issue),
+                                                       short_desc=query,
                                                        include_fields=['id', 'summary', 'weburl']))
 
     def report_issue(self, report_details, test, extension):

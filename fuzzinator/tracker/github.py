@@ -21,8 +21,7 @@ from .base import BaseTracker
 
 class GithubTracker(BaseTracker):
 
-    def __init__(self, repository, template, title=None):
-        BaseTracker.__init__(self, template=template, title=title)
+    def __init__(self, repository):
         self.repository = repository
         self.ghapi = Github().get_repo(self.repository)
         self.gh = None
@@ -45,7 +44,7 @@ class GithubTracker(BaseTracker):
         except BadCredentialsException:
             return False
 
-    def find_issue(self, issue):
+    def find_issue(self, query):
         options = []
         pages = self.ghapi.get_issues(state='open')
         idx = 0
@@ -55,8 +54,7 @@ class GithubTracker(BaseTracker):
             if not page:
                 break
             for entry in page:
-                ident = issue['id'].decode('utf-8', errors='ignore') if isinstance(issue['id'], bytes) else issue['id']
-                if all(word in entry.body for word in ident.split()):
+                if all(word in entry.body for word in query.split()):
                     options.append(entry)
         return options
 

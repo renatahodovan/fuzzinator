@@ -10,8 +10,10 @@ from urwid import *
 from .decor_widgets import PatternBox
 from .graphics import fz_box_pattern
 from .button import FormattedButton
-from fuzzinator.pkgdata import __pkg_name__, __version__, __author__, __author_email__, __url__
 
+from fuzzinator.config import config_get_callable
+from fuzzinator.formatter import JsonFormatter
+from fuzzinator.pkgdata import __pkg_name__, __version__, __author__, __author_email__, __url__
 
 class Dialog(PopUpTarget):
     signals = ['close']
@@ -109,9 +111,10 @@ class YesNoDialog(Dialog):
 class FormattedIssueDialog(Dialog):
     exit_keys = ['esc', 'f3']
 
-    def __init__(self, issue, tracker, db):
-        super(FormattedIssueDialog, self).__init__(title=issue['id'],
-                                                   body=[Padding(Text(line, wrap='clip'), left=2, right=2) for line in tracker.format_issue(issue).splitlines()],
+    def __init__(self, config, issue, db):
+        formatter = config_get_callable(config, 'sut.' + issue['sut'], ['tui_formatter', 'formatter'])[0] or JsonFormatter
+        super(FormattedIssueDialog, self).__init__(title=formatter(issue=issue, format='short'),
+                                                   body=[Padding(Text(line, wrap='clip'), left=2, right=2) for line in formatter(issue=issue).splitlines()],
                                                    footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))])
 
 

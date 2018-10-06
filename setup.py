@@ -27,8 +27,11 @@ setup(
     include_package_data=True,
     install_requires=[
         'chardet',
+        'chevron',
+        'jinja2',
         'keyring',
         'keyrings.alt',
+        'markdown',
         'pexpect',
         'picire==18.1',
         'picireny==18.2',

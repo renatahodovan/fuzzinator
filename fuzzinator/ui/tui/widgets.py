@@ -14,7 +14,8 @@ from collections import OrderedDict
 from math import ceil
 from urwid import *
 
-from fuzzinator.tracker.base import init_tracker
+from fuzzinator.config import config_get_callable
+from fuzzinator.formatter import JsonFormatter
 
 from .decor_widgets import PatternBox
 from .button import FormattedButton
@@ -126,10 +127,8 @@ class MainWindow(PopUpLauncher):
             if test_bytes:
                 pyperclip.copy(str(issue['test']))
             else:
-                sut = self.issues_table.selection.data['sut']
-                if sut not in self.trackers:
-                    self.trackers[sut] = init_tracker(self.config, sut)
-                pyperclip.copy(self.trackers[sut].format_issue(issue))
+                formatter = config_get_callable(self.config, 'sut.' + issue['sut'], ['tui_formatter', 'formatter'])[0] or JsonFormatter
+                pyperclip.copy(formatter(issue=issue))
 
     def keypress(self, size, key):
         if key == 'tab':

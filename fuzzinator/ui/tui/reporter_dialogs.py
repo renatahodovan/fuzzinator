@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -8,6 +8,9 @@
 from os import get_terminal_size
 from urwid import *
 
+from fuzzinator.config import config_get_callable
+from fuzzinator.formatter import JsonFormatter
+from fuzzinator.tracker import BaseTracker
 from .decor_widgets import PatternBox
 from .graphics import fz_box_pattern
 from .dialogs import Dialog, BugEditor
@@ -62,16 +65,17 @@ class LoginButton(PopUpLauncher):
 class ReportDialog(PopUpTarget):
     signals = ['close']
 
-    def __init__(self, issue, tracker, db, side_bar=None):
+    def __init__(self, issue, config, db, side_bar=None):
         self.issue = issue
-        self.tracker = tracker
+        self.tracker = config_get_callable(config, 'sut.' + issue['sut'], 'tracker')[0] or BaseTracker()
         self.db = db
         self.duplicate = None
 
         self.edit_dups = BugEditor()
         self.result = Text('')
-        self.issue_title = BugEditor(edit_text=self.tracker.title(issue))
-        self.issue_desc = BugEditor(edit_text=self.tracker.format_issue(issue), multiline=True, wrap='clip')
+        formatter = config_get_callable(config, 'sut.' + issue['sut'], 'formatter')[0] or JsonFormatter
+        self.issue_title = BugEditor(edit_text=formatter(issue=issue, format='short'))
+        self.issue_desc = BugEditor(edit_text=formatter(issue=issue), multiline=True, wrap='clip')
         self.body = SimpleListWalker([Columns([('fixed', 13, Text(('dialog_secondary', 'Summary: '))),
                                                ('weight', 10, self.issue_title)], dividechars=1),
                                       Columns([('fixed', 13, Text(('dialog_secondary', 'Description: '))),
@@ -101,7 +105,7 @@ class ReportDialog(PopUpTarget):
     def find_duplicates(self):
         dups_walker = SimpleListWalker([self.edit_dups])
         options = []
-        for entry in self.tracker.find_issue(self.issue):
+        for entry in self.tracker.find_issue(self.issue_title.get_text()[0]):
             radio_btn = RadioButton(options, self.tracker.issue_url(entry), on_state_change=self.set_duplicate)
             # Select the first suggested bug if there is not set any.
             if self.duplicate is None:
@@ -139,11 +143,12 @@ class ReportDialog(PopUpTarget):
 
 class BugzillaReportDialog(ReportDialog):
 
-    def __init__(self, issue, tracker, db):
+    def __init__(self, issue, config, db):
         self.edit_blocks = BugEditor()
         self.edit_cc = BugEditor(multiline=True)
         self.edit_extension = BugEditor(edit_text='html')
 
+        tracker = config_get_callable(config, 'sut.' + issue['sut'], 'tracker')[0] or BaseTracker()
         self.product_info = tracker.bzapi.getproducts()
         self.product = None
         products_walker = SimpleListWalker([])
@@ -165,7 +170,7 @@ class BugzillaReportDialog(ReportDialog):
                     Columns([('weight', 1, Text('Blocks: ')), ('weight', 4, self.edit_blocks)]),
                     Columns([('weight', 1, Text('Ext: ')), ('weight', 4, self.edit_extension)])]
 
-        super(BugzillaReportDialog, self).__init__(issue=issue, tracker=tracker, db=db, side_bar=side_bar)
+        super(BugzillaReportDialog, self).__init__(issue=issue, config=config, db=db, side_bar=side_bar)
         self.set_product(products_walker.contents[0], True)
 
     def set_product(self, btn, state):

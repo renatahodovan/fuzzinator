@@ -9,6 +9,7 @@ from .controller import Controller
 from .pkgdata import __version__
 
 from . import call
+from . import formatter
 from . import fuzzer
 from . import listener
 from . import reduce
@@ -19,6 +20,7 @@ __all__ = [
     'Controller',
     '__version__',
     'call',
+    'formatter',
     'fuzzer',
     'listener',
     'reduce',

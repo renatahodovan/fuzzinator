@@ -167,7 +167,7 @@ class ListenerManager(object):
                     try:
                         getattr(listener, self.name)(**kwargs)
                     except Exception as e:
-                        logger.warning(e)
+                        logger.warning('Unhandled exception in listener \'%s\'.', self.name, exc_info=e)
 
         for fn, _ in inspect.getmembers(EventListener, predicate=inspect.isfunction):
             setattr(self, fn, Trampoline(self, fn))

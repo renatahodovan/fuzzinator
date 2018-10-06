@@ -88,7 +88,7 @@ class StreamMonitoredSubprocessCall(object):
                 if proc.poll() is not None or (self.timeout and time.time() - start_time > self.timeout):
                     break
             except IOError as e:
-                logger.warning('[filter_streams] %s' % str(e))
+                logger.warning('Exception in stream filtering.', exc_info=e)
 
         Controller.kill_process_tree(proc.pid, sig=signal.SIGKILL)
 

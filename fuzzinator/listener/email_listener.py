@@ -52,7 +52,7 @@ class EmailListener(EventListener):
             try:
                 server.login(self.from_address, pwd)
             except Exception as e:
-                logger.warning('Wrong password.' + str(e))
+                logger.warning('Authentication failed.', exc_info=e)
                 pwd = None
         keyring.set_password('fuzzinator', self.from_address, pwd)
         server.quit()

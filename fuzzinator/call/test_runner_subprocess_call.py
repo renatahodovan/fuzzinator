@@ -109,7 +109,7 @@ class TestRunnerSubprocessCall(object):
                 if self.proc.poll() is not None:
                     break
             except IOError as e:
-                logger.warning('[filter_streams] %s' % str(e))
+                logger.warning('Exception in stream filtering.', exc_info=e)
 
         logger.debug('{stdout}\n{stderr}'.format(stdout=streams['stdout'].decode('utf-8', errors='ignore'),
                                                  stderr=streams['stderr'].decode('utf-8', errors='ignore')))

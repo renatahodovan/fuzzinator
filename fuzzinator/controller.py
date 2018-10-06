@@ -258,7 +258,7 @@ class Controller(object):
         except KeyboardInterrupt:
             pass
         except Exception as e:
-            self.listener.warning(msg='{msg}\n{trace}'.format(msg=str(e), trace=traceback.format_exc()))
+            self.listener.warning(msg='Exception in the main controller loop: {exception}\n{trace}'.format(exception=e, trace=traceback.format_exc()))
         finally:
             Controller.kill_process_tree(os.getpid(), kill_root=False)
             if os.path.exists(self.work_dir):
@@ -302,10 +302,10 @@ class Controller(object):
             for issue in job.run():
                 self.add_reduce_job(issue=issue)
         except Exception as e:
-            self.listener.warning(msg='Exception: {job} {exception}\n{trace}'.format(
+            self.listener.warning(msg='Exception in {job}: {exception}\n{trace}'.format(
                 job=repr(job),
                 exception=e,
-                trace=''.join(traceback.format_exception(*sys.exc_info())).strip('\n')))
+                trace=traceback.format_exc()))
 
     def add_reduce_job(self, issue):
         with self._lock:

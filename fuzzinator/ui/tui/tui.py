@@ -7,6 +7,7 @@
 
 import argparse
 import json
+import logging
 import os
 import pkgutil
 import time
@@ -21,6 +22,8 @@ from fuzzinator.ui import build_parser, process_args
 from fuzzinator.config import config_get_name_from_section
 from .tui_listener import TuiListener
 from .widgets import MainWindow
+
+logger = logging.getLogger(__name__)
 
 
 class Tui(PopUpLauncher):
@@ -194,11 +197,12 @@ def execute(args=None, parser=None):
         # No need to handle CTRL+C as SIGINT is sent by the terminal to all
         # (sub)processes.
         pass
-    except Exception:
+    except Exception as e:
         # Handle every kind of TUI exceptions except for KeyboardInterrupt.
         # SIGINT will trigger a KeyboardInterrupt exception in controller,
         # thus allowing it to perform proper cleanup.
         os.kill(fuzz_process.pid, signal.SIGINT)
+        logger.error('Unhandled exception in TUI.', exc_info=e)
     else:
         # Handle normal exit after 'Q' or F10. SIGINT will trigger a
         # KeyboardInterrupt exception in controller, thus allowing it to

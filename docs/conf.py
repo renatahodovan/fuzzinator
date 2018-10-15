@@ -15,7 +15,7 @@
 # General information about the project.
 project = 'Fuzzinator'
 author = 'Renata Hodovan, Akos Kiss'
-copyright = '2016-2017, %s' % author
+copyright = '2016-2018, %s' % author
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

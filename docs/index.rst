@@ -18,6 +18,7 @@ Fuzzinator
    fuzzinator
    fuzzinator.call
    fuzzinator.fuzzer
+   fuzzinator.listener
    fuzzinator.reduce
    fuzzinator.update
 

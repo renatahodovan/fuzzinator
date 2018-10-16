@@ -20,9 +20,10 @@ class FuzzJob(CallJob):
         CallJob.__init__(self, config, db, listener)
         self.fuzz_section = fuzz_section
 
-        self.sut_section = self.config.get(self.fuzz_section, 'sut')
+        sut_section = self.config.get(self.fuzz_section, 'sut')
+        self.sut_name = config_get_name_from_section(sut_section)
         self.fuzzer_name = config_get_name_from_section(self.fuzz_section)
-        self.cost = int(self.config.get(self.sut_section, 'cost', fallback=1))
+        self.cost = int(self.config.get(sut_section, 'cost', fallback=1))
         self.batch = float(self.config.get(self.fuzz_section, 'batch', fallback=1))
         self.refresh = float(self.config.get(self.fuzz_section, 'refresh', fallback=self.batch))
 
@@ -44,7 +45,7 @@ class FuzzJob(CallJob):
         self.listener.update_fuzz_stat()
         with fuzzer:
             while index < self.batch:
-                sut_call, sut_call_kwargs = config_get_callable(self.config, self.sut_section, 'call')
+                sut_call, sut_call_kwargs = config_get_callable(self.config, 'sut.' + self.sut_name, 'call')
                 with sut_call:
                     while index < self.batch:
                         test = fuzzer(index=index, **fuzzer_kwargs)
@@ -66,7 +67,7 @@ class FuzzJob(CallJob):
 
                         if issue and test is None:
                             self.batch = index
-                            self.listener.warning(msg='{sut} crashed before the first test.'.format(sut=config_get_name_from_section(self.sut_section)))
+                            self.listener.warning(msg='{sut} crashed before the first test.'.format(sut=self.sut_name))
                             break
 
                         if issue is not None and ('test' not in issue or not issue['test']):
@@ -80,7 +81,7 @@ class FuzzJob(CallJob):
 
                         self.listener.job_progress(ident=id(self), progress=index)
                         if index - stat_updated >= self.refresh:
-                            self.db.update_stat(self.sut_section, self.fuzzer_name, index - stat_updated, issue_count)
+                            self.db.update_stat(self.sut_name, self.fuzzer_name, index - stat_updated, issue_count)
                             self.listener.update_fuzz_stat()
                             issue_count = 0
                             stat_updated = index
@@ -90,6 +91,6 @@ class FuzzJob(CallJob):
                             break
 
         # Update statistics.
-        self.db.update_stat(self.sut_section, self.fuzzer_name, index - stat_updated, issue_count)
+        self.db.update_stat(self.sut_name, self.fuzzer_name, index - stat_updated, issue_count)
         self.listener.update_fuzz_stat()
         return new_issues

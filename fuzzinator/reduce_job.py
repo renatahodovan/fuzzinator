@@ -22,10 +22,11 @@ class ReduceJob(CallJob):
         self.issue = issue
         self.work_dir = work_dir
 
-        self.sut_section = self.issue['sut']
+        self.sut_name = self.issue['sut']
+        sut_section = 'sut.' + self.sut_name
         self.fuzzer_name = '{fuzzer}/{reducer}'.format(fuzzer=self.issue['fuzzer'].split('/')[0],
-                                                       reducer=self.config.get(self.sut_section, 'reduce'))
-        self.cost = int(self.config.get(self.sut_section, 'reduce_cost', fallback=self.config.get(self.sut_section, 'cost', fallback=1)))
+                                                       reducer=self.config.get(sut_section, 'reduce'))
+        self.cost = int(self.config.get(sut_section, 'reduce_cost', fallback=self.config.get(sut_section, 'cost', fallback=1)))
 
     def run(self):
         if not ValidateJob(config=self.config,
@@ -34,11 +35,12 @@ class ReduceJob(CallJob):
                            listener=self.listener).run():
             return []
 
-        if self.config.has_option(self.sut_section, 'reduce_call'):
-            sut_call, sut_call_kwargs = config_get_callable(self.config, self.sut_section, 'reduce_call')
+        sut_section = 'sut.' + self.sut_name
+        if self.config.has_option(sut_section, 'reduce_call'):
+            sut_call, sut_call_kwargs = config_get_callable(self.config, sut_section, 'reduce_call')
         else:
-            sut_call, sut_call_kwargs = config_get_callable(self.config, self.sut_section, 'call')
-        reduce, reduce_kwargs = config_get_callable(self.config, self.sut_section, 'reduce')
+            sut_call, sut_call_kwargs = config_get_callable(self.config, sut_section, 'call')
+        reduce, reduce_kwargs = config_get_callable(self.config, sut_section, 'reduce')
 
         with reduce:
             reduced_src, new_issues = reduce(sut_call=sut_call,

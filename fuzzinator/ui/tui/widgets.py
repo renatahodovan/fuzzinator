@@ -116,7 +116,7 @@ class MainWindow(PopUpLauncher):
     def validate(self):
         if self.issues_table.selection:
             issue = self.db.find_issue_by_id(self.issues_table.selection.data['_id'])
-            if not self.config.has_section(issue['sut']):
+            if not self.config.has_section('sut.' + issue['sut']):
                 self.warning_popup(msg='{sut} is not defined.'.format(sut=issue['sut']))
             else:
                 self.controller.validate(issue)
@@ -128,9 +128,8 @@ class MainWindow(PopUpLauncher):
                 pyperclip.copy(str(issue['test']))
             else:
                 sut = self.issues_table.selection.data['sut']
-                sut_section = 'sut.' + sut
                 if sut not in self.trackers:
-                    self.trackers[sut] = init_tracker(self.config, sut_section)
+                    self.trackers[sut] = init_tracker(self.config, sut)
                 pyperclip.copy(self.trackers[sut].format_issue(issue))
 
     def keypress(self, size, key):
@@ -215,14 +214,6 @@ class IssuesTable(Table):
         else:
             return super(IssuesTable, self).keypress(size, key)
 
-    def format_names(self, data):
-        for entry in data:
-            if entry['fuzzer'].startswith('fuzz.'):
-                entry['fuzzer'] = entry['fuzzer'][5:]
-            elif entry['sut'].startswith('sut.'):
-                entry['sut'] = entry['sut'][4:]
-        return data
-
     def update(self):
         if self.all_issues:
             self.show_all()
@@ -231,14 +222,13 @@ class IssuesTable(Table):
 
     def show_all(self):
         self.all_issues = True
-        self.query_data = self.format_names(self.db.all_issues())
+        self.query_data = self.db.all_issues()
         self.requery(self.query_data)
         self.walker._modified()
 
     def show_less(self):
         self.all_issues = False
-        current_issues = [issue for issue in self.db.all_issues() if issue['_id'] not in self.issues_baseline]
-        self.query_data = self.format_names(current_issues)
+        self.query_data = [issue for issue in self.db.all_issues() if issue['_id'] not in self.issues_baseline]
         self.requery(self.query_data)
         self.walker._modified()
 

@@ -17,13 +17,13 @@ class CallJob(object):
         self.config = config
         self.db = db
         self.listener = listener
-        # expects self.sut_section and self.fuzzer_name to be set by descendants
+        # expects self.sut_name and self.fuzzer_name to be set by descendants
 
     def add_issue(self, issue, new_issues):
         test = issue['test']
 
         # Save issue details.
-        issue.update(dict(sut=self.sut_section,
+        issue.update(dict(sut=self.sut_name,
                           fuzzer=self.fuzzer_name,
                           test=test,
                           reduced=None,

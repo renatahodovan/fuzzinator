@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -13,11 +13,11 @@ class UpdateJob(object):
     Class for running SUT update jobs.
     """
 
-    def __init__(self, config, sut_section):
+    def __init__(self, config, sut_name):
         self.config = config
-        self.sut_section = sut_section
+        self.sut_name = sut_name
 
     def run(self):
-        update, update_kwargs = config_get_callable(self.config, self.sut_section, 'update')
+        update, update_kwargs = config_get_callable(self.config, 'sut.' + self.sut_name, 'update')
         with update:
             update(**update_kwargs)

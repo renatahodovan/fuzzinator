@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -57,9 +57,8 @@ class ViewButton(FullScreenPopupLauncher):
             return None
 
         sut = focus.data['sut']
-        sut_section = 'sut.' + sut
         if sut not in self.trackers:
-            self.trackers[sut] = init_tracker(self.config, sut_section)
+            self.trackers[sut] = init_tracker(self.config, sut)
         pop_up = FormattedIssueDialog(issue=self.issues_table.db.find_issue_by_id(focus.data['_id']),
                                       tracker=self.trackers[sut])
 
@@ -105,9 +104,8 @@ class ReportButton(FullScreenPopupLauncher):
             return None
 
         sut = focus.data['sut']
-        sut_section = 'sut.' + sut
         if sut not in self.trackers:
-            self.trackers[sut] = init_tracker(self.config, sut_section)
+            self.trackers[sut] = init_tracker(self.config, sut)
 
         issue_details = self.issues_table.db.find_issue_by_id(focus.data['_id'])
         try:

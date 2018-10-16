@@ -207,7 +207,7 @@ class Controller(object):
                                                  listener=self.listener)
                             next_job_id = id(next_job)
                             self.listener.new_reduce_job(ident=next_job_id,
-                                                         sut=config_get_name_from_section(next_job.sut_section),
+                                                         sut=next_job.sut_name,
                                                          cost=next_job.cost,
                                                          issue_id=issue['id'],
                                                          size=len(issue['test']))
@@ -242,7 +242,7 @@ class Controller(object):
                     # Notify the active listener about the new job.
                     self.listener.new_fuzz_job(ident=next_job_id,
                                                fuzzer=config_get_name_from_section(next_job.fuzz_section),
-                                               sut=config_get_name_from_section(next_job.sut_section),
+                                               sut=next_job.sut_name,
                                                cost=next_job.cost,
                                                batch=next_job.batch)
 
@@ -265,16 +265,16 @@ class Controller(object):
                 shutil.rmtree(self.work_dir, ignore_errors=True)
 
     def _check_update(self, job, running_jobs):
-        if self.config.has_option(job.sut_section, 'update_condition') and \
-                self.config.has_option(job.sut_section, 'update'):
-            update_condition, update_condition_kwargs = config_get_callable(self.config, job.sut_section, 'update_condition')
+        sut_section = 'sut.' + job.sut_name
+        if self.config.has_option(sut_section, 'update_condition') and \
+                self.config.has_option(sut_section, 'update'):
+            update_condition, update_condition_kwargs = config_get_callable(self.config, sut_section, 'update_condition')
             with update_condition:
                 if update_condition(**update_condition_kwargs):
                     next_job = UpdateJob(config=self.config,
-                                         sut_section=job.sut_section)
+                                         sut_name=job.sut_name)
                     next_job_id = id(next_job)
-                    self.listener.new_update_job(ident=next_job_id,
-                                                 sut=config_get_name_from_section(next_job.sut_section))
+                    self.listener.new_update_job(ident=next_job_id, sut=job.sut_name)
                     # Wait until every job has finished.
                     self._wait_for_load(self.capacity, running_jobs)
                     # Emit 'next_job available' event.

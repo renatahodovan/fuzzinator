@@ -67,7 +67,8 @@ class BaseTracker(object, metaclass=MultitonMetaClass):
         return ''
 
 
-def init_tracker(config, sut_section):
+def init_tracker(config, sut):
+    sut_section = 'sut.' + sut
     if config.has_option(sut_section, 'tracker'):
         tracker, _ = config_get_callable(config, sut_section, 'tracker')
     else:

@@ -89,7 +89,6 @@ class Tui(PopUpLauncher):
         self.view.stat_table.update()
 
     def new_issue(self, issue):
-        issue['sut'] = config_get_name_from_section(issue['sut'])
         # Do shiny animation if a new issue has received.
         self.view.logo.do_animate = True
         self.loop.set_alarm_at(time.time() + 5, callback=self.view.logo.stop_animation)

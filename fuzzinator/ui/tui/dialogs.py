@@ -109,7 +109,7 @@ class YesNoDialog(Dialog):
 class FormattedIssueDialog(Dialog):
     exit_keys = ['esc', 'f3']
 
-    def __init__(self, issue, tracker):
+    def __init__(self, issue, tracker, db):
         super(FormattedIssueDialog, self).__init__(title=issue['id'],
                                                    body=[Padding(Text(line, wrap='clip'), left=2, right=2) for line in tracker.format_issue(issue).splitlines()],
                                                    footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))])

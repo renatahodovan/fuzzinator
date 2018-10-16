@@ -7,6 +7,15 @@
 
 
 class NonIssue(dict):
+    """
+    Wrapper class for issue dictionaries to mark them as non-issue.
+
+    The ``NonIssue`` class is a custom dictionary with a truth value forced to
+    ``False``. With this change, it's capable to express that an issue
+    dictionary doesn't encode a failure, without emptying it or converting to
+    ``None``. The content of a ``NonIssue`` can be taken as a SUT response to a
+    given test case and can be useful in feedback-driven fuzzing scenarios.
+    """
 
     def __bool__(self):
         return False

@@ -9,7 +9,6 @@ import os
 import psutil
 import shutil
 import signal
-import sys
 import time
 import traceback
 

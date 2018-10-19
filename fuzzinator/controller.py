@@ -265,22 +265,28 @@ class Controller(object):
 
     def _check_update(self, job, running_jobs):
         sut_section = 'sut.' + job.sut_name
-        if self.config.has_option(sut_section, 'update_condition') and \
-                self.config.has_option(sut_section, 'update'):
-            update_condition, update_condition_kwargs = config_get_callable(self.config, sut_section, 'update_condition')
-            with update_condition:
-                if update_condition(**update_condition_kwargs):
-                    next_job = UpdateJob(config=self.config,
-                                         sut_name=job.sut_name)
-                    next_job_id = id(next_job)
-                    self.listener.new_update_job(ident=next_job_id, sut=job.sut_name)
-                    # Wait until every job has finished.
-                    self._wait_for_load(self.capacity, running_jobs)
-                    # Emit 'next_job available' event.
-                    self.listener.activate_job(ident=next_job_id)
-                    # Update job runs in the main thread since it's blocking for any other jobs.
-                    next_job.run()
-                    self.listener.remove_job(ident=next_job_id)
+        if not self.config.has_option(sut_section, 'update'):
+            return
+
+        update_condition, update_condition_kwargs = config_get_callable(self.config, sut_section, 'update_condition')
+        if not update_condition:
+            return
+
+        with update_condition:
+            if not update_condition(**update_condition_kwargs):
+                return
+
+        next_job = UpdateJob(config=self.config,
+                             sut_name=job.sut_name)
+        next_job_id = id(next_job)
+        self.listener.new_update_job(ident=next_job_id, sut=job.sut_name)
+        # Wait until every job has finished.
+        self._wait_for_load(self.capacity, running_jobs)
+        # Emit 'next_job available' event.
+        self.listener.activate_job(ident=next_job_id)
+        # Update job runs in the main thread since it's blocking for any other jobs.
+        next_job.run()
+        self.listener.remove_job(ident=next_job_id)
 
     def _wait_for_load(self, new_load, running_jobs):
         while True:

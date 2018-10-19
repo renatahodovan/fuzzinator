@@ -36,10 +36,7 @@ class ReduceJob(CallJob):
             return []
 
         sut_section = 'sut.' + self.sut_name
-        if self.config.has_option(sut_section, 'reduce_call'):
-            sut_call, sut_call_kwargs = config_get_callable(self.config, sut_section, 'reduce_call')
-        else:
-            sut_call, sut_call_kwargs = config_get_callable(self.config, sut_section, 'call')
+        sut_call, sut_call_kwargs = config_get_callable(self.config, sut_section, ['reduce_call', 'call'])
         reduce, reduce_kwargs = config_get_callable(self.config, sut_section, 'reduce')
 
         with reduce:

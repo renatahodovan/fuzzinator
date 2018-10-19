@@ -23,15 +23,8 @@ class ValidateJob(CallJob):
         self.cost = 0
 
     def run(self):
-        sut_section = 'sut.' + self.sut_name
-        if self.config.has_option(sut_section, 'validate_call'):
-            call_type = 'validate_call'
-        elif self.config.has_option(sut_section, 'reduce_call'):
-            call_type = 'reduce_call'
-        else:
-            call_type = 'call'
+        sut_call, sut_call_kwargs = config_get_callable(self.config, 'sut.' + self.sut_name, ['validate_call', 'reduce_call', 'call'])
 
-        sut_call, sut_call_kwargs = config_get_callable(self.config, sut_section, call_type)
         with sut_call:
             sut_call_kwargs.update(self.issue)
             issue = sut_call(**sut_call_kwargs)

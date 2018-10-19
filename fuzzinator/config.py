@@ -36,42 +36,52 @@ class CallableContextManager(object):
         return self._callable(*args, **kwargs)
 
 
-def config_get_callable(config, section, option):
+def config_get_callable(config, section, options):
     """
     Return an object that can both act as a context manager and as a callable,
     as well as a dictionary with key-value pairs to be used when calling the
     object.
     """
-    # get the python entity (function or callable context manager class) named
-    # in $(section:option) and its call arguments given in $(section.option:*)
-    entity = import_entity(config.get(section, option))
-    entity_kwargs = config_get_kwargs(config, section + '.' + option)
+    options = options if isinstance(options, list) else [options]
 
-    # find decorator classes named in $(section:option.decorate(*)) and apply
-    # them with their arguments given in $(section.option.decorate(*):*)
-    opt_prefix = option + '.decorate('
-    opt_suffix = ')'
-    decorator_options = [opt for opt in config.options(section)
-                         if opt.startswith(opt_prefix) and
-                         opt.endswith(opt_suffix)]
-    decorator_options.sort(key=lambda opt: int(opt[len(opt_prefix):-len(opt_suffix)]))
-    for decopt in decorator_options:
-        decorator_class = import_entity(config.get(section, decopt))
-        decorator_kwargs = config_get_kwargs(config, section + '.' + decopt)
-        decorator = decorator_class(**decorator_kwargs)
-        entity = decorator(entity)
+    callable_ctx, entity_kwargs = None, None
+    for option in options:
+        if not config.has_option(section, option):
+            continue
 
-    # if entity is a callable context manager class, instantiate it with
-    # arguments given in $(section.option.init:*)
-    if isclass(entity):
-        init_kwargs = {}
-        if config.has_section(section + '.' + option + '.init'):
-            init_kwargs = config_get_kwargs(config, section + '.' + option + '.init')
-        callable_ctx = entity(**init_kwargs)
-    # if entity is a function, wrap it into a default callable context manager
-    # object
-    else:
-        callable_ctx = CallableContextManager(entity)
+        # get the python entity (function or callable context manager class) named
+        # in $(section:option) and its call arguments given in $(section.option:*)
+        entity = import_entity(config.get(section, option))
+        entity_kwargs = config_get_kwargs(config, section + '.' + option)
+
+        # find decorator classes named in $(section:option.decorate(*)) and apply
+        # them with their arguments given in $(section.option.decorate(*):*)
+        opt_prefix = option + '.decorate('
+        opt_suffix = ')'
+        decorator_options = [opt for opt in config.options(section)
+                             if opt.startswith(opt_prefix) and
+                             opt.endswith(opt_suffix)]
+        decorator_options.sort(key=lambda opt: int(opt[len(opt_prefix):-len(opt_suffix)]))
+        for decopt in decorator_options:
+            decorator_class = import_entity(config.get(section, decopt))
+            decorator_kwargs = config_get_kwargs(config, section + '.' + decopt)
+            decorator = decorator_class(**decorator_kwargs)
+            entity = decorator(entity)
+
+        # if entity is a callable context manager class, instantiate it with
+        # arguments given in $(section.option.init:*)
+        if isclass(entity):
+            init_kwargs = {}
+            if config.has_section(section + '.' + option + '.init'):
+                init_kwargs = config_get_kwargs(config, section + '.' + option + '.init')
+            callable_ctx = entity(**init_kwargs)
+        # if entity is a function, wrap it into a default callable context manager
+        # object
+        else:
+            callable_ctx = CallableContextManager(entity)
+
+        # break the loop after finding the first matching option.
+        break
 
     # return the callable context manager and its call arguments
     return callable_ctx, entity_kwargs

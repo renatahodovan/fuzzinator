@@ -60,7 +60,8 @@ class ViewButton(FullScreenPopupLauncher):
         if sut not in self.trackers:
             self.trackers[sut] = init_tracker(self.config, sut)
         pop_up = FormattedIssueDialog(issue=self.issues_table.db.find_issue_by_id(focus.data['_id']),
-                                      tracker=self.trackers[sut])
+                                      tracker=self.trackers[sut],
+                                      db=self.issues_table.db)
 
         connect_signal(pop_up, 'close', lambda button: self.close_pop_up())
         return pop_up

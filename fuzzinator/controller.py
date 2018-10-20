@@ -161,7 +161,7 @@ class Controller(object):
         self.config.set('fuzzinator', 'work_dir', self.work_dir)
 
         self.db = MongoDriver(config_get_with_writeback(self.config, 'fuzzinator', 'db_uri', 'mongodb://localhost/fuzzinator'))
-        self.db.init_db([(self.config.get(fuzzer, 'sut'), config_get_name_from_section(fuzzer)) for fuzzer in self.fuzzers])
+        self.db.init_db([(config_get_name_from_section(self.config.get(fuzzer, 'sut')), config_get_name_from_section(fuzzer)) for fuzzer in self.fuzzers])
 
         self.listener = ListenerManager()
         for name in config_get_kwargs(self.config, 'listeners'):

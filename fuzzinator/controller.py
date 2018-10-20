@@ -222,7 +222,7 @@ class Controller(object):
                     fuzz_section = 'fuzz.' + self.fuzzers[fuzz_idx]
                     instances = self.config.get(fuzz_section, 'instances', fallback='inf')
                     instances = float(instances) if instances == 'inf' else int(instances)
-                    if instances <= len(list(filter(lambda job: job.fuzzer_name == self.fuzzers[fuzz_idx], (running_jobs[ident]['job'] for ident in running_jobs if isinstance(running_jobs[ident]['job'], FuzzJob))))):
+                    if instances <= sum(1 for job in running_jobs.values() if isinstance(job['job'], FuzzJob) and job['job'].fuzzer_name == self.fuzzers[fuzz_idx]):
                         # Update fuzz_idx to point the next job's parameters.
                         fuzz_idx = (fuzz_idx + 1) % len(self.fuzzers)
                         continue

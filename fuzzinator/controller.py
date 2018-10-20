@@ -103,7 +103,7 @@ class Controller(object):
 
       - Sections ``fuzz.NAME``: Definitions of a fuzz job named *NAME*
 
-        - Option ``sut``: Name of the SUT section that describes the subject of
+        - Option ``sut``: Name of the SUT that describes the subject of
           this fuzz job. (Mandatory)
 
         - Option ``fuzzer``: Fully qualified name of a python callable that must
@@ -163,7 +163,7 @@ class Controller(object):
         self.config.set('fuzzinator', 'work_dir', self.work_dir)
 
         self.db = MongoDriver(config_get_with_writeback(self.config, 'fuzzinator', 'db_uri', 'mongodb://localhost/fuzzinator'))
-        self.db.init_db([(config_get_name_from_section(self.config.get('fuzz.' + fuzzer, 'sut')), fuzzer) for fuzzer in self.fuzzers])
+        self.db.init_db([(self.config.get('fuzz.' + fuzzer, 'sut'), fuzzer) for fuzzer in self.fuzzers])
 
         self.listener = ListenerManager()
         for name in config_get_kwargs(self.config, 'listeners'):

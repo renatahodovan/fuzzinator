@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -29,7 +29,7 @@ def RandomContent(*, min_length='1', max_length='1', **kwargs):
             # see fuzzinator.call.*
 
             [fuzz.foo-with-random]
-            sut=sut.foo
+            sut=foo
             fuzzer=fuzzinator.fuzzer.RandomContent
             batch=100
 

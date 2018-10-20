@@ -52,7 +52,7 @@ class SubprocessRunner(object):
             # see fuzzinator.call.*
 
             [fuzz.foo-with-bar]
-            sut=sut.foo
+            sut=foo
             fuzzer=fuzzinator.fuzzer.SubprocessRunner
             batch=50
 

@@ -19,11 +19,9 @@ class FuzzJob(CallJob):
     def __init__(self, config, fuzz_section, db, listener):
         CallJob.__init__(self, config, db, listener)
         self.fuzz_section = fuzz_section
-
-        sut_section = self.config.get(self.fuzz_section, 'sut')
-        self.sut_name = config_get_name_from_section(sut_section)
+        self.sut_name = self.config.get(self.fuzz_section, 'sut')
         self.fuzzer_name = config_get_name_from_section(self.fuzz_section)
-        self.cost = int(self.config.get(sut_section, 'cost', fallback=1))
+        self.cost = int(self.config.get('sut.' + self.sut_name, 'cost', fallback=1))
         self.batch = float(self.config.get(self.fuzz_section, 'batch', fallback=1))
         self.refresh = float(self.config.get(self.fuzz_section, 'refresh', fallback=self.batch))
 

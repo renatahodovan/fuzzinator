@@ -5,6 +5,7 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+from datetime import datetime
 from urwid import *
 
 from ...config import config_get_callable
@@ -164,6 +165,8 @@ class EditIssueDialog(Dialog):
             return value
         if t == bytes:
             return value.decode('utf-8', errors='ignore')
+        if t == datetime:
+            return value.strftime('%Y-%m-%d %H:%M:%S')
         if value is None:
             self.type_dict[prop] = None
             return ''
@@ -178,6 +181,8 @@ class EditIssueDialog(Dialog):
             return int(value)
         if t == bytes:
             return value.encode('utf-8', errors='ignore')
+        if t == datetime:
+            return datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
         if t is None:
             return value or None
         return eval(value)

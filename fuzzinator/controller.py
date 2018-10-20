@@ -87,6 +87,8 @@ class Controller(object):
           (Optional, default: the value of option ``reduce_call`` if defined,
           otherwise the value of option ``call``)
 
+          See package :mod:`fuzzinator.call` for potential callables.
+
         - Option ``update_condition``: Fully qualified name of a python callable
           that must return ``True`` if and only if the SUT should be updated.
           (Optional, SUT is never updated if option is missing.)

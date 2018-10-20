@@ -14,7 +14,6 @@ from collections import OrderedDict
 from math import ceil
 from urwid import *
 
-from fuzzinator.config import config_get_name_from_section
 from fuzzinator.tracker.base import init_tracker
 
 from .decor_widgets import PatternBox
@@ -36,7 +35,7 @@ class MainWindow(PopUpLauncher):
 
         self.logo = FuzzerLogo(max_load=controller.capacity)
         self.issues_table = IssuesTable(issues_baseline=[issue['_id'] for issue in self.db.all_issues()], db=self.db, initial_sort='sut')
-        self.stat_table = StatTable(['fuzzer'], stat_baseline=self.db.stat_snapshot([config_get_name_from_section(fuzz_section) for fuzz_section in controller.fuzzers]), db=self.db)
+        self.stat_table = StatTable(['fuzzer'], stat_baseline=self.db.stat_snapshot(controller.fuzzers), db=self.db)
         self.job_table = JobsTable()
 
         self.data_tables = Pile([

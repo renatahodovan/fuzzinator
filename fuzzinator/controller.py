@@ -155,15 +155,15 @@ class Controller(object):
         """
         self.config = config
 
-        # Extract sections describing fuzzing jobs.
-        self.fuzzers = [section for section in config.sections() if section.startswith('fuzz.') and section.count('.') == 1]
+        # Extract fuzzer names from sections describing fuzzing jobs.
+        self.fuzzers = [config_get_name_from_section(section) for section in config.sections() if section.startswith('fuzz.') and section.count('.') == 1]
 
         self.capacity = int(config_get_with_writeback(self.config, 'fuzzinator', 'cost_budget', str(os.cpu_count())))
         self.work_dir = config_get_with_writeback(self.config, 'fuzzinator', 'work_dir', os.path.join(os.getcwd(), '.fuzzinator-{uid}')).format(uid=os.getpid())
         self.config.set('fuzzinator', 'work_dir', self.work_dir)
 
         self.db = MongoDriver(config_get_with_writeback(self.config, 'fuzzinator', 'db_uri', 'mongodb://localhost/fuzzinator'))
-        self.db.init_db([(config_get_name_from_section(self.config.get(fuzzer, 'sut')), config_get_name_from_section(fuzzer)) for fuzzer in self.fuzzers])
+        self.db.init_db([(config_get_name_from_section(self.config.get('fuzz.' + fuzzer, 'sut')), fuzzer) for fuzzer in self.fuzzers])
 
         self.listener = ListenerManager()
         for name in config_get_kwargs(self.config, 'listeners'):
@@ -219,16 +219,16 @@ class Controller(object):
                         time.sleep(1)
                         continue
 
-                    fuzzer_name = config_get_name_from_section(self.fuzzers[fuzz_idx])
-                    instances = self.config.get(self.fuzzers[fuzz_idx], 'instances', fallback='inf')
+                    fuzz_section = 'fuzz.' + self.fuzzers[fuzz_idx]
+                    instances = self.config.get(fuzz_section, 'instances', fallback='inf')
                     instances = float(instances) if instances == 'inf' else int(instances)
-                    if instances <= len(list(filter(lambda job: job.fuzzer_name == fuzzer_name, (running_jobs[ident]['job'] for ident in running_jobs if isinstance(running_jobs[ident]['job'], FuzzJob))))):
+                    if instances <= len(list(filter(lambda job: job.fuzzer_name == self.fuzzers[fuzz_idx], (running_jobs[ident]['job'] for ident in running_jobs if isinstance(running_jobs[ident]['job'], FuzzJob))))):
                         # Update fuzz_idx to point the next job's parameters.
                         fuzz_idx = (fuzz_idx + 1) % len(self.fuzzers)
                         continue
 
                     next_job = FuzzJob(config=self.config,
-                                       fuzz_section=self.fuzzers[fuzz_idx],
+                                       fuzz_section=fuzz_section,
                                        db=self.db,
                                        listener=self.listener)
                     next_job_id = id(next_job)

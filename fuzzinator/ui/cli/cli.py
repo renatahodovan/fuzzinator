@@ -11,8 +11,8 @@ import sys
 
 from rainbow_logging_handler import RainbowLoggingHandler
 
-from fuzzinator import Controller
-from fuzzinator.ui import build_parser, process_args
+from ... import Controller
+from .. import build_parser, process_args
 from .cli_listener import CliListener
 
 

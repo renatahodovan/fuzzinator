@@ -17,8 +17,8 @@ import sys
 from multiprocessing import Lock, Process, Queue
 from urwid import connect_signal, raw_display, util, ExitMainLoop, MainLoop, PopUpLauncher
 
-from fuzzinator import Controller
-from fuzzinator.ui import build_parser, process_args
+from ... import Controller
+from .. import build_parser, process_args
 from .tui_listener import TuiListener
 from .widgets import MainWindow
 

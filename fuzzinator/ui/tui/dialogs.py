@@ -7,13 +7,13 @@
 
 from urwid import *
 
+from ...config import config_get_callable
+from ...formatter import JsonFormatter
+from ...pkgdata import __pkg_name__, __version__, __author__, __author_email__, __url__
 from .decor_widgets import PatternBox
 from .graphics import fz_box_pattern
 from .button import FormattedButton
 
-from fuzzinator.config import config_get_callable
-from fuzzinator.formatter import JsonFormatter
-from fuzzinator.pkgdata import __pkg_name__, __version__, __author__, __author_email__, __url__
 
 class Dialog(PopUpTarget):
     signals = ['close']

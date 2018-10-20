@@ -8,9 +8,9 @@
 from os import get_terminal_size
 from urwid import *
 
-from fuzzinator.config import config_get_callable
-from fuzzinator.formatter import JsonFormatter
-from fuzzinator.tracker import BaseTracker
+from ...config import config_get_callable
+from ...formatter import JsonFormatter
+from ...tracker import BaseTracker
 from .decor_widgets import PatternBox
 from .graphics import fz_box_pattern
 from .dialogs import Dialog, BugEditor

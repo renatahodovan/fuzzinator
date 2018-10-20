@@ -14,9 +14,8 @@ from collections import OrderedDict
 from math import ceil
 from urwid import *
 
-from fuzzinator.config import config_get_callable
-from fuzzinator.formatter import JsonFormatter
-
+from ...config import config_get_callable
+from ...formatter import JsonFormatter
 from .decor_widgets import PatternBox
 from .button import FormattedButton
 from .dialogs import WarningDialog, YesNoDialog

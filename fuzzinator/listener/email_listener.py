@@ -68,7 +68,7 @@ class EmailListener(EventListener):
             data = dict((self.param_name, data.decode('utf-8', 'ignore')))
         data = dict((name, raw.decode('utf-8', 'ignore') if type(raw) == bytes else raw) for name, raw in data.items())
 
-        from fuzzinator.formatter import JsonFormatter
+        from ..formatter import JsonFormatter
         formatter = config_get_callable(self.config, 'sut.' + data['sut'], ['email_formatter', 'formatter'])[0] or JsonFormatter
 
         subject = formatter(issue=data, format='short')

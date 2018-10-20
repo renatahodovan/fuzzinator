@@ -228,7 +228,7 @@ class Controller(object):
                         continue
 
                     next_job = FuzzJob(config=self.config,
-                                       fuzz_section=fuzz_section,
+                                       fuzzer_name=self.fuzzers[fuzz_idx],
                                        db=self.db,
                                        listener=self.listener)
                     next_job_id = id(next_job)
@@ -242,7 +242,7 @@ class Controller(object):
 
                     # Notify the active listener about the new job.
                     self.listener.new_fuzz_job(ident=next_job_id,
-                                               fuzzer=config_get_name_from_section(next_job.fuzz_section),
+                                               fuzzer=next_job.fuzzer_name,
                                                sut=next_job.sut_name,
                                                cost=next_job.cost,
                                                batch=next_job.batch)

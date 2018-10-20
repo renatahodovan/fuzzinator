@@ -8,7 +8,7 @@
 import signal
 
 from .call_job import CallJob
-from .config import config_get_callable, config_get_name_from_section
+from .config import config_get_callable
 
 
 class FuzzJob(CallJob):
@@ -16,17 +16,17 @@ class FuzzJob(CallJob):
     Class for running fuzzer jobs.
     """
 
-    def __init__(self, config, fuzz_section, db, listener):
+    def __init__(self, config, fuzzer_name, db, listener):
         CallJob.__init__(self, config, db, listener)
-        self.fuzz_section = fuzz_section
-        self.sut_name = self.config.get(self.fuzz_section, 'sut')
-        self.fuzzer_name = config_get_name_from_section(self.fuzz_section)
+        fuzz_section = 'fuzz.' + fuzzer_name
+        self.fuzzer_name = fuzzer_name
+        self.sut_name = self.config.get(fuzz_section, 'sut')
         self.cost = int(self.config.get('sut.' + self.sut_name, 'cost', fallback=1))
-        self.batch = float(self.config.get(self.fuzz_section, 'batch', fallback=1))
-        self.refresh = float(self.config.get(self.fuzz_section, 'refresh', fallback=self.batch))
+        self.batch = float(self.config.get(fuzz_section, 'batch', fallback=1))
+        self.refresh = float(self.config.get(fuzz_section, 'refresh', fallback=self.batch))
 
     def run(self):
-        fuzzer, fuzzer_kwargs = config_get_callable(self.config, self.fuzz_section, 'fuzzer')
+        fuzzer, fuzzer_kwargs = config_get_callable(self.config, 'fuzz.' + self.fuzzer_name, 'fuzzer')
 
         # Register signal handler to catch keyboard interrupts.
         def terminate(signum, frame):

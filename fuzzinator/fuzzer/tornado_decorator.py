@@ -56,8 +56,8 @@ class TornadoDecorator(object):
         # Disable all the output of the tornado server to avoid messing up with Fuzzinator's messages.
         hn = logging.NullHandler()
         hn.setLevel(logging.DEBUG)
-        logging.getLogger("tornado.access").addHandler(hn)
-        logging.getLogger("tornado.access").propagate = False
+        logging.getLogger('tornado.access').addHandler(hn)
+        logging.getLogger('tornado.access').propagate = False
 
     def __call__(self, callable):
         ancestor = object if isroutine(callable) else callable
@@ -74,7 +74,7 @@ class TornadoDecorator(object):
                 self.ioloop = None
 
             def __call__(self, **kwargs):
-                # Saving fuzzer args to make them available from the requesthandlers
+                # Saving fuzzer args to make them available from the RequestHandlers
                 # after passing a reference of ourselves.
                 if kwargs['index'] != 0 and self.test is None:
                     return None
@@ -136,7 +136,7 @@ class TornadoDecorator(object):
                             content = Template('<meta http-equiv="refresh" content="1;url=?&{% raw request %}">{% raw test %}'). \
                                 generate(request='index={index}'.format(index=self.wrapper.index), test=self.wrapper.test)
                     except Exception as e:
-                        logger.warning(e)
+                        logger.warning('Unhandled exception in TornadoDecorator.', exc_info=e)
 
                     self.write(content)
 

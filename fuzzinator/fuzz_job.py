@@ -16,8 +16,8 @@ class FuzzJob(CallJob):
     Class for running fuzzer jobs.
     """
 
-    def __init__(self, config, fuzzer_name, db, listener):
-        CallJob.__init__(self, config, db, listener)
+    def __init__(self, id, config, fuzzer_name, db, listener):
+        CallJob.__init__(self, id, config, db, listener)
         fuzz_section = 'fuzz.' + fuzzer_name
         self.fuzzer_name = fuzzer_name
         self.sut_name = self.config.get(fuzz_section, 'sut')
@@ -77,7 +77,7 @@ class FuzzJob(CallJob):
                         if issue:
                             issue_count += 1
 
-                        self.listener.job_progress(ident=id(self), progress=index)
+                        self.listener.job_progress(ident=self.id, progress=index)
                         if index - stat_updated >= self.refresh:
                             self.db.update_stat(self.sut_name, self.fuzzer_name, index - stat_updated, issue_count)
                             self.listener.update_fuzz_stat()

@@ -207,6 +207,7 @@ class Controller(object):
             entity = import_entity(self.config.get('listeners', name))
             self.listener += entity(config=config, **config_get_kwargs(config, 'listeners.' + name + '.init'))
 
+        self._job_id = 0
         self._issue_queue = Queue()
         self._lock = Lock()
 
@@ -238,12 +239,13 @@ class Controller(object):
                     while not self._issue_queue.empty():
                         issue = self._issue_queue.get_nowait()
                         if self.config.has_option(issue['sut'], 'reduce'):
-                            next_job = ReduceJob(config=self.config,
+                            next_job_id = self._next_job_id()
+                            next_job = ReduceJob(id=next_job_id,
+                                                 config=self.config,
                                                  issue=issue,
                                                  work_dir=self.work_dir,
                                                  db=self.db,
                                                  listener=self.listener)
-                            next_job_id = id(next_job)
                             self.listener.new_reduce_job(ident=next_job_id,
                                                          sut=next_job.sut_name,
                                                          cost=next_job.cost,
@@ -264,11 +266,12 @@ class Controller(object):
                         fuzz_idx = (fuzz_idx + 1) % len(self.fuzzers)
                         continue
 
-                    next_job = FuzzJob(config=self.config,
+                    next_job_id = self._next_job_id()
+                    next_job = FuzzJob(id=next_job_id,
+                                       config=self.config,
                                        fuzzer_name=self.fuzzers[fuzz_idx],
                                        db=self.db,
                                        listener=self.listener)
-                    next_job_id = id(next_job)
 
                     # Before starting a new fuzz job let's check if we are working with
                     # the latest version of the SUT and update it if needed.
@@ -315,9 +318,10 @@ class Controller(object):
             if not update_condition(**update_condition_kwargs):
                 return
 
-        next_job = UpdateJob(config=self.config,
+        next_job_id = self._next_job_id()
+        next_job = UpdateJob(id=next_job_id,
+                             config=self.config,
                              sut_name=job.sut_name)
-        next_job_id = id(next_job)
         self.listener.new_update_job(ident=next_job_id, sut=job.sut_name)
         # Wait until every job has finished.
         self._wait_for_load(self.capacity, running_jobs)
@@ -351,6 +355,11 @@ class Controller(object):
                 exception=e,
                 trace=traceback.format_exc()))
 
+    def _next_job_id(self):
+        next_job_id = self._job_id
+        self._job_id += 1
+        return next_job_id
+
     def add_reduce_job(self, issue):
         with self._lock:
             self._issue_queue.put(issue)
@@ -361,7 +370,8 @@ class Controller(object):
                 self.add_reduce_job(issue)
 
     def validate(self, issue):
-        ValidateJob(config=self.config,
+        ValidateJob(id=self._next_job_id(),
+                    config=self.config,
                     issue=issue,
                     db=self.db,
                     listener=self.listener).run()

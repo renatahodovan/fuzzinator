@@ -13,7 +13,8 @@ class CallJob(object):
     Base class for jobs that call SUTs and can find new issues.
     """
 
-    def __init__(self, config, db, listener):
+    def __init__(self, id, config, db, listener):
+        self.id = id
         self.config = config
         self.db = db
         self.listener = listener

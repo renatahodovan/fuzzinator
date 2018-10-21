@@ -17,8 +17,8 @@ class ReduceJob(CallJob):
     Class for running test case reduction jobs.
     """
 
-    def __init__(self, config, issue, work_dir, db, listener):
-        CallJob.__init__(self, config, db, listener)
+    def __init__(self, id, config, issue, work_dir, db, listener):
+        CallJob.__init__(self, id, config, db, listener)
         self.issue = issue
         self.work_dir = work_dir
 
@@ -29,7 +29,8 @@ class ReduceJob(CallJob):
         self.cost = int(self.config.get(sut_section, 'reduce_cost', fallback=self.config.get(sut_section, 'cost', fallback=1)))
 
     def run(self):
-        if not ValidateJob(config=self.config,
+        if not ValidateJob(id=self.id,
+                           config=self.config,
                            issue=self.issue,
                            db=self.db,
                            listener=self.listener).run():
@@ -43,9 +44,9 @@ class ReduceJob(CallJob):
             reduced_src, new_issues = reduce(sut_call=sut_call,
                                              sut_call_kwargs=sut_call_kwargs,
                                              listener=self.listener,
-                                             ident=id(self),
+                                             ident=self.id,
                                              issue=self.issue,
-                                             work_dir=os.path.join(self.work_dir, str(id(self))),
+                                             work_dir=os.path.join(self.work_dir, str(self.id)),
                                              **reduce_kwargs)
 
         if reduced_src is None:

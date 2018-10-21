@@ -12,8 +12,8 @@ class UpdateJob(object):
     """
     Class for running SUT update jobs.
     """
-
-    def __init__(self, config, sut_name):
+    def __init__(self, id, config, sut_name):
+        self.id = id
         self.config = config
         self.sut_name = sut_name
 

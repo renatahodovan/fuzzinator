@@ -336,6 +336,9 @@ class JobsTable(WidgetWrap):
     def add_update_job(self, ident, sut):
         self.insert_widget(ident, UpdateJobWidget(dict(sut=sut)))
 
+    def add_validate_job(self, ident, sut, issue_id):
+        self.insert_widget(ident, ValidateJobWidget(dict(sut=sut, issue=issue_id)))
+
     def activate_job(self, ident):
         idx = self.walker.index(self.jobs[ident])
         self.walker[idx].activate()
@@ -463,6 +466,12 @@ class UpdateJobWidget(JobWidget):
 
     labels = dict(sut='Sut', cost='Cost')
     title = 'Update Job'
+
+
+class ValidateJobWidget(JobWidget):
+
+    labels = dict(sut='Sut', issue='Issue')
+    title = 'Validate Job'
 
 
 class FuzzerLogo(WidgetWrap):

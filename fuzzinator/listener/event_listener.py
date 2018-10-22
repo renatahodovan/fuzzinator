@@ -71,6 +71,17 @@ class EventListener(object):
         """
         pass
 
+    def new_validate_job(self, ident, sut, issue_id):
+        """
+        Invoked when a new (still inactive) validate job is instantiated.
+
+        :param int ident: a unique identifier of the new validate job.
+        :param str sut: short name of the SUT used in the new validate job (name
+            of the corresponding config section without the "sut." prefix).
+        :param Any issue_id: ``'id'`` property of the issue to be validated.
+        """
+        pass
+
     def activate_job(self, ident):
         """
         Invoked when a previously instantiated job is activated (started).

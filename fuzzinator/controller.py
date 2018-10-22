@@ -367,11 +367,18 @@ class Controller(object):
                 self.add_reduce_job(issue)
 
     def validate(self, issue):
-        ValidateJob(id=self._next_job_id(),
-                    config=self.config,
-                    issue=issue,
-                    db=self.db,
-                    listener=self.listener).run()
+        next_job_id = self._next_job_id()
+        next_job = ValidateJob(id=next_job_id,
+                               config=self.config,
+                               issue=issue,
+                               db=self.db,
+                               listener=self.listener)
+        self.listener.new_validate_job(ident=next_job_id,
+                                       sut=next_job.sut_name,
+                                       issue_id=issue['id'])
+        self.listener.activate_job(ident=next_job_id)
+        next_job.run()
+        self.listener.remove_job(ident=next_job_id)
 
     @staticmethod
     def kill_process_tree(pid, kill_root=True, sig=signal.SIGTERM):

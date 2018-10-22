@@ -27,6 +27,9 @@ class CliListener(EventListener):
     def new_reduce_job(self, ident, sut, cost, issue_id, size):
         logger.debug('[{sut}] New reduce job added: {issue} [{size} bytes].'.format(sut=sut, issue=issue_id, size=size))
 
+    def new_validate_job(self, ident, sut, issue_id):
+        logger.debug('[{sut}] New validate job added: {issue}.'.format(sut=sut, issue=issue_id))
+
     def remove_job(self, ident):
         logger.debug('[{ident}] Remove job.'.format(ident=ident))
 

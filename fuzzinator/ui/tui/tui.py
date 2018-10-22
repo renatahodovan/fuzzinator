@@ -72,6 +72,9 @@ class Tui(PopUpLauncher):
     def new_update_job(self, ident, sut):
         self.view.job_table.add_update_job(ident, sut)
 
+    def new_validate_job(self, ident, sut, issue_id):
+        self.view.job_table.add_validate_job(ident, sut, issue_id)
+
     def remove_job(self, ident):
         self.view.job_table.remove_job(ident)
 

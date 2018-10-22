@@ -7,8 +7,8 @@
 
 import signal
 
+from ..config import config_get_callable
 from .call_job import CallJob
-from .config import config_get_callable
 
 
 class FuzzJob(CallJob):

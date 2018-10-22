@@ -5,7 +5,7 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-from .config import config_get_callable
+from ..config import config_get_callable
 
 
 class UpdateJob(object):

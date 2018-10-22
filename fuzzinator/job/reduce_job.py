@@ -7,8 +7,8 @@
 
 import os
 
+from ..config import config_get_callable
 from .call_job import CallJob
-from .config import config_get_callable
 from .validate_job import ValidateJob
 
 

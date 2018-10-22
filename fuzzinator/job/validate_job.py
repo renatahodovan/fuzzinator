@@ -5,9 +5,8 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-
+from ..config import config_get_callable
 from .call_job import CallJob
-from .config import config_get_callable
 
 
 class ValidateJob(CallJob):

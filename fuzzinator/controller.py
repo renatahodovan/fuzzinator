@@ -15,12 +15,9 @@ import traceback
 from multiprocessing import Lock, Process, Queue
 
 from .config import config_get_callable, config_get_kwargs, config_get_name_from_section, config_get_with_writeback, import_entity
-from .fuzz_job import FuzzJob
+from .job import FuzzJob, ReduceJob, UpdateJob, ValidateJob
 from .listener import ListenerManager
 from .mongo_driver import MongoDriver
-from .reduce_job import ReduceJob
-from .update_job import UpdateJob
-from .validate_job import ValidateJob
 
 
 class Controller(object):

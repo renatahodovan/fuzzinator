@@ -6,7 +6,8 @@
 # according to those terms.
 
 from .email_listener import EmailListener
-from .listener import EventListener, ListenerManager
+from .event_listener import EventListener
+from .listener_manager import ListenerManager
 
 __all__ = [
     'EmailListener',

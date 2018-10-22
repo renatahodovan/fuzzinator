@@ -13,7 +13,7 @@ import smtplib
 from email.mime.text import MIMEText
 
 from ..config import config_get_callable
-from .listener import EventListener
+from .event_listener import EventListener
 
 logger = logging.getLogger(__name__)
 

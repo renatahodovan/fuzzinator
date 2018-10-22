@@ -41,3 +41,6 @@ class CliListener(EventListener):
 
     def activate_job(self, ident):
         logger.debug('Activate job: {ident}'.format(ident=ident))
+
+    def update_issue(self, issue):
+        logger.info('Issue updated: {id}.'.format(id=issue['id']))

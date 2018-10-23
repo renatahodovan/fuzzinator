@@ -31,8 +31,8 @@ class Dialog(PopUpTarget):
         self.frame = Frame(body=AttrMap(self.listbox, style['body']),
                            footer=Columns([('pack', btn) for btn in footer_btns], dividechars=1),
                            focus_part='body')
-        super(Dialog, self).__init__(AttrMap(PatternBox(self.frame, title=(style['title'], title), **fz_box_pattern()),
-                                             attr_map=style['border']))
+        super().__init__(AttrMap(PatternBox(self.frame, title=(style['title'], title), **fz_box_pattern()),
+                                 attr_map=style['border']))
 
     def keypress(self, size, key):
         if key in self.exit_keys:
@@ -52,7 +52,7 @@ class Dialog(PopUpTarget):
                     self.frame.focus_part = 'body'
                     self.listbox.focus_position = 0
         else:
-            super(Dialog, self).keypress(size, key)
+            super().keypress(size, key)
 
 
 class AboutDialog(Dialog):
@@ -60,9 +60,9 @@ class AboutDialog(Dialog):
 
     def __init__(self, ):
         self.content = self.compile_about_data()
-        super(AboutDialog, self).__init__(title='About',
-                                          body=[Text(self.content)],
-                                          footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))])
+        super().__init__(title='About',
+                         body=[Text(self.content)],
+                         footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))])
 
     def compile_about_data(self, prop_width=15):
         return '{name_prop}: {name}\n' \
@@ -85,10 +85,10 @@ class WarningDialog(Dialog):
     exit_keys = ['esc', 'enter']
 
     def __init__(self, msg):
-        super(WarningDialog, self).__init__(title='WARNING',
-                                            body=[Text(msg)],
-                                            footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))],
-                                            warning=True)
+        super().__init__(title='WARNING',
+                         body=[Text(msg)],
+                         footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))],
+                         warning=True)
 
 
 class YesNoDialog(Dialog):
@@ -101,12 +101,12 @@ class YesNoDialog(Dialog):
             self._emit('no')
 
     def __init__(self, msg):
-        super(YesNoDialog, self).__init__(title='Question',
-                                          body=[Text(msg)],
-                                          footer_btns=[
-                                              FormattedButton('Yes', lambda button: self._emit('yes')),
-                                              FormattedButton('No', lambda button: self._emit('no'))],
-                                          warning=True)
+        super().__init__(title='Question',
+                         body=[Text(msg)],
+                         footer_btns=[
+                             FormattedButton('Yes', lambda button: self._emit('yes')),
+                             FormattedButton('No', lambda button: self._emit('no'))],
+                         warning=True)
 
 
 class FormattedIssueDialog(Dialog):
@@ -114,9 +114,9 @@ class FormattedIssueDialog(Dialog):
 
     def __init__(self, config, issue, db):
         formatter = config_get_callable(config, 'sut.' + issue['sut'], ['tui_formatter', 'formatter'])[0] or JsonFormatter
-        super(FormattedIssueDialog, self).__init__(title=formatter(issue=issue, format='short'),
-                                                   body=[Padding(Text(line, wrap='clip'), left=2, right=2) for line in formatter(issue=issue).splitlines()],
-                                                   footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))])
+        super().__init__(title=formatter(issue=issue, format='short'),
+                                         body=[Padding(Text(line, wrap='clip'), left=2, right=2) for line in formatter(issue=issue).splitlines()],
+                                         footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))])
 
 
 class BugEditor(Edit):
@@ -130,7 +130,7 @@ class BugEditor(Edit):
             self.set_edit_text(before + after)
             self.set_edit_pos(len(before))
         else:
-            super(BugEditor, self).keypress(size, key)
+            super().keypress(size, key)
 
 
 class EditIssueDialog(Dialog):
@@ -152,10 +152,10 @@ class EditIssueDialog(Dialog):
             rows.append(Columns([('weight', 1, Text(('dialog_secondary', prop + ': '))),
                                  ('weight', 10, self.edit_boxes[prop])], dividechars=1))
 
-        super(EditIssueDialog, self).__init__(title=issue['id'],
-                                              body=rows,
-                                              footer_btns=[FormattedButton('Save', self.save_modifications),
-                                                           FormattedButton('Close', lambda button: self._emit('close'))])
+        super().__init__(title=issue['id'],
+                         body=rows,
+                         footer_btns=[FormattedButton('Save', self.save_modifications),
+                                      FormattedButton('Close', lambda button: self._emit('close'))])
 
     def _to_str(self, prop, value):
         t = type(value)

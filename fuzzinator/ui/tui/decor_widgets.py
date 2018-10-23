@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -17,12 +17,12 @@ class PatternHLine(Widget):
     ignore_focus = True
 
     def __init__(self, pattern):
-        super(PatternHLine, self).__init__()
+        super().__init__()
         assert len(pattern) != 0
         self.pattern = pattern
 
     def _repr_words(self):
-        return super(PatternHLine, self)._repr_words() + [repr(self.pattern)]
+        return super()._repr_words() + [repr(self.pattern)]
 
     def rows(self, size, focus=False):
         return 1
@@ -38,7 +38,7 @@ class PatternVLine(BoxWidget):
     ignore_focus = True
 
     def __init__(self, pattern):
-        super(PatternVLine, self).__init__()
+        super().__init__()
         assert len(pattern) != 0
         self.pattern = []
         self.cs = []
@@ -48,7 +48,7 @@ class PatternVLine(BoxWidget):
             self.cs.append(_cs)
 
     def _repr_words(self):
-        return super(PatternVLine, self)._repr_words() + [repr(self.pattern)]
+        return super()._repr_words() + [repr(self.pattern)]
 
     def render(self, size, focus=False):
         maxcol, maxrow = size

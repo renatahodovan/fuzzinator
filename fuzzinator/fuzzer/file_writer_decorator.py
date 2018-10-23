@@ -48,18 +48,18 @@ class FileWriterDecorator(object):
 
             def __init__(self, *args, **kwargs):
                 if hasattr(ancestor, '__init__'):
-                    super(Inherited, self).__init__(*args, **kwargs)
+                    super().__init__(*args, **kwargs)
                 self.file_path = self.decorator.filename.format(uid='{pid}-{id}'.format(pid=os.getpid(), id=id(self)))
 
             def __enter__(self, *args, **kwargs):
                 if hasattr(ancestor, '__enter__'):
-                    super(Inherited, self).__enter__(*args, **kwargs)
+                    super().__enter__(*args, **kwargs)
                 os.makedirs(os.path.dirname(self.file_path), exist_ok=True)
                 return self
 
             def __exit__(self, *exc):
                 if hasattr(ancestor, '__exit__'):
-                    super(Inherited, self).__exit__(*exc)
+                    super().__exit__(*exc)
 
                 if os.path.exists(self.file_path):
                     os.remove(self.file_path)
@@ -67,7 +67,7 @@ class FileWriterDecorator(object):
                 return None
 
             def __call__(self, **kwargs):
-                call = super(Inherited, self).__call__ if isclass(callable) else callable
+                call = super().__call__ if isclass(callable) else callable
                 self.test = call(**kwargs)
 
                 if self.test is None:

@@ -64,7 +64,7 @@ class MainWindow(PopUpLauncher):
         self.view = AttrMap(Frame(body=Pile([('fixed', 6, self.logo), self.content_columns]),
                                   footer=BoxAdapter(Filler(AttrMap(Columns(list(self.footer_btns.values()), dividechars=1), 'default')), height=1)),
                             'border')
-        super(MainWindow, self).__init__(self.view)
+        super().__init__(self.view)
 
         connect_signal(self, 'warning', lambda _, msg: self.warning_popup(msg))
         connect_signal(self.issues_table, 'select', lambda source, selection: self.footer_btns['view'].keypress((0, 0), 'enter'))
@@ -165,7 +165,7 @@ class MainWindow(PopUpLauncher):
         elif key in ('q', 'Q', 'f10'):
             raise ExitMainLoop()
         else:
-            super(MainWindow, self).keypress(size, key)
+            super().keypress(size, key)
 
     def show_all(self, btn):
         if btn.label == 'F9 Show all':
@@ -193,7 +193,7 @@ class IssuesTable(Table):
     def __init__(self, issues_baseline, db, *args, **kwargs):
         self.issues_baseline = issues_baseline
         self.db = db
-        super(IssuesTable, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def keypress(self, size, key):
         if key == "shift up":
@@ -209,7 +209,7 @@ class IssuesTable(Table):
         elif key in ["r", "ctrl r"]:
             self._emit('refresh')
         else:
-            return super(IssuesTable, self).keypress(size, key)
+            return super().keypress(size, key)
 
     def update(self):
         if self.all_issues:
@@ -232,7 +232,7 @@ class IssuesTable(Table):
     def update_row(self, ident):
         issue = self.db.find_issue_by_id(ident)
         attr_map, focus_map = self.get_attr(issue)
-        super(IssuesTable, self).update_row_style(ident, attr_map, focus_map)
+        super().update_row_style(ident, attr_map, focus_map)
 
     def get_attr(self, data):
         if data['reported']:
@@ -248,7 +248,7 @@ class IssuesTable(Table):
 
     def add_row(self, data, position=None, attr_map=None, focus_map=None):
         attr_map, focus_map = self.get_attr(data)
-        return super(IssuesTable, self).add_row(data, position=0, attr_map=attr_map, focus_map=focus_map)
+        return super().add_row(data, position=0, attr_map=attr_map, focus_map=focus_map)
 
 
 class StatTable(Table):
@@ -268,7 +268,7 @@ class StatTable(Table):
         self.stat_baseline = stat_baseline
         self.db = db
         self.show_current = True
-        super(StatTable, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def update(self):
         if self.show_current:
@@ -305,7 +305,7 @@ class JobsTable(WidgetWrap):
         self.walker = SimpleListWalker([])
         self.listbox = ListBox(self.walker)
         self.pattern_box = PatternBox(self.listbox, title=self.title, **fz_box_pattern())
-        super(JobsTable, self).__init__(self.pattern_box)
+        super().__init__(self.pattern_box)
 
     @property
     def title(self):
@@ -428,7 +428,7 @@ class JobWidget(WidgetWrap):
                                          ('weight', 8, self.progress)]))
 
         self.attr = AttrMap(Pile(body_content), attr_map=self.inactive_map, focus_map=self.inactive_focus_map)
-        super(JobWidget, self).__init__(self.attr)
+        super().__init__(self.attr)
 
     def update_progress(self, done):
         # Workaround for an urwid issue that happens if the progressbar displays value < 3%.
@@ -458,7 +458,7 @@ class ReduceJobWidget(JobWidget):
     height = 8
 
     def __init__(self, data, pb_done=None):
-        super(ReduceJobWidget, self).__init__(data, pb_done)
+        super().__init__(data, pb_done)
         self.progress.set_completion(pb_done)
 
 
@@ -488,7 +488,7 @@ class FuzzerLogo(WidgetWrap):
                                             Filler(self.load)]))
                               ], dividechars=1)])
         self.do_animate = False
-        super(FuzzerLogo, self).__init__(rows)
+        super().__init__(rows)
 
     def random_color(self):
         return random.choice(['logo_fireworks_1', 'logo_fireworks_2', 'logo_fireworks_3', 'logo_fireworks_4'])
@@ -518,7 +518,7 @@ class TimerWidget(Text):
 
     def __init__(self):
         self._started = time.time()
-        super(TimerWidget, self).__init__(self.format_text(0))
+        super().__init__(self.format_text(0))
         self.update()
 
     def to_hms(self, ss):

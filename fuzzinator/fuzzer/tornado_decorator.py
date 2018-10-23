@@ -67,7 +67,7 @@ class TornadoDecorator(object):
 
             def __init__(self, *args, **kwargs):
                 if hasattr(ancestor, '__init__'):
-                    super(Inherited, self).__init__(*args, **kwargs)
+                    super().__init__(*args, **kwargs)
                 self.index = 0
                 self.test = None
                 self.fuzzer_kwargs = dict()
@@ -84,11 +84,11 @@ class TornadoDecorator(object):
 
             def __enter__(self, *args, **kwargs):
                 if hasattr(ancestor, '__enter__'):
-                    super(Inherited, self).__enter__(*args, **kwargs)
+                    super().__enter__(*args, **kwargs)
 
                 app = Application([
                     (r'/', self.MainHandler, dict(wrapper=self,
-                                                  fuzzer=super(Inherited, self).__call__ if isclass(callable) else callable))
+                                                  fuzzer=super().__call__ if isclass(callable) else callable))
                 ])
 
                 while True:
@@ -109,7 +109,7 @@ class TornadoDecorator(object):
 
             def __exit__(self, *exc):
                 if hasattr(ancestor, '__exit__'):
-                    super(Inherited, self).__exit__(*exc)
+                    super().__exit__(*exc)
 
                 self.ioloop.add_callback(self.ioloop.stop)
                 logger.debug('Shut down tornado server.')
@@ -118,7 +118,7 @@ class TornadoDecorator(object):
             class MainHandler(RequestHandler):
 
                 def __init__(self, application, request, wrapper, fuzzer):
-                    RequestHandler.__init__(self, application, request)
+                    super().__init__(application, request)
                     self.wrapper = wrapper
                     self.fuzzer = fuzzer
 

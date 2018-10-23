@@ -25,12 +25,12 @@ class LoginDialog(Dialog):
         name = Edit(caption='Username: ', edit_text='')
         pwd = Edit(caption='Password: ', edit_text='', mask='*')
         self.result = Text('')
-        super(LoginDialog, self).__init__(title='Login',
-                                          body=[self.result, name, pwd],
-                                          footer_btns=[FormattedButton(label='Login',
-                                                                       on_press=self.send_credentials,
-                                                                       user_data=(name, pwd)),
-                                                       FormattedButton(label='Cancel', on_press=lambda btn: self._emit('close'))])
+        super().__init__(title='Login',
+                         body=[self.result, name, pwd],
+                         footer_btns=[FormattedButton(label='Login',
+                                                      on_press=self.send_credentials,
+                                                      user_data=(name, pwd)),
+                                      FormattedButton(label='Cancel', on_press=lambda btn: self._emit('close'))])
 
     def send_credentials(self, _, details):
         result = self.tracker.login(details[0].edit_text, details[1].edit_text)
@@ -45,7 +45,7 @@ class LoginButton(PopUpLauncher):
 
     def __init__(self, tracker):
         self.tracker = tracker
-        super(LoginButton, self).__init__(FormattedButton('', style='dialog'))
+        super().__init__(FormattedButton('', style='dialog'))
         connect_signal(self.original_widget, 'click', lambda btn: self.open_pop_up())
 
     def create_pop_up(self):
@@ -92,7 +92,7 @@ class ReportDialog(PopUpTarget):
                                       ('pack', login_button)], dividechars=2),
                       focus_part='body')
 
-        super(ReportDialog, self).__init__(AttrMap(PatternBox(frame, title=('dialog_title', issue['id']), **fz_box_pattern()), attr_map='dialog_border'))
+        super().__init__(AttrMap(PatternBox(frame, title=('dialog_title', issue['id']), **fz_box_pattern()), attr_map='dialog_border'))
         if not self.tracker.logged_in:
             login_button.keypress((0, 0), 'enter')
         else:
@@ -138,7 +138,7 @@ class ReportDialog(PopUpTarget):
         if key in ['esc', 'f7']:
             self._emit('close')
         else:
-            super(ReportDialog, self).keypress(size, key)
+            super().keypress(size, key)
 
 
 class BugzillaReportDialog(ReportDialog):
@@ -170,7 +170,7 @@ class BugzillaReportDialog(ReportDialog):
                     Columns([('weight', 1, Text('Blocks: ')), ('weight', 4, self.edit_blocks)]),
                     Columns([('weight', 1, Text('Ext: ')), ('weight', 4, self.edit_extension)])]
 
-        super(BugzillaReportDialog, self).__init__(issue=issue, config=config, db=db, side_bar=side_bar)
+        super().__init__(issue=issue, config=config, db=db, side_bar=side_bar)
         self.set_product(products_walker.contents[0], True)
 
     def set_product(self, btn, state):

@@ -34,7 +34,7 @@ class EmailListener(EventListener):
         :param smtp_host: Host of the smtp server to send e-mails from.
         :param smtp_port: Port of the smtp server to send e-mails from.
         """
-        super(EmailListener, self).__init__(config)
+        super().__init__(config)
         self.param_name = param_name
         self.from_address = from_address
         self.to_address = to_address

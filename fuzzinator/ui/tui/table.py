@@ -18,7 +18,7 @@ class TableRowsListWalker(listbox.ListWalker):
         self.sort = sort
         self.focus = 0
         self.rows = list()
-        super(TableRowsListWalker, self).__init__()
+        super().__init__()
 
     def __getitem__(self, position):
         if position < 0 or position >= len(self.rows):
@@ -88,7 +88,7 @@ class ScrollingListBox(WidgetWrap):
         self.body = self.listbox.body
         self.ends_visible = self.listbox.ends_visible
 
-        super(ScrollingListBox, self).__init__(self.listbox)
+        super().__init__(self.listbox)
 
     def keypress(self, size, key):
         if len(self.body):
@@ -111,7 +111,7 @@ class ScrollingListBox(WidgetWrap):
                 emit_signal(self, 'select', self, self.selection)
             elif key == 'left':
                 return
-        return super(ScrollingListBox, self).keypress(size, key)
+        return super().keypress(size, key)
 
     def render(self, size, focus=False):
         maxcol, maxrow = size
@@ -120,7 +120,7 @@ class ScrollingListBox(WidgetWrap):
             emit_signal(self, 'load_more', len(self.body))
 
         self.height = maxrow
-        return super(ScrollingListBox, self).render((maxcol, maxrow), focus)
+        return super().render((maxcol, maxrow), focus)
 
     @property
     def focus(self):
@@ -195,7 +195,7 @@ class TableColumn(object):
 class HeaderColumns(Columns):
     def __init__(self, contents):
         self.selected_column = None
-        super(HeaderColumns, self).__init__(contents)
+        super().__init__(contents)
 
     def __setitem__(self, i, v):
         self.contents[i * 2] = (v, self.contents[i * 2][1])
@@ -204,7 +204,7 @@ class HeaderColumns(Columns):
 class BodyColumns(Columns):
     def __init__(self, contents, header=None):
         self.header = header
-        super(BodyColumns, self).__init__(contents)
+        super().__init__(contents)
 
     @property
     def selected_column(self):
@@ -228,7 +228,7 @@ class TableCell(WidgetWrap):
         padding = self.column.padding or self.table.padding
         self.padding = Padding(self.contents, left=padding, right=padding)
         self.attr = AttrMap(self.padding, attr_map=row.attr_map, focus_map=row.focus_map)
-        super(TableCell, self).__init__(self.attr)
+        super().__init__(self.attr)
 
     def selectable(self):
         return isinstance(self.row, TableBodyRow)
@@ -330,7 +330,7 @@ class TableRow(WidgetWrap):
         self.row.contents = sum([[x, (Divider(self.border_char), ('given', border_width, False))] for x in self.row.contents], [])
         self.attr = AttrMap(self.row, attr_map=self.attr_map, focus_map=self.focus_map)
 
-        super(TableRow, self).__init__(self.attr)
+        super().__init__(self.attr)
 
     def __len__(self):
         return len(self.contents)
@@ -397,7 +397,7 @@ class TableHeaderRow(TableRow):
         self.table = table
         self.contents = [str(x.label) for x in self.table.columns]
 
-        super(TableHeaderRow, self).__init__(
+        super().__init__(
             self.table,
             self.contents,
             cell_click=self.header_clicked,
@@ -464,7 +464,7 @@ class Table(WidgetWrap):
 
         self.pattern_box = PatternBox(self.pile, title=['[', ('border_title', ' {title} (0) '.format(title=self.title)), ']'], **fz_box_pattern())
         self.attr = AttrMap(self.pattern_box, attr_map=self.attr_map)
-        super(Table, self).__init__(self.attr)
+        super().__init__(self.attr)
 
         connect_signal(self.header, 'column_click', lambda index: self.sort_by_column(index, toggle=True))
 

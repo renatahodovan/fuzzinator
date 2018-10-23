@@ -22,7 +22,7 @@ class FullScreenPopupLauncher(PopUpLauncher):
 class AboutButton(PopUpLauncher):
 
     def __init__(self, label):
-        super(AboutButton, self).__init__(FormattedButton(label))
+        super().__init__(FormattedButton(label))
         self.about = AboutDialog()
 
         width = max([len(line) for line in self.about.content.splitlines()]) + 10
@@ -42,7 +42,7 @@ class AboutButton(PopUpLauncher):
 class ViewButton(FullScreenPopupLauncher):
 
     def __init__(self, label, issues_table, config, trackers):
-        super(ViewButton, self).__init__(FormattedButton(label))
+        super().__init__(FormattedButton(label))
         self.issues_table = issues_table
         self.config = config
         self.trackers = trackers
@@ -64,7 +64,7 @@ class ViewButton(FullScreenPopupLauncher):
 class EditButton(FullScreenPopupLauncher):
 
     def __init__(self, label, issues_table):
-        super(EditButton, self).__init__(FormattedButton(label))
+        super().__init__(FormattedButton(label))
         self.issues_table = issues_table
         connect_signal(self.original_widget, 'click', lambda btn: self.open_pop_up())
 
@@ -82,7 +82,7 @@ class EditButton(FullScreenPopupLauncher):
 class ReportButton(FullScreenPopupLauncher):
 
     def __init__(self, label, issues_table, config, trackers):
-        super(ReportButton, self).__init__(FormattedButton(label))
+        super().__init__(FormattedButton(label))
         self.issues_table = issues_table
         self.config = config
         self.trackers = trackers

@@ -15,7 +15,7 @@ class ValidateJob(CallJob):
     """
 
     def __init__(self, id, config, issue, db, listener):
-        super(ValidateJob, self).__init__(id=id, config=config, db=db, listener=listener)
+        super().__init__(id=id, config=config, db=db, listener=listener)
         self.issue = issue
         self.sut_name = issue['sut']
         self.fuzzer_name = issue['fuzzer']

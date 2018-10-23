@@ -45,7 +45,7 @@ class Tui(PopUpLauncher):
 
         self.pipe = self.loop.watch_pipe(self.update_ui)
         self.loop.set_alarm_in(0.1, Tui.update_timer, self.view.logo.timer)
-        super(Tui, self).__init__(self.view)
+        super().__init__(self.view)
 
         connect_signal(self.view.issues_table, 'refresh', lambda source: self.loop.draw_screen())
         connect_signal(self.view.stat_table, 'refresh', lambda source: self.loop.draw_screen())

@@ -17,7 +17,7 @@ class FuzzJob(CallJob):
     """
 
     def __init__(self, id, config, fuzzer_name, db, listener):
-        CallJob.__init__(self, id, config, db, listener)
+        super().__init__(id, config, db, listener)
         fuzz_section = 'fuzz.' + fuzzer_name
         self.fuzzer_name = fuzzer_name
         self.sut_name = self.config.get(fuzz_section, 'sut')

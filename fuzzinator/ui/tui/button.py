@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -20,7 +20,7 @@ class FormattedButton(WidgetWrap):
     def __init__(self, label, on_press=None, user_data=None, style='button'):
         self.text_len = len(label)
         self.btn = ShortButton(label, on_press, user_data)
-        super(FormattedButton, self).__init__(AttrMap(self.btn, style))
+        super().__init__(AttrMap(self.btn, style))
         connect_signal(self.btn, 'click', lambda btn: self._emit('click'))
 
     def sizing(self):

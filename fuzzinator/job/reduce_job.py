@@ -18,7 +18,7 @@ class ReduceJob(CallJob):
     """
 
     def __init__(self, id, config, issue, work_dir, db, listener):
-        CallJob.__init__(self, id, config, db, listener)
+        super().__init__(id, config, db, listener)
         self.issue = issue
         self.work_dir = work_dir
 

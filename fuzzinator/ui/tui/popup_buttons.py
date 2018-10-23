@@ -7,9 +7,9 @@
 
 from urwid import *
 
-from .reporter_dialogs import *
 from .button import FormattedButton
 from .dialogs import AboutDialog, EditIssueDialog, FormattedIssueDialog
+from .reporter_dialogs import *
 
 
 class FullScreenPopupLauncher(PopUpLauncher):

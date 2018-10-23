@@ -16,11 +16,11 @@ from urwid import *
 
 from ...config import config_get_callable
 from ...formatter import JsonFormatter
-from .decor_widgets import PatternBox
 from .button import FormattedButton
+from .decor_widgets import PatternBox
 from .dialogs import WarningDialog, YesNoDialog
-from .popup_buttons import AboutButton, EditButton, ReportButton, ViewButton
 from .graphics import fz_box_pattern, fz_logo_4lines
+from .popup_buttons import AboutButton, EditButton, ReportButton, ViewButton
 from .table import Table, TableColumn
 
 
@@ -331,7 +331,7 @@ class JobsTable(WidgetWrap):
         self.insert_widget(ident, FuzzerJobWidget(dict(fuzzer=fuzzer, sut=sut, cost=cost), pb_done=batch))
 
     def add_reduce_job(self, ident, sut, cost, issue_id, size):
-        self.insert_widget(ident, ReduceJobWidget(data=dict(sut=sut, cost=cost, issue=issue_id), pb_done=size))
+        self.insert_widget(ident, ReduceJobWidget(dict(sut=sut, cost=cost, issue=issue_id), pb_done=size))
 
     def add_update_job(self, ident, sut):
         self.insert_widget(ident, UpdateJobWidget(dict(sut=sut)))
@@ -453,7 +453,7 @@ class FuzzerJobWidget(JobWidget):
 
 class ReduceJobWidget(JobWidget):
 
-    labels = dict(sut='Sut', cost='Cost', issue='Issue', size='Size')
+    labels = dict(sut='Sut', cost='Cost', issue='Issue')
     title = 'Reduce Job'
     height = 8
 
@@ -464,7 +464,7 @@ class ReduceJobWidget(JobWidget):
 
 class UpdateJobWidget(JobWidget):
 
-    labels = dict(sut='Sut', cost='Cost')
+    labels = dict(sut='Sut')
     title = 'Update Job'
 
 

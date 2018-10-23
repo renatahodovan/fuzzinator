@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -11,7 +11,7 @@ Graphical components of the TUI, prepared for UTF-8 and non-UTF-8 terminals
 
 from urwid import util
 
-from fuzzinator import __version__
+from ...pkgdata import __version__
 
 
 def fz_logo_4lines():

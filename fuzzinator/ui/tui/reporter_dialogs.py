@@ -11,10 +11,10 @@ from urwid import *
 from ...config import config_get_callable
 from ...formatter import JsonFormatter
 from ...tracker import BaseTracker
-from .decor_widgets import PatternBox
-from .graphics import fz_box_pattern
-from .dialogs import Dialog, BugEditor
 from .button import FormattedButton
+from .decor_widgets import PatternBox
+from .dialogs import BugEditor, Dialog
+from .graphics import fz_box_pattern
 
 
 class LoginDialog(Dialog):

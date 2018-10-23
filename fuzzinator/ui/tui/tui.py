@@ -10,9 +10,9 @@ import json
 import logging
 import os
 import pkgutil
-import time
 import signal
 import sys
+import time
 
 from multiprocessing import Lock, Process, Queue
 from urwid import connect_signal, raw_display, util, ExitMainLoop, MainLoop, PopUpLauncher

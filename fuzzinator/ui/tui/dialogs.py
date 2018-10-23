@@ -10,10 +10,10 @@ from urwid import *
 
 from ...config import config_get_callable
 from ...formatter import JsonFormatter
-from ...pkgdata import __pkg_name__, __version__, __author__, __author_email__, __url__
+from ...pkgdata import __author__, __author_email__, __pkg_name__, __url__, __version__
+from .button import FormattedButton
 from .decor_widgets import PatternBox
 from .graphics import fz_box_pattern
-from .button import FormattedButton
 
 
 class Dialog(PopUpTarget):

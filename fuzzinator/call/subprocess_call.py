@@ -12,8 +12,8 @@ import shlex
 import subprocess
 import sys
 
-from fuzzinator import Controller
-from .non_issue import NonIssue
+from .. import Controller
+from . import NonIssue
 
 logger = logging.getLogger(__name__)
 

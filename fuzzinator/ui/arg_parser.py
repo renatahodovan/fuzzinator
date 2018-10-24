@@ -10,7 +10,7 @@ import configparser
 import logging
 import sys
 
-from fuzzinator import __version__
+from ..pkgdata import __version__
 
 
 def build_parser(parent=None):

@@ -12,8 +12,8 @@ import shlex
 import subprocess
 import sys
 
+from .. import Controller
 from . import CallableDecorator
-from fuzzinator import Controller
 
 logger = logging.getLogger(__name__)
 

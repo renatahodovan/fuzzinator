@@ -18,7 +18,7 @@ import subprocess
 import sys
 import time
 
-from fuzzinator import Controller
+from .. import Controller
 
 logger = logging.getLogger(__name__)
 

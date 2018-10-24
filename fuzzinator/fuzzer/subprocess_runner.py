@@ -13,7 +13,7 @@ import subprocess
 import os
 import sys
 
-from fuzzinator import Controller
+from .. import Controller
 
 logger = logging.getLogger(__name__)
 

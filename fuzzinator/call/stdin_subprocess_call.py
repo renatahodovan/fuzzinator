@@ -12,7 +12,7 @@ import shlex
 import subprocess
 import sys
 
-from fuzzinator import Controller
+from .. import Controller
 
 logger = logging.getLogger(__name__)
 

@@ -38,9 +38,9 @@ class MarkdownDecorator(CallableDecorator):
 
     def decorator(self, **kwargs):
         def wrapper(fn):
-            def render(issue, format='long', *args, **kwargs):
-                formatted = fn(issue, format, *args, **kwargs)
-                if format != 'short':
+            def render(*args, **kwargs):
+                formatted = fn(*args, **kwargs)
+                if kwargs.get('format', 'long') != 'short':
                     formatted = markdown.markdown(formatted, extensions=['extra'])
                 return formatted
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -8,6 +8,7 @@
 import getpass
 import keyring
 import logging
+import platform
 import smtplib
 
 from email.mime.text import MIMEText
@@ -54,6 +55,7 @@ class EmailListener(EventListener):
                 logger.warning('Authentication failed.', exc_info=e)
                 pwd = None
         keyring.set_password('fuzzinator', self.from_address, pwd)
+        self.pwd = pwd if platform.system() == 'Darwin' else None
         server.quit()
 
         setattr(self, event, lambda *args, **kwargs: self.send_mail(kwargs[param_name]))
@@ -81,6 +83,6 @@ class EmailListener(EventListener):
 
         server = smtplib.SMTP(self.smtp_host, self.smtp_port)
         server.starttls()
-        server.login(self.from_address, keyring.get_password('fuzzinator', self.from_address))
+        server.login(self.from_address, self.pwd or keyring.get_password('fuzzinator', self.from_address))
         server.send_message(msg)
         server.quit()

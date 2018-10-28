@@ -87,8 +87,8 @@ Compatibility
 
 *Fuzzinator* was tested on:
 
-* Linux (Ubuntu 14.04 / 15.10 / 16.04)
-* Mac OS X (OS X El Capitan - 10.11).
+* Linux (Ubuntu 14.04 / 16.04 / 18.04)
+* Mac OS X (El Capitan 10.11 / Sierra 10.12 / High Sierra 10.13 / Mojave 10.14).
 
 
 Acknowledgements

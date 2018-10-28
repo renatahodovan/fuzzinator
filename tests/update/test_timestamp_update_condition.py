@@ -5,8 +5,8 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import pytest
 import os
+import pytest
 
 import fuzzinator
 

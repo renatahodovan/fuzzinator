@@ -235,7 +235,7 @@ class Controller(object):
                     # Perform all the reduce jobs before start hunting for new issues.
                     while not self._issue_queue.empty():
                         issue = self._issue_queue.get_nowait()
-                        if self.config.has_option(issue['sut'], 'reduce'):
+                        if self.config.has_option('sut.' + issue['sut'], 'reduce'):
                             next_job_id = self._next_job_id()
                             next_job = ReduceJob(id=next_job_id,
                                                  config=self.config,

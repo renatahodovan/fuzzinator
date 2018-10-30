@@ -1,17 +1,31 @@
 language: python
 sudo: false
 
-matrix:
+install: pip install -U tox
+script: tox -v
+
+jobs:
   include:
-    - python: 3.4
+    - stage: test
+      python: 3.4
       env: TOXENV=py
     - python: 3.5
       env: TOXENV=py
     - python: 3.6
       env: TOXENV=py
 
+    - stage: deploy
+      python: 3.4
+      install: skip
+      script: skip
+      deploy:
+        provider: pypi
+        user: renatahodovan
+        password:
+          secure: yZ+6IWtgS0t0AhP8TCZCPAlZ/ZhY1kLCE95U67bFfWd2ofudW1MhGOEcml3y3L+dWyeWd4gZw53P+z33u24YNCZjYma7g1qRfANg362aR+zCXR4gbn+iCRpr4AT916NmDq3eYE4n+mfqLpg1Wu8qZFaRBY4g/yJhL3vl9/raXfG1Hg0ncULV8Jl7tg3JEwzl6NZ03kl2hk5XnHtLPQMjruhdbPlSWdur+zrqshj0iLT47dQ9aYFk4fyvc7hd2CWBqfsHLY0vavx0Mx+71CAN2h1dO0EUcg7mweTo7W3Q9gcXdosVwNqoPjRcagdmbNNBrWIx5w7trbxwaD4c0/9VA8QPpRjC8jlISZpb6kH0DT9ZpEbXMfKY1NX6nKJboy/qf3gr40Cd/0iow9ZlZAyuXebGh1chTFz/dNeIY/zkBC/eDuuH8X6YMBb8k8H/CrI9P+hitVjbSU2CKCOB+SL+8BsG8YcU6YEiQ5Xgu/jrKnr/Yuj1eQ48shxPypnbokkkLARz0GNPf3aolDp99EnZ6lxki7oKJRbXti72zN53T3jIviJ2+6aWC81MRFvqgy1YcABbKN4VUrwZgo0cczUuPpGBuIO7Cbk/LSygmkmLuJrIg+5M9C3GmOMSdI/pruQSFFhaQjX3X34SU4zySvmUsmZk0bA8eAStGO9zVl38p98=
+        on:
+          repo: renatahodovan/fuzzinator
+          tags: true
+
 # TODO: start mongodb once more complex tests are implemented
 # services: mongodb
-
-install: pip install -U tox
-script: tox -v

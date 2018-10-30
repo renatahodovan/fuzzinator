@@ -7,6 +7,7 @@
 
 from .template_formatter import TemplateFormatter
 from .chevron_formatter import ChevronFormatter
+from .decoder_decorator import DecoderDecorator
 from .jinja_formatter import JinjaFormatter
 from .json_formatter import JsonFormatter
 from .markdown_decorator import MarkdownDecorator
@@ -16,6 +17,7 @@ from .string_formatter import StringFormatter
 __all__ = [
     'TemplateFormatter',
     'ChevronFormatter',
+    'DecoderDecorator',
     'JinjaFormatter',
     'JsonFormatter',
     'MarkdownDecorator',

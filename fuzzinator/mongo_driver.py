@@ -35,6 +35,7 @@ class MongoDriver(object):
         issues.create_index([('sut', ASCENDING), ('id', ASCENDING)])
         issues.create_index([('sut', ASCENDING), ('fuzzer', ASCENDING)])
         issues.create_index('first_seen')
+        issues.create_index('invalid')
 
         stats = db.fuzzinator_stats
         stats.create_index([('sut', ASCENDING), ('fuzzer', ASCENDING)])
@@ -48,7 +49,7 @@ class MongoDriver(object):
         # be used in the `first_seen` field, too.
         now = datetime.utcnow()
         result = self._db.fuzzinator_issues.find_one_and_update(
-            {'sut': issue['sut'], 'id': issue['id']},
+            {'sut': issue['sut'], 'id': issue['id'], 'invalid': {'$exists': False}},
             {'$setOnInsert': dict(issue, first_seen=now),
              '$set': dict(last_seen=now),
              '$inc': dict(count=1)},
@@ -61,8 +62,8 @@ class MongoDriver(object):
         # different from the value stored in `now` (on nanosecond level).
         return issue['first_seen'] == issue['last_seen']
 
-    def all_issues(self):
-        return list(self._db.fuzzinator_issues.find({}))
+    def all_issues(self, include_invalid=False):
+        return list(self._db.fuzzinator_issues.find({'invalid': {'$exists': False}} if not include_invalid else {}))
 
     def find_issue_by_id(self, _id):
         return self._db.fuzzinator_issues.find_one({'_id': ObjectId(_id)})
@@ -75,6 +76,9 @@ class MongoDriver(object):
 
     def remove_issue_by_id(self, _id):
         self._db.fuzzinator_issues.delete_one({'_id': ObjectId(_id)})
+
+    def invalidate_issue_by_id(self, _id):
+        self._db.fuzzinator_issues.update_one({'_id': ObjectId(_id)}, {'$set': {'invalid': datetime.utcnow()}})
 
     def get_stats(self, filter=None, skip=0, limit=0, sort=None, show_all=True):
         start_time = self.session_start if not show_all else datetime.fromtimestamp(0)

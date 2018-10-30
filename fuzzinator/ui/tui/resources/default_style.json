@@ -14,6 +14,7 @@
     "selected_bg": "dark gray",
     "issue_reduced_fg": "yellow",
     "issue_reported_fg": "brown",
+    "issue_invalid_fg": "dark magenta",
 
     "job_head_bg": "dark cyan",
     "job_head_fg": "white",

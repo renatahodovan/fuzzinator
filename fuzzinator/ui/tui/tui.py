@@ -98,7 +98,7 @@ class Tui(PopUpLauncher):
         self.view.issues_table.add_row(issue)
 
     def invalid_issue(self, ident, issue):
-        self.view.remove_issue_popup(ident=issue['_id'])
+        self.view.issues_table.invalidate_row(ident=issue['_id'])
 
     def update_issue(self, ident, issue):
         self.view.issues_table.update_row(ident=issue['_id'])
@@ -135,6 +135,8 @@ def load_style(style):
         ('issue_reported',              style['issue_reported_fg'],         style['default_bg']),
         ('issue_reduced_selected',      style['issue_reduced_fg'],          style['selected_bg']),
         ('issue_reported_selected',     style['issue_reported_fg'],         style['selected_bg']),
+        ('issue_invalid',               style['issue_invalid_fg'],          style['default_bg']),
+        ('issue_invalid_selected',      style['issue_invalid_fg'],          style['selected_bg']),
         ('job_head',                    style['job_head_fg'],               style['job_head_bg']),
         ('job_label',                   style['job_label_fg'],              style['default_bg']),
         ('job_head_inactive',           style['job_head_inactive_fg'],      style['job_head_inactive_bg']),

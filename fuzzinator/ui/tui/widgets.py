@@ -70,6 +70,7 @@ class MainWindow(PopUpLauncher):
         connect_signal(self, 'warning', lambda _, msg: self.warning_popup(msg))
         connect_signal(self.issues_table, 'select', lambda source, selection: self.footer_btns['view'].keypress((0, 0), 'enter'))
         connect_signal(self.issues_table, 'refresh', lambda source: self._emit('refresh'))
+        connect_signal(self.issues_table, 'delete', lambda source: self.remove_issue_popup())
         connect_signal(self.stat_table, 'refresh', lambda source: self._emit('refresh'))
 
     def init_popup(self, msg):
@@ -87,9 +88,9 @@ class MainWindow(PopUpLauncher):
         connect_signal(self.pop_up, 'close', lambda button: self.close_pop_up())
         self.init_popup(msg)
 
-    def remove_issue_popup(self, ident):
-        ident_str = self.issues_table.row_dict[ident]['id']
-        msg = '{ident}: not valid anymore. Delete?'.format(ident=ident_str)
+    def remove_issue_popup(self):
+        ident = self.issues_table.selection.data['_id']
+        msg = 'Are you sure you want to delete this issue?'
         self.pop_up = YesNoDialog(msg)
         connect_signal(self.pop_up, 'yes', lambda button: self.remove_issue(ident))
         connect_signal(self.pop_up, 'no', lambda button: self.close_pop_up())
@@ -165,6 +166,8 @@ class MainWindow(PopUpLauncher):
             self.footer_btns['delete'].keypress((0, 0), 'enter')
         elif key == 'f9':
             self.footer_btns['show'].keypress((0, 0), 'enter')
+        elif key == 'shift f9':
+            self.issues_table.invert_invalid()
         elif key in ('q', 'Q', 'f10'):
             raise ExitMainLoop()
         else:
@@ -183,6 +186,7 @@ class MainWindow(PopUpLauncher):
 
 class IssuesTable(Table):
     all_issues = False
+    show_invalid = False
     key_columns = ['id']
     query_data = []
     title = 'ISSUES'
@@ -207,12 +211,26 @@ class IssuesTable(Table):
             self.sort_by_column(toggle=True)
         elif key in ["delete", 'd']:
             if len(self):
-                self.db.remove_issue_by_id(self[self.focus_position].data['_id'])
-                del self[self.focus_position]
+                ident = self[self.focus_position].data['_id']
+                self.db.invalidate_issue_by_id(ident)
+                self.invalidate_row(ident)
+        elif key in ["shift delete", "D"]:
+            if len(self):
+                self._emit('delete')
         elif key in ["r", "ctrl r"]:
             self._emit('refresh')
         else:
             return super().keypress(size, key)
+
+    def invalidate_row(self, ident):
+        if self.show_invalid:
+            self.update_row(ident=ident)
+        else:
+            del self[self.body.rows.index(self.row_dict[ident])]
+
+    def invert_invalid(self):
+        self.show_invalid = not self.show_invalid
+        self.update()
 
     def update(self):
         if self.all_issues:
@@ -222,13 +240,13 @@ class IssuesTable(Table):
 
     def show_all(self):
         self.all_issues = True
-        self.query_data = self.db.all_issues()
+        self.query_data = self.db.all_issues(self.show_invalid)
         self.requery(self.query_data)
         self.walker._modified()
 
     def show_less(self):
         self.all_issues = False
-        self.query_data = [issue for issue in self.db.all_issues() if issue['_id'] not in self.issues_baseline]
+        self.query_data = [issue for issue in self.db.all_issues() if issue['_id'] not in self.issues_baseline and (self.show_invalid or 'invalid' not in issue)]
         self.requery(self.query_data)
         self.walker._modified()
 
@@ -238,7 +256,10 @@ class IssuesTable(Table):
         super().update_row_style(ident, attr_map, focus_map)
 
     def get_attr(self, data):
-        if data['reported']:
+        if data.get('invalid', False):
+            attr_map = {None: 'issue_invalid'}
+            focus_map = {None: 'issue_invalid_selected'}
+        elif data['reported']:
             attr_map = {None: 'issue_reported'}
             focus_map = {None: 'issue_reported_selected'}
         elif data['reduced'] is not None:

@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -423,7 +423,7 @@ class TableHeaderRow(TableRow):
 
 
 class Table(WidgetWrap):
-    signals = ['select', 'refresh', 'focus']
+    signals = ['select', 'refresh', 'focus', 'delete']
 
     attr_map = {}
     focus_map = {}

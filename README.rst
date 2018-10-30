@@ -88,14 +88,17 @@ Compatibility
 *Fuzzinator* was tested on:
 
 * Linux (Ubuntu 14.04 / 16.04 / 18.04)
-* Mac OS X (El Capitan 10.11 / Sierra 10.12 / High Sierra 10.13 / Mojave 10.14).
+* Mac OS X (El Capitan 10.11 / Sierra 10.12 / High Sierra 10.13 / Mojave 10.14)
 
 
-Acknowledgements
-================
+Acknowledgement and Citations
+=============================
 
 The authors are immensely grateful to Dr. Heinz Doofenshmirtz for the continuous
 inspiration.
+
+Background on *Fuzzinator* is published in (R. Hodovan, A. Kiss: "Fuzzinator: An
+Open-Source Modular Random Testing Framework", ICST 2018).
 
 .. end included documentation
 

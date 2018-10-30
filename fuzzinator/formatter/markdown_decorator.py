@@ -5,6 +5,7 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+import json
 import markdown
 
 from ..call import CallableDecorator
@@ -21,7 +22,10 @@ class MarkdownDecorator(CallableDecorator):
     summary isn't suitable, while the main content, i.e., the ``long`` format,
     is expected to be in HTML.
 
-    This decorator takes no custom input.
+    **Optional parameters of the decorator:**
+
+      - ``extensions``: array of markdown extensions to enable (enable
+        ``extra`` by default).
 
     **Example configuration snippet:**
 
@@ -34,14 +38,18 @@ class MarkdownDecorator(CallableDecorator):
 
             [sut.foo.formatter.init]
             long_file=/path/to/templates/foo.md
+
+            [sut.foo.formatter.decorate(0)]
+            extensions=["extra", "codehilite"]
     """
 
-    def decorator(self, **kwargs):
+    def decorator(self, extensions=None, **kwargs):
+        extensions = ['extra'] if extensions is None else json.loads(extensions) if isinstance(extensions, str) else extensions
         def wrapper(fn):
             def render(*args, **kwargs):
                 formatted = fn(*args, **kwargs)
                 if kwargs.get('format', 'long') != 'short':
-                    formatted = markdown.markdown(formatted, extensions=['extra'])
+                    formatted = markdown.markdown(formatted, extensions=extensions)
                 return formatted
 
             return render

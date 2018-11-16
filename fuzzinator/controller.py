@@ -204,6 +204,7 @@ class Controller(object):
             entity = import_entity(self.config.get('listeners', name))
             self.listener += entity(config=config, **config_get_kwargs(config, 'listeners.' + name + '.init'))
 
+        self._load = 0
         self._job_id = 0
         self._issue_queue = Queue()
         self._lock = Lock()
@@ -337,7 +338,11 @@ class Controller(object):
                     del running_jobs[ident]
                 else:
                     load += running_jobs[ident]['job'].cost
-            self.listener.update_load(load=load)
+
+            if self._load != load:
+                self.listener.update_load(load=load)
+                self._load = load
+
             if load + new_load <= self.capacity:
                 return load
             time.sleep(1)

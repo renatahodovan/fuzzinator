@@ -13,6 +13,20 @@ from .event_listener import EventListener
 logger = logging.getLogger(__name__)
 
 
+class Trampoline(object):
+
+    def __init__(self, manager, name):
+        self.manager = manager
+        self.name = name
+
+    def __call__(self, **kwargs):
+        for listener in self.manager.listeners:
+            try:
+                getattr(listener, self.name)(**kwargs)
+            except Exception as e:
+                logger.warning('Unhandled exception in listener \'%s\'.', self.name, exc_info=e)
+
+
 class ListenerManager(object):
     """
     Class that registers listeners to various events and executes all of them
@@ -24,19 +38,6 @@ class ListenerManager(object):
         :param listeners: List of listener objects.
         """
         self.listeners = listeners or []
-
-        class Trampoline(object):
-
-            def __init__(self, manager, name):
-                self.manager = manager
-                self.name = name
-
-            def __call__(self, **kwargs):
-                for listener in self.manager.listeners:
-                    try:
-                        getattr(listener, self.name)(**kwargs)
-                    except Exception as e:
-                        logger.warning('Unhandled exception in listener \'%s\'.', self.name, exc_info=e)
 
         for fn, _ in inspect.getmembers(EventListener, predicate=inspect.isfunction):
             setattr(self, fn, Trampoline(self, fn))

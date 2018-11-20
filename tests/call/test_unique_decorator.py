@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -17,9 +17,9 @@ from common_call import mock_always_fail_call, mock_never_fail_call, MockAlwaysF
     ({'init_foo': b'init_bar'}, {'foo': b'bar', 'baz': b'qux'})
 ])
 @pytest.mark.parametrize('call, dec_kwargs, exp', [
-    (mock_always_fail_call, {'properties': '["foo", "baz"]'}, {'foo': b'bar', 'baz': b'qux', 'id': b'bar qux'}),
+    (mock_always_fail_call, {'properties': '["foo", "baz"]'}, {'foo': b'bar', 'baz': b'qux', 'id': 'bar qux'}),
     (mock_never_fail_call, {'properties': '["foo", "baz"]'}, None),
-    (MockAlwaysFailCall, {'properties': '["init_foo", "baz"]'}, {'init_foo': b'init_bar', 'foo': b'bar', 'baz': b'qux', 'id': b'init_bar qux'}),
+    (MockAlwaysFailCall, {'properties': '["init_foo", "baz"]'}, {'init_foo': b'init_bar', 'foo': b'bar', 'baz': b'qux', 'id': 'init_bar qux'}),
     (MockNeverFailCall, {'properties': '["init_foo", "baz"]'}, None),
 ])
 def test_unique_decorator(call, call_init_kwargs, call_kwargs, dec_kwargs, exp):

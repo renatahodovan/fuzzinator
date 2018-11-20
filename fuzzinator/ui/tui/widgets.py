@@ -88,7 +88,6 @@ class MainWindow(PopUpLauncher):
 
     def remove_issue_popup(self, ident):
         ident_str = self.issues_table.row_dict[ident]['id']
-        ident_str = ident_str if isinstance(ident_str, str) else ident_str.decode('utf-8', errors='ignore')
         msg = '{ident}: not valid anymore. Delete?'.format(ident=ident_str)
         self.pop_up = YesNoDialog(msg)
         connect_signal(self.pop_up, 'yes', lambda button: self.remove_issue(ident))

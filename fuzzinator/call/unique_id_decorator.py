@@ -47,7 +47,8 @@ class UniqueIdDecorator(CallableDecorator):
                 if not issue:
                     return issue
 
-                issue['id'] = b' '.join(issue.get(x, b'') for x in properties)
+                prop_lst = [issue.get(x, '') for x in properties]
+                issue['id'] = ' '.join(prop.decode('utf-8', errors='ignore') if isinstance(prop, bytes) else prop for prop in prop_lst)
                 return issue
 
             return filter

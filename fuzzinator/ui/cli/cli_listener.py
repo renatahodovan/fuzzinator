@@ -19,31 +19,31 @@ class CliListener(EventListener):
         pass
 
     def new_fuzz_job(self, ident, fuzzer, sut, cost, batch):
-        logger.debug('[{sut}] New fuzzer jobb added: {fuzzer} [{batch}]'.format(sut=sut, fuzzer=fuzzer, batch=batch))
+        logger.debug('New fuzzer job #{ident} for {fuzzer} to {sut} ({batch} tests).'.format(ident=ident, sut=sut, fuzzer=fuzzer, batch=batch))
 
     def new_update_job(self, ident, sut):
-        logger.debug('[{sut}] New update job added.'.format(sut=sut))
+        logger.debug('New update job #{ident} for {sut}.'.format(ident=ident, sut=sut))
 
     def new_reduce_job(self, ident, sut, cost, issue_id, size):
-        logger.debug('[{sut}] New reduce job added: {issue} [{size} bytes].'.format(sut=sut, issue=issue_id, size=size))
+        logger.debug('New reduce job #{ident} for {issue!r} in {sut} ({size} bytes).'.format(ident=ident, sut=sut, issue=issue_id, size=size))
 
     def new_validate_job(self, ident, sut, issue_id):
-        logger.debug('[{sut}] New validate job added: {issue}.'.format(sut=sut, issue=issue_id))
+        logger.debug('New validate job #{ident} for {issue!r} in {sut}.'.format(ident=ident, sut=sut, issue=issue_id))
+
+    def activate_job(self, ident):
+        logger.debug('Activate job #{ident}.'.format(ident=ident))
 
     def remove_job(self, ident):
-        logger.debug('[{ident}] Remove job.'.format(ident=ident))
+        logger.debug('Remove job #{ident}.'.format(ident=ident))
 
     def warning(self, msg):
         logger.warning(msg)
 
     def new_issue(self, issue):
-        logger.info('New issue: {msg}'.format(msg=issue['id']))
-
-    def invalid_issue(self, issue):
-        logger.debug('{ident} issue is invalid.'.format(ident=issue['id'].decode('utf-8', errors='ignore')))
-
-    def activate_job(self, ident):
-        logger.debug('Activate job: {ident}'.format(ident=ident))
+        logger.info('New issue {issue!r} in {sut}.'.format(issue=issue['id'], sut=issue['sut']))
 
     def update_issue(self, issue):
-        logger.info('Issue updated: {id}.'.format(id=issue['id']))
+        logger.info('Updated issue {issue!r} in {sut}.'.format(issue=issue['id'], sut=issue['sut']))
+
+    def invalid_issue(self, issue):
+        logger.debug('Invalid issue {issue!r} in {sut}.'.format(issue=issue['id'], sut=issue['sut']))

@@ -22,14 +22,12 @@ class JinjaFormatter(TemplateFormatter):
 
     **Optional parameters of the formatter:**
 
-      - ``short``: string template to define the issue summary template
-        (default: empty string).
+      - ``short``: the issue summary template string (default: empty string).
 
-      - ``short_file``: path to a file containing the summary template
+      - ``short_file``: path to a file containing the issue summary template
         (default: ``None``).
 
-      - ``long``: string template to define the detailed issue template
-        (default: empty string).
+      - ``long``: the detailed issue template string (default: empty string).
 
       - ``long_file``: path to a file containing the detailed issue template
         (default: ``None``).

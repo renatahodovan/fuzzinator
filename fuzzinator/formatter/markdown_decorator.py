@@ -13,12 +13,13 @@ from ..call import CallableDecorator
 
 class MarkdownDecorator(CallableDecorator):
     """
-    Decorator for formatters that produce their output in Markdown format.
+    Decorator for formatters that produce their output in
+    `Markdown <https://github.com/Python-Markdown/markdown>`_ format.
 
     This decorator converts the ``long`` version of an issue descriptor
     to HTML, while the ``short`` version remains untouched. The reason is
     that ``short`` versions usually serve as a summary in e-mail subjects
-    or as a title of bug reports. In these cases having an HTML converted
+    or as a title of bug reports. In these cases having an HTML-converted
     summary isn't suitable, while the main content, i.e., the ``long`` format,
     is expected to be in HTML.
 

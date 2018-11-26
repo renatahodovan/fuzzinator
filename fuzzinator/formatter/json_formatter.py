@@ -15,7 +15,7 @@ def JsonFormatter(issue, format='long'):
     This formatter does not take any custom instructions regarding the
     format, beyond that it's processed with JSON.
     The ``short`` version returns the ``id`` field of the input issue
-    dictionary, while the `long` version returns a sorted and 4-space
+    dictionary, while the ``long`` version returns a sorted and 4-space
     indented JSON dump of the issue. Because of these defaults, there
     is no need to define templates for the two versions (i.e., neither
     ``short`` nor ``long`` definitions are required).

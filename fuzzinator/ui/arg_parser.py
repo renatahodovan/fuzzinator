@@ -8,6 +8,7 @@
 import argparse
 import configparser
 import logging
+import re
 import sys
 
 from ..pkgdata import __version__
@@ -17,6 +18,8 @@ def build_parser(parent=None):
     parser = argparse.ArgumentParser(description='Fuzzinator Random Testing Framework', fromfile_prefix_chars='@', parents=[parent])
     parser.add_argument('config', default=list(), nargs='*',
                         help='config files describing the fuzz jobs to run (if no config is provided and TUI is enabled, then the framework starts in issue viewer mode)')
+    parser.add_argument('-D', metavar='SECT:OPT=VAL', dest='options', default=list(), action='append',
+                        help='define additional config options')
     parser.add_argument('-l', '--log-level', metavar='LEVEL', default=logging.INFO,
                         help='set log level')
     parser.add_argument('-v', dest='log_level', action='store_const', const='DEBUG', default=argparse.SUPPRESS,
@@ -31,9 +34,21 @@ def process_args(args):
     config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(),
                                        strict=False,
                                        allow_no_value=True)
+
     parsed_fn = config.read(args.config)
     if len(parsed_fn) != len(args.config):
         return 'Config file(s) do(es) not exist: {fn}'.format(fn=', '.join(fn for fn in args.config if fn not in parsed_fn))
+
+    for opt in args.options:
+        parts = re.fullmatch('(.*):(.*)=(.*)', opt)
+        if not parts:
+            return 'Config option definition not in SECT:OPT=VAL format: {opt}'.format(opt=opt)
+
+        section, option, value = parts.group(1, 2, 3)
+        if not config.has_section(section):
+            config.add_section(section)
+        config.set(section, option, value)
+
     args.config = config
 
     logger = logging.getLogger()

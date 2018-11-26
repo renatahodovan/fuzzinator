@@ -23,7 +23,7 @@ class PicireTester(object):
         self._issues = issues
 
     def __call__(self, config, config_id):
-        test = codecs.encode(self._test_builder(config), encoding=self._encoding, errors='ignore')
+        test = codecs.encode(self._test_builder(config), self._encoding, 'ignore')
         with self._sut_call:
             issue = self._sut_call(test=test, filename=self._test_pattern % config_id, **self._sut_call_kwargs)
 

@@ -1,0 +1,11 @@
+{
+  "grammars": {
+    "mock": {
+      "files": [ "MockGrammar.g4" ],
+      "replacements": {
+        "CHAR": ""
+      }
+    }
+  },
+  "start": "mock:text"
+}

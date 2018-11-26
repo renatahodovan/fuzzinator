@@ -8,4 +8,5 @@ dist
 .cache
 .pytest_cache
 .tox
+.coverage*
 docs/_build

@@ -57,9 +57,8 @@ class MongoDriver(object):
     def all_issues(self):
         return list(self._db.fuzzinator_issues.find({}))
 
-    def find_issue_by_id(self, id):
-        id = ObjectId(id)
-        return self._db.fuzzinator_issues.find_one({'_id': id})
+    def find_issue_by_id(self, _id):
+        return self._db.fuzzinator_issues.find_one({'_id': ObjectId(_id)})
 
     def find_issues_by_suts(self, suts):
         return list(self._db.fuzzinator_issues.find({'sut': {'$in': suts}}))
@@ -68,8 +67,7 @@ class MongoDriver(object):
         self._db.fuzzinator_issues.update_one({'id': issue['id'], 'sut': issue['sut']}, {'$set': _set})
 
     def remove_issue_by_id(self, _id):
-        _id = ObjectId(_id)
-        self._db.fuzzinator_issues.delete_one({'_id': _id})
+        self._db.fuzzinator_issues.delete_one({'_id': ObjectId(_id)})
 
     def stat_snapshot(self, fuzzers):
         db = self._db

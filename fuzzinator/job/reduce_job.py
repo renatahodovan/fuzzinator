@@ -17,16 +17,16 @@ class ReduceJob(CallJob):
     Class for running test case reduction jobs.
     """
 
-    def __init__(self, id, config, issue, work_dir, db, listener):
+    def __init__(self, id, config, issue, db, listener):
         super().__init__(id, config, db, listener)
         self.issue = issue
-        self.work_dir = work_dir
 
         self.sut_name = self.issue['sut']
         sut_section = 'sut.' + self.sut_name
         self.fuzzer_name = '{fuzzer}/{reducer}'.format(fuzzer=self.issue['fuzzer'].split('/')[0],
                                                        reducer=self.config.get(sut_section, 'reduce'))
         self.cost = int(self.config.get(sut_section, 'reduce_cost', fallback=self.config.get(sut_section, 'cost', fallback=1)))
+        self.work_dir = self.config.get('fuzzinator', 'work_dir')
 
     def run(self):
         valid, issues = ValidateJob(id=self.id,

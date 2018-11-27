@@ -86,9 +86,12 @@ class Controller(object):
 
           See package :mod:`fuzzinator.call` for potential callables.
 
+        - Option ``validate_cost``: (Optional, default: the value of option
+          ``cost``)
+
         - Option ``update_condition``: Fully qualified name of a python callable
           that must return ``True`` if and only if the SUT should be updated.
-          (Optional, SUT is never updated if option is missing.)
+          (Optional, SUT is never updated automatically if option is missing.)
 
           See package :mod:`fuzzinator.update` for potential callables.
 
@@ -97,6 +100,9 @@ class Controller(object):
           if option is missing.)
 
           See package :mod:`fuzzinator.update` for potential callables.
+
+        - Option ``update_cost``: (Optional, default: the value of option
+          ``fuzzinator:cost_budget``)
 
         - Option ``formatter``: Fully qualified name of a python callable that
           formats the issue dictionary of the SUT and returns a custom string
@@ -206,8 +212,9 @@ class Controller(object):
 
         self._load = 0
         self._job_id = 0
-        self._issue_queue = Queue()
-        self._lock = Lock()
+        self._job_queue = []
+        self._shared_queue = Queue()
+        self._shared_lock = Lock()
 
     def run(self, *, max_cycles=None):
         """
@@ -222,71 +229,56 @@ class Controller(object):
         fuzz_idx = 0
         try:
             while True:
-                self._wait_for_load(0, running_jobs)
+                self._wait_for_load(0, running_jobs) # update load and poll added jobs (if any)
 
                 if fuzz_idx == 0:
                     cycle += 1
                 if cycle > max_cycles or (not self.fuzzers and max_cycles != float('inf')):
-                    self._wait_for_load(self.capacity, running_jobs)
+                    self._wait_for_load(self.capacity, running_jobs) # wait until currently running jobs finish
                     break
 
-                next_job = None
-                if not self._issue_queue.empty():
-
-                    # Perform all the reduce jobs before start hunting for new issues.
-                    while not self._issue_queue.empty():
-                        issue = self._issue_queue.get_nowait()
-                        if self.config.has_option('sut.' + issue['sut'], 'reduce'):
-                            next_job = ReduceJob(id=self._next_job_id(),
-                                                 config=self.config,
-                                                 issue=issue,
-                                                 work_dir=self.work_dir,
-                                                 db=self.db,
-                                                 listener=self.listener)
-                            self.listener.new_reduce_job(ident=next_job.id,
-                                                         sut=next_job.sut_name,
-                                                         cost=next_job.cost,
-                                                         issue_id=issue['id'],
-                                                         size=len(issue['test']))
-                            break
-
-                if not next_job:
+                # Hunt for new issues only if there is no other work to do.
+                if not self._job_queue:
                     if not self.fuzzers:
                         time.sleep(1)
                         continue
 
-                    fuzz_section = 'fuzz.' + self.fuzzers[fuzz_idx]
-                    instances = self.config.get(fuzz_section, 'instances', fallback='inf')
-                    instances = float(instances) if instances == 'inf' else int(instances)
-                    if instances <= sum(1 for job in running_jobs.values() if isinstance(job['job'], FuzzJob) and job['job'].fuzzer_name == self.fuzzers[fuzz_idx]):
-                        # Update fuzz_idx to point the next job's parameters.
-                        fuzz_idx = (fuzz_idx + 1) % len(self.fuzzers)
-                        continue
-
-                    next_job = FuzzJob(id=self._next_job_id(),
-                                       config=self.config,
-                                       fuzzer_name=self.fuzzers[fuzz_idx],
-                                       db=self.db,
-                                       listener=self.listener)
-                    self.listener.new_fuzz_job(ident=next_job.id,
-                                               fuzzer=next_job.fuzzer_name,
-                                               sut=next_job.sut_name,
-                                               cost=next_job.cost,
-                                               batch=next_job.batch)
-
-                    # Before starting a new fuzz job let's check if we are working with
-                    # the latest version of the SUT and update it if needed.
-                    self._check_update(next_job, running_jobs)
-
-                    # Update fuzz_idx to point the next job's parameters.
+                    # Determine fuzz job to be queued and then update fuzz_idx
+                    # to point to the next job's parameters.
+                    fuzzer_name = self.fuzzers[fuzz_idx]
+                    fuzz_section = 'fuzz.' + fuzzer_name
                     fuzz_idx = (fuzz_idx + 1) % len(self.fuzzers)
 
-                # Wait until there is enough capacity for the next job.
-                self._wait_for_load(next_job.cost, running_jobs)
+                    # Skip fuzz job if limit on parallel instances is reached.
+                    instances = self.config.get(fuzz_section, 'instances', fallback='inf')
+                    instances = float(instances) if instances == 'inf' else int(instances)
+                    if instances <= sum(1 for job in running_jobs.values() if isinstance(job['job'], FuzzJob) and job['job'].fuzzer_name == fuzzer_name):
+                        continue
+
+                    # Before queueing a new fuzz job, check if we are working
+                    # with the latest version of the SUT and queue an update if
+                    # needed.
+                    sut_name = self.config.get(fuzz_section, 'sut')
+                    update_condition, update_condition_kwargs = config_get_callable(self.config, 'sut.' + sut_name, 'update_condition')
+                    if update_condition:
+                        with update_condition:
+                            if update_condition(**update_condition_kwargs):
+                                self.add_update_job(sut_name)
+
+                    self.add_fuzz_job(fuzzer_name)
+
+                    # Poll newly added job(s). Looping ensures that jobs will
+                    # eventually arrive.
+                    # (Unfortunately, multiprocessing.Queue.empty() is unreliable.)
+                    while not self._job_queue:
+                        self._wait_for_load(0, running_jobs)
+
+                # Perform next job as soon as there is enough capacity for it.
+                next_job = self._job_queue.pop(0)
+                self._wait_for_load(next_job.cost, running_jobs) # also poll jobs while waiting
 
                 proc = Process(target=self._run_job, args=(next_job,))
                 running_jobs[next_job.id] = dict(job=next_job, proc=proc)
-                # Notify the active listener that a job has been activated.
                 self.listener.activate_job(ident=next_job.id)
                 proc.start()
 
@@ -298,31 +290,6 @@ class Controller(object):
             Controller.kill_process_tree(os.getpid(), kill_root=False)
             if os.path.exists(self.work_dir):
                 shutil.rmtree(self.work_dir, ignore_errors=True)
-
-    def _check_update(self, job, running_jobs):
-        sut_section = 'sut.' + job.sut_name
-        if not self.config.has_option(sut_section, 'update'):
-            return
-
-        update_condition, update_condition_kwargs = config_get_callable(self.config, sut_section, 'update_condition')
-        if not update_condition:
-            return
-
-        with update_condition:
-            if not update_condition(**update_condition_kwargs):
-                return
-
-        next_job = UpdateJob(id=self._next_job_id(),
-                             config=self.config,
-                             sut_name=job.sut_name)
-        self.listener.new_update_job(ident=next_job.id, sut=job.sut_name)
-        # Wait until every job has finished.
-        self._wait_for_load(self.capacity, running_jobs)
-        # Emit 'next_job available' event.
-        self.listener.activate_job(ident=next_job.id)
-        # Update job runs in the main thread since it's blocking for any other jobs.
-        next_job.run()
-        self.listener.remove_job(ident=next_job.id)
 
     def _wait_for_load(self, new_load, running_jobs):
         while True:
@@ -338,14 +305,50 @@ class Controller(object):
                 self.listener.update_load(load=load)
                 self._load = load
 
+            self._poll_jobs()
+
             if load + new_load <= self.capacity:
                 return load
             time.sleep(1)
 
+    def _poll_jobs(self):
+        with self._shared_lock:
+            while not self._shared_queue.empty():
+                job_class, job_kwargs = self._shared_queue.get_nowait()
+                next_job = job_class(id=self._next_job_id(),
+                                     config=self.config,
+                                     db=self.db,
+                                     listener=self.listener,
+                                     **job_kwargs)
+                {
+                    FuzzJob:
+                    lambda: self.listener.new_fuzz_job(ident=next_job.id,
+                                                       fuzzer=next_job.fuzzer_name,
+                                                       sut=next_job.sut_name,
+                                                       cost=next_job.cost,
+                                                       batch=next_job.batch),
+                    ValidateJob:
+                    lambda: self.listener.new_validate_job(ident=next_job.id,
+                                                           sut=next_job.sut_name,
+                                                           issue_id=next_job.issue['id']), # NOTE: listener not notified about validate job cost
+                    ReduceJob:
+                    lambda: self.listener.new_reduce_job(ident=next_job.id,
+                                                         sut=next_job.sut_name,
+                                                         cost=next_job.cost,
+                                                         issue_id=next_job.issue['id'],
+                                                         size=len(next_job.issue['test'])),
+                    UpdateJob:
+                    lambda: self.listener.new_update_job(ident=next_job.id,
+                                                         sut=next_job.sut_name), # NOTE: listener not notified about update job cost
+                }[job_class]()
+
+                self._job_queue.append(next_job)
+
     def _run_job(self, job):
         try:
             for issue in job.run():
-                self.add_reduce_job(issue=issue)
+                # Automatic reduction and/or validation if the job found something new
+                self.add_reduce_job(issue=issue) or self.add_validate_job(issue=issue)
         except Exception as e:
             self.listener.warning(msg='Exception in {job}: {exception}\n{trace}'.format(
                 job=repr(job),
@@ -357,27 +360,38 @@ class Controller(object):
         self._job_id += 1
         return next_job_id
 
+    def add_fuzz_job(self, fuzzer_name):
+        # Added for the sake of completeness and consistency.
+        # Should not be used by UI to add fuzz jobs.
+        with self._shared_lock:
+            self._shared_queue.put((FuzzJob, dict(fuzzer_name=fuzzer_name)))
+        return True
+
+    def add_validate_job(self, issue):
+        with self._shared_lock:
+            self._shared_queue.put((ValidateJob, dict(issue=issue)))
+        return True
+
     def add_reduce_job(self, issue):
-        with self._lock:
-            self._issue_queue.put(issue)
+        if not self.config.has_option('sut.' + issue['sut'], 'reduce'):
+            return False
+
+        with self._shared_lock:
+            self._shared_queue.put((ReduceJob, dict(issue=issue)))
+        return True
+
+    def add_update_job(self, sut_name):
+        if not self.config.has_option('sut.' + sut_name, 'update'):
+            return False
+
+        with self._shared_lock:
+            self._shared_queue.put((UpdateJob, dict(sut_name=sut_name)))
+        return True
 
     def reduce_all(self):
         for issue in self.db.find_issues_by_suts([section for section in self.config.sections() if section.startswith('sut.') and section.count('.') == 1]):
             if not issue['reported'] and not issue['reduced']:
                 self.add_reduce_job(issue)
-
-    def validate(self, issue):
-        next_job = ValidateJob(id=self._next_job_id(),
-                               config=self.config,
-                               issue=issue,
-                               db=self.db,
-                               listener=self.listener)
-        self.listener.new_validate_job(ident=next_job.id,
-                                       sut=next_job.sut_name,
-                                       issue_id=issue['id'])
-        self.listener.activate_job(ident=next_job.id)
-        next_job.run()
-        self.listener.remove_job(ident=next_job.id)
 
     @staticmethod
     def kill_process_tree(pid, kill_root=True, sig=signal.SIGTERM):

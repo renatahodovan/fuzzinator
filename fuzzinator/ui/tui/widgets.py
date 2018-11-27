@@ -51,7 +51,7 @@ class MainWindow(PopUpLauncher):
 
         self.footer_btns = OrderedDict()
         self.footer_btns['about'] = AboutButton('F1 About')
-        self.footer_btns['validate'] = FormattedButton('F2 Validate', on_press=lambda btn: self.validate())
+        self.footer_btns['validate'] = FormattedButton('F2 Validate', on_press=lambda btn: self.add_validate_job())
         self.footer_btns['view'] = ViewButton('F3 View', self.issues_table, self.config, self.trackers)
         self.footer_btns['edit'] = EditButton('F4 Edit', self.issues_table)
         self.footer_btns['copy'] = FormattedButton('F5 Copy', on_press=lambda btn: self.copy_selected())
@@ -105,19 +105,22 @@ class MainWindow(PopUpLauncher):
 
     def add_reduce_job(self):
         if self.issues_table.selection:
-            issue = self.issues_table.selection.data
-            self.controller.add_reduce_job(issue=self.db.find_issue_by_id(issue['_id']))
+            issue = self.db.find_issue_by_id(self.issues_table.selection.data['_id'])
+            if not self.config.has_section('sut.' + issue['sut']):
+                self.warning_popup(msg='{sut} is not defined.'.format(sut=issue['sut']))
+            else:
+                self.controller.add_reduce_job(issue)
 
     def reduce_all(self):
         self.controller.reduce_all()
 
-    def validate(self):
+    def add_validate_job(self):
         if self.issues_table.selection:
             issue = self.db.find_issue_by_id(self.issues_table.selection.data['_id'])
             if not self.config.has_section('sut.' + issue['sut']):
                 self.warning_popup(msg='{sut} is not defined.'.format(sut=issue['sut']))
             else:
-                self.controller.validate(issue)
+                self.controller.add_validate_job(issue)
 
     def copy_selected(self, test_bytes=False):
         if self.issues_table.selection:

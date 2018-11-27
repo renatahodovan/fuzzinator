@@ -19,7 +19,7 @@ class ValidateJob(CallJob):
         self.issue = issue
         self.sut_name = issue['sut']
         self.fuzzer_name = issue['fuzzer']
-        self.cost = 0
+        self.cost = int(self.config.get('sut.' + self.sut_name, 'validate_cost', fallback=self.config.get('sut.' + self.sut_name, 'cost', fallback=1)))
 
     def run(self):
         _, new_issues = self.validate()

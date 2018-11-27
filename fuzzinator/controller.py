@@ -270,6 +270,11 @@ class Controller(object):
                                        fuzzer_name=self.fuzzers[fuzz_idx],
                                        db=self.db,
                                        listener=self.listener)
+                    self.listener.new_fuzz_job(ident=next_job_id,
+                                               fuzzer=next_job.fuzzer_name,
+                                               sut=next_job.sut_name,
+                                               cost=next_job.cost,
+                                               batch=next_job.batch)
 
                     # Before starting a new fuzz job let's check if we are working with
                     # the latest version of the SUT and update it if needed.
@@ -277,13 +282,6 @@ class Controller(object):
 
                     # Update fuzz_idx to point the next job's parameters.
                     fuzz_idx = (fuzz_idx + 1) % len(self.fuzzers)
-
-                    # Notify the active listener about the new job.
-                    self.listener.new_fuzz_job(ident=next_job_id,
-                                               fuzzer=next_job.fuzzer_name,
-                                               sut=next_job.sut_name,
-                                               cost=next_job.cost,
-                                               batch=next_job.batch)
 
                 # Wait until there is enough capacity for the next job.
                 self._wait_for_load(next_job.cost, running_jobs)

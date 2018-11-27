@@ -25,11 +25,12 @@ class PicireTester(object):
     def __call__(self, config, config_id):
         test = codecs.encode(self._test_builder(config), self._encoding, 'ignore')
         with self._sut_call:
-            issue = self._sut_call(test=test, filename=self._test_pattern % config_id, **self._sut_call_kwargs)
+            filename = self._test_pattern % '_'.join(str(i) for i in config_id)
+            issue = self._sut_call(test=test, filename=filename, **self._sut_call_kwargs)
 
             # Second chance for flaky tests in case of 'assert' check.
             if config_id == 'assert' and not issue:
-                issue = self._sut_call(test=test, filename=self._test_pattern % config_id, **self._sut_call_kwargs)
+                issue = self._sut_call(test=test, filename=filename, **self._sut_call_kwargs)
 
             if issue:
                 if self._expected == issue['id']:

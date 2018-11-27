@@ -237,14 +237,13 @@ class Controller(object):
                     while not self._issue_queue.empty():
                         issue = self._issue_queue.get_nowait()
                         if self.config.has_option('sut.' + issue['sut'], 'reduce'):
-                            next_job_id = self._next_job_id()
-                            next_job = ReduceJob(id=next_job_id,
+                            next_job = ReduceJob(id=self._next_job_id(),
                                                  config=self.config,
                                                  issue=issue,
                                                  work_dir=self.work_dir,
                                                  db=self.db,
                                                  listener=self.listener)
-                            self.listener.new_reduce_job(ident=next_job_id,
+                            self.listener.new_reduce_job(ident=next_job.id,
                                                          sut=next_job.sut_name,
                                                          cost=next_job.cost,
                                                          issue_id=issue['id'],
@@ -264,13 +263,12 @@ class Controller(object):
                         fuzz_idx = (fuzz_idx + 1) % len(self.fuzzers)
                         continue
 
-                    next_job_id = self._next_job_id()
-                    next_job = FuzzJob(id=next_job_id,
+                    next_job = FuzzJob(id=self._next_job_id(),
                                        config=self.config,
                                        fuzzer_name=self.fuzzers[fuzz_idx],
                                        db=self.db,
                                        listener=self.listener)
-                    self.listener.new_fuzz_job(ident=next_job_id,
+                    self.listener.new_fuzz_job(ident=next_job.id,
                                                fuzzer=next_job.fuzzer_name,
                                                sut=next_job.sut_name,
                                                cost=next_job.cost,
@@ -287,9 +285,9 @@ class Controller(object):
                 self._wait_for_load(next_job.cost, running_jobs)
 
                 proc = Process(target=self._run_job, args=(next_job,))
-                running_jobs[next_job_id] = dict(job=next_job, proc=proc)
+                running_jobs[next_job.id] = dict(job=next_job, proc=proc)
                 # Notify the active listener that a job has been activated.
-                self.listener.activate_job(ident=next_job_id)
+                self.listener.activate_job(ident=next_job.id)
                 proc.start()
 
         except KeyboardInterrupt:
@@ -314,18 +312,17 @@ class Controller(object):
             if not update_condition(**update_condition_kwargs):
                 return
 
-        next_job_id = self._next_job_id()
-        next_job = UpdateJob(id=next_job_id,
+        next_job = UpdateJob(id=self._next_job_id(),
                              config=self.config,
                              sut_name=job.sut_name)
-        self.listener.new_update_job(ident=next_job_id, sut=job.sut_name)
+        self.listener.new_update_job(ident=next_job.id, sut=job.sut_name)
         # Wait until every job has finished.
         self._wait_for_load(self.capacity, running_jobs)
         # Emit 'next_job available' event.
-        self.listener.activate_job(ident=next_job_id)
+        self.listener.activate_job(ident=next_job.id)
         # Update job runs in the main thread since it's blocking for any other jobs.
         next_job.run()
-        self.listener.remove_job(ident=next_job_id)
+        self.listener.remove_job(ident=next_job.id)
 
     def _wait_for_load(self, new_load, running_jobs):
         while True:
@@ -370,18 +367,17 @@ class Controller(object):
                 self.add_reduce_job(issue)
 
     def validate(self, issue):
-        next_job_id = self._next_job_id()
-        next_job = ValidateJob(id=next_job_id,
+        next_job = ValidateJob(id=self._next_job_id(),
                                config=self.config,
                                issue=issue,
                                db=self.db,
                                listener=self.listener)
-        self.listener.new_validate_job(ident=next_job_id,
+        self.listener.new_validate_job(ident=next_job.id,
                                        sut=next_job.sut_name,
                                        issue_id=issue['id'])
-        self.listener.activate_job(ident=next_job_id)
+        self.listener.activate_job(ident=next_job.id)
         next_job.run()
-        self.listener.remove_job(ident=next_job_id)
+        self.listener.remove_job(ident=next_job.id)
 
     @staticmethod
     def kill_process_tree(pid, kill_root=True, sig=signal.SIGTERM):

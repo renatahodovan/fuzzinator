@@ -22,18 +22,25 @@ class ValidateJob(CallJob):
         self.cost = 0
 
     def run(self):
+        _, new_issues = self.validate()
+        return new_issues
+
+    def validate(self):
         sut_call, sut_call_kwargs = config_get_callable(self.config, 'sut.' + self.sut_name, ['validate_call', 'reduce_call', 'call'])
 
         with sut_call:
             sut_call_kwargs.update(self.issue)
             issue = sut_call(**sut_call_kwargs)
-            if issue:
-                issue['test'] = self.issue['test']
-                if issue['id'] == self.issue['id']:
-                    self.db.update_issue(self.issue, issue)
-                    return [issue]
 
-                self.add_issue(issue, new_issues=[])
+        new_issues = []
+
+        if issue:
+            issue['test'] = self.issue['test']
+            if issue['id'] == self.issue['id']:
+                self.db.update_issue(self.issue, issue)
+                return True, new_issues
+
+            self.add_issue(issue, new_issues=new_issues)
 
         self.listener.invalid_issue(issue=self.issue)
-        return []
+        return False, new_issues

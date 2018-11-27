@@ -29,12 +29,13 @@ class ReduceJob(CallJob):
         self.cost = int(self.config.get(sut_section, 'reduce_cost', fallback=self.config.get(sut_section, 'cost', fallback=1)))
 
     def run(self):
-        if not ValidateJob(id=self.id,
-                           config=self.config,
-                           issue=self.issue,
-                           db=self.db,
-                           listener=self.listener).run():
-            return []
+        valid, issues = ValidateJob(id=self.id,
+                                    config=self.config,
+                                    issue=self.issue,
+                                    db=self.db,
+                                    listener=self.listener).validate()
+        if not valid:
+            return issues
 
         sut_section = 'sut.' + self.sut_name
         sut_call, sut_call_kwargs = config_get_callable(self.config, sut_section, ['reduce_call', 'call'])
@@ -55,7 +56,6 @@ class ReduceJob(CallJob):
             self.db.update_issue(self.issue, {'reduced': reduced_src})
             self.listener.update_issue(issue=self.issue)
 
-        issues = list()
         for issue in new_issues:
             self.add_issue(issue, new_issues=issues)
 

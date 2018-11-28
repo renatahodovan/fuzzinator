@@ -24,7 +24,7 @@ class Controller(object):
     """
     Fuzzinator's main controller that orchestrates a fuzz session by scheduling
     all related activities (e.g., keeps SUTs up-to-date, runs fuzzers and feeds
-    test cases to SUTs, or minimizes failure inducing test cases) . All
+    test cases to SUTs, or minimizes failure inducing test cases). All
     configuration options of the framework must be encapsulated in a
     :class:`configparser.ConfigParser` object.
 
@@ -112,7 +112,7 @@ class Controller(object):
           should be formatted in full, while if ``'short'`` is given, a
           summary description (preferably a single line of text) should be
           returned.
-          (Optional, default: :mod:`fuzzinator.formatter.JsonFormatter`.)
+          (Optional, default: :func:`fuzzinator.formatter.JsonFormatter`.)
 
           See package :mod:`fuzzinator.formatter` for further potential
           callables.
@@ -139,7 +139,7 @@ class Controller(object):
           this fuzz job. (Mandatory)
 
         - Option ``fuzzer``: Fully qualified name of a python callable that must
-          accept and ``index`` keyword argument representing a running counter
+          accept an ``index`` keyword argument representing a running counter
           in the fuzz job and must return a test input (or ``None``, which
           signals that the fuzzer is "exhausted" and cannot generate more test
           cases in this fuzz job). The semantics of the generated test input is
@@ -150,19 +150,19 @@ class Controller(object):
           See package :mod:`fuzzinator.fuzzer` for potential callables.
 
         - Option ``batch``: Number of times the fuzzer is requested to generate
-          a new test and the SUT is called with it. (Optional, default: 1)
+          a new test for the SUT. (Optional, default: 1)
 
         - Option ``instances``: Number of instances of this fuzz job allowed to
           run in parallel. (Optional, default: ``inf``)
 
-        - Option ``refresh``: Statistic update frequency in terms of executed
+        - Option ``refresh``: Statistics update frequency in terms of executed
           test cases. (Optional, default: ``batch`` size)
 
       - Section ``listeners``: Definitions of custom event listeners.
         This section is optional.
 
-        - Options ``OPT``: Fully qualified name of python class that
-          executes custom actions to selected events.
+        - Options ``OPT``: Fully qualified name of a python class that
+          executes custom actions for selected events.
 
         See package :mod:`fuzzinator.listeners` for potential listeners.
 

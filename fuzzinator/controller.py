@@ -245,13 +245,13 @@ class Controller(object):
         def _poll_jobs():
             with self._shared_lock:
                 while not self._shared_queue.empty():
-                    job_class, job_kwargs = self._shared_queue.get_nowait()
+                    job_class, job_kwargs, priority = self._shared_queue.get_nowait()
                     if job_class is not None:
-                        _add_job(job_class, job_kwargs)
+                        _add_job(job_class, job_kwargs, priority)
                     else:
                         _cancel_job(**job_kwargs)
 
-        def _add_job(job_class, job_kwargs):
+        def _add_job(job_class, job_kwargs, priority):
             nonlocal job_id
             next_job = job_class(id=job_id,
                                  config=self.config,
@@ -259,6 +259,10 @@ class Controller(object):
                                  listener=self.listener,
                                  **job_kwargs)
             job_id += 1
+
+            if priority:
+                next_job.cost = 0
+
             {
                 FuzzJob:
                 lambda: self.listener.new_fuzz_job(ident=next_job.id,
@@ -281,7 +285,7 @@ class Controller(object):
                                                      sut=next_job.sut_name), # NOTE: listener not notified about update job cost
             }[job_class]()
 
-            job_queue.append(next_job)
+            job_queue.insert(0 if priority else len(job_queue), next_job)
 
         def _cancel_job(ident):
             if ident in running_jobs:
@@ -382,32 +386,32 @@ class Controller(object):
                 exception=e,
                 trace=traceback.format_exc()))
 
-    def add_fuzz_job(self, fuzzer_name):
+    def add_fuzz_job(self, fuzzer_name, priority=False):
         # Added for the sake of completeness and consistency.
         # Should not be used by UI to add fuzz jobs.
         with self._shared_lock:
-            self._shared_queue.put((FuzzJob, dict(fuzzer_name=fuzzer_name)))
+            self._shared_queue.put((FuzzJob, dict(fuzzer_name=fuzzer_name), priority))
         return True
 
-    def add_validate_job(self, issue):
+    def add_validate_job(self, issue, priority=False):
         with self._shared_lock:
-            self._shared_queue.put((ValidateJob, dict(issue=issue)))
+            self._shared_queue.put((ValidateJob, dict(issue=issue), priority))
         return True
 
-    def add_reduce_job(self, issue):
+    def add_reduce_job(self, issue, priority=False):
         if not self.config.has_option('sut.' + issue['sut'], 'reduce'):
             return False
 
         with self._shared_lock:
-            self._shared_queue.put((ReduceJob, dict(issue=issue)))
+            self._shared_queue.put((ReduceJob, dict(issue=issue), priority))
         return True
 
-    def add_update_job(self, sut_name):
+    def add_update_job(self, sut_name, priority=False):
         if not self.config.has_option('sut.' + sut_name, 'update'):
             return False
 
         with self._shared_lock:
-            self._shared_queue.put((UpdateJob, dict(sut_name=sut_name)))
+            self._shared_queue.put((UpdateJob, dict(sut_name=sut_name), priority))
         return True
 
     def reduce_all(self):
@@ -417,7 +421,7 @@ class Controller(object):
 
     def cancel_job(self, ident):
         with self._shared_lock:
-            self._shared_queue.put((None, dict(ident=ident)))
+            self._shared_queue.put((None, dict(ident=ident), None))
         return True
 
     @staticmethod

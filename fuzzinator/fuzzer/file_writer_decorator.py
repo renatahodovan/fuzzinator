@@ -58,13 +58,15 @@ class FileWriterDecorator(object):
                 return self
 
             def __exit__(self, *exc):
+                suppress = False
+
                 if hasattr(ancestor, '__exit__'):
-                    super().__exit__(*exc)
+                    suppress = super().__exit__(*exc)
 
                 if os.path.exists(self.file_path):
                     os.remove(self.file_path)
 
-                return None
+                return suppress
 
             def __call__(self, **kwargs):
                 call = super().__call__ if isclass(callable) else callable

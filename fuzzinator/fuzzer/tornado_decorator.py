@@ -108,12 +108,15 @@ class TornadoDecorator(object):
                 return self
 
             def __exit__(self, *exc):
+                suppress = False
+
                 if hasattr(ancestor, '__exit__'):
-                    super().__exit__(*exc)
+                    suppress = super().__exit__(*exc)
 
                 self.ioloop.add_callback(self.ioloop.stop)
                 logger.debug('Shut down tornado server.')
-                return None
+
+                return suppress
 
             class MainHandler(RequestHandler):
 

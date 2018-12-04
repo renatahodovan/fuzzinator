@@ -102,7 +102,7 @@ class AFLRunner(object):
         return self
 
     def __exit__(self, *exc):
-        return None
+        return False
 
     def __call__(self, **kwargs):
         crash_dir = os.path.join(self.output, '{name}'.format(name=self.master_name or self.slave_name or ''), 'crashes')

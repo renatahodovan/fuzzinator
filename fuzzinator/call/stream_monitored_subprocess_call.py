@@ -41,7 +41,7 @@ class StreamMonitoredSubprocessCall(object):
         return self
 
     def __exit__(self, *exc):
-        return None
+        return False
 
     def __call__(self, test, **kwargs):
         if self.timeout:

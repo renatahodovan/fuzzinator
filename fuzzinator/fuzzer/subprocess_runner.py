@@ -91,7 +91,7 @@ class SubprocessRunner(object):
 
     def __exit__(self, *exc):
         shutil.rmtree(self.outdir, ignore_errors=True)
-        return None
+        return False
 
     # Although kwargs is not used here but the 'index' argument will be passed anyhow
     # and it has to be accepted.

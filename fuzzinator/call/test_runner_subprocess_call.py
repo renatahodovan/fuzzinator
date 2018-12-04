@@ -44,7 +44,7 @@ class TestRunnerSubprocessCall(object):
     def __exit__(self, *exc):
         if self.proc and self.proc.poll() is None:
             Controller.kill_process_tree(self.proc.pid)
-        return None
+        return False
 
     def __call__(self, test, **kwargs):
         if not self.proc or self.proc.poll() is not None:

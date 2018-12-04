@@ -58,7 +58,7 @@ class ListDirectory(object):
         return self
 
     def __exit__(self, *exc):
-        return None
+        return False
 
     def __call__(self, **kwargs):
         if not self.tests:

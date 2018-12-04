@@ -30,7 +30,7 @@ class CallableContextManager(object):
         return self
 
     def __exit__(self, *exc):
-        return None
+        return False
 
     def __call__(self, *args, **kwargs):
         return self._callable(*args, **kwargs)

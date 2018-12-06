@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -65,7 +65,7 @@ class FuzzJob(CallJob):
 
                         if issue and test is None:
                             self.batch = index
-                            self.listener.warning(msg='{sut} crashed before the first test.'.format(sut=self.sut_name))
+                            self.listener.warning(ident=self.id, msg='{sut} crashed before the first test.'.format(sut=self.sut_name))
                             break
 
                         if issue is not None and ('test' not in issue or not issue['test']):

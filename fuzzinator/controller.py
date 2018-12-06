@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -266,23 +266,25 @@ class Controller(object):
             {
                 FuzzJob:
                 lambda: self.listener.new_fuzz_job(ident=next_job.id,
-                                                   fuzzer=next_job.fuzzer_name,
-                                                   sut=next_job.sut_name,
                                                    cost=next_job.cost,
+                                                   sut=next_job.sut_name,
+                                                   fuzzer=next_job.fuzzer_name,
                                                    batch=next_job.batch),
                 ValidateJob:
                 lambda: self.listener.new_validate_job(ident=next_job.id,
+                                                       cost=next_job.cost,
                                                        sut=next_job.sut_name,
-                                                       issue_id=next_job.issue['id']), # NOTE: listener not notified about validate job cost
+                                                       issue_id=next_job.issue['id']),
                 ReduceJob:
                 lambda: self.listener.new_reduce_job(ident=next_job.id,
-                                                     sut=next_job.sut_name,
                                                      cost=next_job.cost,
+                                                     sut=next_job.sut_name,
                                                      issue_id=next_job.issue['id'],
                                                      size=len(next_job.issue['test'])),
                 UpdateJob:
                 lambda: self.listener.new_update_job(ident=next_job.id,
-                                                     sut=next_job.sut_name), # NOTE: listener not notified about update job cost
+                                                     cost=next_job.cost,
+                                                     sut=next_job.sut_name),
             }[job_class]()
 
             job_queue.insert(0 if priority else len(job_queue), next_job)
@@ -369,7 +371,7 @@ class Controller(object):
         except KeyboardInterrupt:
             pass
         except Exception as e:
-            self.listener.warning(msg='Exception in the main controller loop: {exception}\n{trace}'.format(exception=e, trace=traceback.format_exc()))
+            self.listener.warning(ident=None, msg='Exception in the main controller loop: {exception}\n{trace}'.format(exception=e, trace=traceback.format_exc()))
         finally:
             Controller.kill_process_tree(os.getpid(), kill_root=False)
             if os.path.exists(self.work_dir):
@@ -381,7 +383,7 @@ class Controller(object):
                 # Automatic reduction and/or validation if the job found something new
                 self.add_reduce_job(issue=issue) or self.add_validate_job(issue=issue)
         except Exception as e:
-            self.listener.warning(msg='Exception in {job}: {exception}\n{trace}'.format(
+            self.listener.warning(ident=job.id, msg='Exception in {job}: {exception}\n{trace}'.format(
                 job=repr(job),
                 exception=e,
                 trace=traceback.format_exc()))

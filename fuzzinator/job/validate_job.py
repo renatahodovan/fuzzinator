@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -42,5 +42,5 @@ class ValidateJob(CallJob):
 
             self.add_issue(issue, new_issues=new_issues)
 
-        self.listener.invalid_issue(issue=self.issue)
+        self.listener.invalid_issue(ident=self.id, issue=self.issue)
         return False, new_issues

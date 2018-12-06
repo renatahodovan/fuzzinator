@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -31,51 +31,53 @@ class EventListener(object):
         """
         pass
 
-    def new_fuzz_job(self, ident, fuzzer, sut, cost, batch):
+    def new_fuzz_job(self, ident, cost, sut, fuzzer, batch):
         """
         Invoked when a new (still inactive) fuzz job is instantiated.
 
         :param int ident: a unique identifier of the new fuzz job.
-        :param str fuzzer: short name of the new fuzz job (name of the
-            corresponding config section without the "fuzz." prefix).
+        :param int cost: cost associated with the new fuzz job.
         :param str sut: short name of the SUT of the new fuzz job (name of the
             corresponding config section without the "sut." prefix).
-        :param int cost: cost associated with the new fuzz job.
+        :param str fuzzer: short name of the new fuzz job (name of the
+            corresponding config section without the "fuzz." prefix).
         :param batch: batch size of the new fuzz job, i.e., number of test cases
             requested from the fuzzer (may be ``inf``).
         :type batch: int, float
         """
         pass
 
-    def new_reduce_job(self, ident, sut, cost, issue_id, size):
+    def new_reduce_job(self, ident, cost, sut, issue_id, size):
         """
         Invoked when a new (still inactive) reduce job is instantiated.
 
         :param int ident: a unique identifier of the new reduce job.
+        :param int cost: cost associated with the new reduce job.
         :param str sut: short name of the SUT used in the new reduce job (name
             of the corresponding config section without the "sut." prefix).
-        :param int cost: cost associated with the new reduce job.
         :param Any issue_id: ``'id'`` property of the issue to be reduced.
         :param int size: size of the test case associated with the issue to be
             reduced.
         """
         pass
 
-    def new_update_job(self, ident, sut):
+    def new_update_job(self, ident, cost, sut):
         """
         Invoked when a new (still inactive) update job is instantiated.
 
         :param int ident: a unique identifier of the new update job.
+        :param int cost: cost associated with the new update job.
         :param str sut: short name of the SUT to be updated (name of the
             corresponding config section without the "sut." prefix).
         """
         pass
 
-    def new_validate_job(self, ident, sut, issue_id):
+    def new_validate_job(self, ident, cost, sut, issue_id):
         """
         Invoked when a new (still inactive) validate job is instantiated.
 
         :param int ident: a unique identifier of the new validate job.
+        :param int cost: cost associated with the new validate job.
         :param str sut: short name of the SUT used in the new validate job (name
             of the corresponding config section without the "sut." prefix).
         :param Any issue_id: ``'id'`` property of the issue to be validated.
@@ -110,10 +112,11 @@ class EventListener(object):
         """
         pass
 
-    def new_issue(self, issue):
+    def new_issue(self, ident, issue):
         """
         Invoked when a new issue is found.
 
+        :param int ident: identifier of the job that has found the issue.
         :param dict issue: the issue that was found (all relevant information -
             e.g., the SUT that reported the issue, the test case that triggered
             the issue, the fuzzer that generated the test case, the ID of the
@@ -121,29 +124,34 @@ class EventListener(object):
         """
         pass
 
-    def invalid_issue(self, issue):
+    def invalid_issue(self, ident, issue):
         """
         Invoked when an issue seems invalid.
 
+        :param int ident: identifier of the job that has invalidated the issue.
         :param dict issue: the issue object that did not pass re-validation
             (listener is free to decide how to react, an option is to remove the
             issue from the database).
         """
         pass
 
-    def update_issue(self, issue):
+    def update_issue(self, ident, issue):
         """
         Invoked when the status of an issue changed.
 
+        :param int ident: identifier of the job that has updated the issue.
         :param dict issue: the issue object that has changed.
         """
         pass
 
-    def warning(self, msg):
+    def warning(self, ident, msg):
         """
         Invoked on unexpected events.
 
-        :param str msg: a string representation of the problem.
+        :param int ident: identifier of the job that has signalled the warning
+            (may be ``None`` if the warning was not signalled by a job but by
+            the core).
+        :param str msg: description of the problem.
         """
         pass
 

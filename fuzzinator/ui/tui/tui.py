@@ -63,16 +63,16 @@ class Tui(PopUpLauncher):
         if timer.update():
             self.set_alarm_in(0.1, Tui.update_timer, timer)
 
-    def new_fuzz_job(self, ident, fuzzer, sut, cost, batch):
+    def new_fuzz_job(self, ident, cost, sut, fuzzer, batch):
         self.view.job_table.add_fuzz_job(ident, fuzzer, sut, cost, batch)
 
-    def new_reduce_job(self, ident, sut, cost, issue_id, size):
+    def new_reduce_job(self, ident, cost, sut, issue_id, size):
         self.view.job_table.add_reduce_job(ident, sut, cost, issue_id, size)
 
-    def new_update_job(self, ident, sut):
+    def new_update_job(self, ident, cost, sut):
         self.view.job_table.add_update_job(ident, sut)
 
-    def new_validate_job(self, ident, sut, issue_id):
+    def new_validate_job(self, ident, cost, sut, issue_id):
         self.view.job_table.add_validate_job(ident, sut, issue_id)
 
     def remove_job(self, ident):
@@ -90,20 +90,20 @@ class Tui(PopUpLauncher):
     def update_fuzz_stat(self):
         self.view.stat_table.update()
 
-    def new_issue(self, issue):
+    def new_issue(self, ident, issue):
         # Do shiny animation if a new issue has received.
         self.view.logo.do_animate = True
         self.loop.set_alarm_at(time.time() + 5, callback=self.view.logo.stop_animation)
         self.loop.set_alarm_in(0.1, self.view.logo.animate, self.view.logo)
         self.view.issues_table.add_row(issue)
 
-    def invalid_issue(self, issue):
+    def invalid_issue(self, ident, issue):
         self.view.remove_issue_popup(ident=issue['_id'])
 
-    def update_issue(self, issue):
+    def update_issue(self, ident, issue):
         self.view.issues_table.update_row(ident=issue['_id'])
 
-    def warning(self, msg):
+    def warning(self, ident, msg):
         self.view._emit('warning', msg)
 
     @staticmethod

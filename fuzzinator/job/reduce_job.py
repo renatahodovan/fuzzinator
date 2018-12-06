@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -51,10 +51,10 @@ class ReduceJob(CallJob):
                                              **reduce_kwargs)
 
         if reduced_src is None:
-            self.listener.warning(msg='Reduce of {ident} failed.'.format(ident=self.issue['id']))
+            self.listener.warning(ident=self.id, msg='Reduce of {ident} failed.'.format(ident=self.issue['id']))
         else:
             self.db.update_issue(self.issue, {'reduced': reduced_src})
-            self.listener.update_issue(issue=self.issue)
+            self.listener.update_issue(ident=self.id, issue=self.issue)
 
         for issue in new_issues:
             self.add_issue(issue, new_issues=issues)

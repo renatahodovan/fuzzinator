@@ -1,3 +1,5 @@
+version: "{build}"
+
 environment:
   TOXENV: "py"
   matrix:

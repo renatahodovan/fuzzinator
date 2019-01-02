@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -55,10 +55,14 @@ def SubprocessUpdate(command, cwd=None, env=None, timeout=None):
                                 cwd=cwd or os.getcwd(),
                                 env=dict(os.environ, **json.loads(env or '{}')))
         stdout, stderr = proc.communicate(timeout=timeout)
+        stdout_str = stderr.decode('utf-8', errors='ignore')
         if proc.returncode != 0:
-            logger.warning(stderr)
+            logger.warning('Update command returned with nonzero exitcode (%d).\n%s\n%s',
+                           proc.returncode,
+                           stdout_str,
+                           stderr.decode('utf-8', errors='ignore'))
         else:
-            logger.info(stdout)
+            logger.info('Update succeeded.\n%s', stdout_str)
     except subprocess.TimeoutExpired:
         logger.debug('Timeout expired in the subprocess update.')
         Controller.kill_process_tree(proc.pid)

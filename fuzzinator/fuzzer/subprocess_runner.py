@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -76,13 +76,16 @@ class SubprocessRunner(object):
     def __enter__(self):
         os.makedirs(self.outdir, exist_ok=True)
         try:
-            with open(os.devnull, 'w') as FNULL:
-                proc = subprocess.Popen(shlex.split(self.command.format(uid=self.uid), posix=sys.platform != 'win32'),
-                                        cwd=self.cwd,
-                                        env=self.env,
-                                        stdout=FNULL,
-                                        stderr=FNULL)
-                proc.communicate(timeout=self.timeout)
+            proc = subprocess.Popen(shlex.split(self.command.format(uid=self.uid), posix=sys.platform != 'win32'),
+                                    cwd=self.cwd,
+                                    env=self.env,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+            stdout, stderr = proc.communicate(timeout=self.timeout)
+            if proc.returncode != 0:
+                logger.warning('Fuzzer command returned with nonzero exitcode (%d): %s\n%s', proc.returncode,
+                               stdout.decode('utf-8', errors='ignore'),
+                               stderr.decode('utf-8', errors='ignore'))
         except subprocess.TimeoutExpired:
             logger.debug('Timeout expired in the fuzzer\'s subprocess runner.')
             Controller.kill_process_tree(proc.pid)

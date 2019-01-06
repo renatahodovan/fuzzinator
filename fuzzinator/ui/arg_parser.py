@@ -24,8 +24,8 @@ def build_parser(parent=None):
                         help='undefine config sections or options')
     parser.add_argument('--show-config', action='store_true',
                         help='show complete config')
-    parser.add_argument('-l', '--log-level', metavar='LEVEL', default=logging.INFO,
-                        help='set log level')
+    parser.add_argument('-l', '--log-level', metavar='LEVEL', default='INFO',
+                        help='set log level (default: %(default)s)')
     parser.add_argument('-v', dest='log_level', action='store_const', const='DEBUG', default=argparse.SUPPRESS,
                         help='verbose mode (alias for -l %(const)s)')
     parser.add_argument('--sys-recursion-limit', metavar='NUM', type=int, default=sys.getrecursionlimit(),

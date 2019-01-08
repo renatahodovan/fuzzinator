@@ -79,7 +79,7 @@ Usage
 
 A common form of *Fuzzinator*'s usage::
 
-    fuzzinator --tui -U <path/to/the/config.ini>
+    fuzzinator --tui --utf8 <path/to/the/config.ini>
 
 
 Compatibility

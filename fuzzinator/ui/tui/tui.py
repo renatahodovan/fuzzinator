@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -158,7 +158,7 @@ def execute(args=None, parser=None):
     parser = build_parser(parent=parser)
     parser.add_argument('--force-encoding', metavar='NAME', default=None, choices=['utf-8', 'ascii'],
                         help='force text encoding used for TUI widgets (%(choices)s; default: autodetect)')
-    parser.add_argument('-U', dest='force_encoding', action='store_const', const='utf-8', default=argparse.SUPPRESS,
+    parser.add_argument('--utf8', '--utf-8', dest='force_encoding', action='store_const', const='utf-8', default=argparse.SUPPRESS,
                         help='force UTF-8 encoding (alias for --force-encoding=%(const)s)')
     parser.add_argument('--log-file', metavar='FILE',
                         help='redirect stderr (instead of /dev/null; for debugging purposes)')

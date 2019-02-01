@@ -44,6 +44,10 @@ class Controller(object):
 
         - Option ``cost_budget``: (Optional, default: number of cpus)
 
+        - Option ``validate_after_update``: Boolean to enable the validation
+          of valid issues of all SUTs after their update.
+          (Optional, default: ``False``)
+
       - Sections ``sut.NAME``: Definitions of a SUT named *NAME*
 
         - Option ``call``: Fully qualified name of a python callable that must
@@ -104,6 +108,10 @@ class Controller(object):
 
         - Option ``update_cost``: (Optional, default: the value of option
           ``fuzzinator:cost_budget``)
+
+        - Option ``validate_after_update``: Boolean to enable the validation
+          of the valid issues of the SUT after its update. (Optional, default:
+          the value of option ``fuzzinator:validate_after_update``)
 
         - Option ``formatter``: Fully qualified name of a python callable that
           formats the issue dictionary of the SUT and returns a custom string
@@ -200,6 +208,7 @@ class Controller(object):
         self.work_dir = config_get_with_writeback(self.config, 'fuzzinator', 'work_dir', os.path.join(os.getcwd(), '.fuzzinator-{uid}')).format(uid=os.getpid())
         self.config.set('fuzzinator', 'work_dir', self.work_dir)
         self.fuzzers = config_get_fuzzers(self.config)
+        self.validate_after_update = config_get_with_writeback(self.config, 'fuzzinator', 'validate_after_update', fallback=False) in [1, '1', True, 'True', 'true']
 
         self.db = MongoDriver(config_get_with_writeback(self.config, 'fuzzinator', 'db_uri', 'mongodb://localhost/fuzzinator'))
         self.db.init_db(self.fuzzers)
@@ -420,11 +429,22 @@ class Controller(object):
 
         with self._shared_lock:
             self._shared_queue.put((UpdateJob, dict(sut_name=sut_name), priority))
+
+        if self.config.get('sut.' + sut_name, 'validate_after_update', fallback=self.validate_after_update) in [1, '1', True, 'True', 'true']:
+            self.validate_all(sut_name)
+
         return True
 
-    def reduce_all(self):
-        for issue in self.db.find_issues_by_suts([section for section in self.config.sections() if section.startswith('sut.') and section.count('.') == 1]):
-            if not issue['reported'] and not issue['reduced']:
+    def validate_all(self, sut_name=None):
+        sut_name = [sut_name] if sut_name else [section for section in self.config.sections() if section.startswith('sut.') and section.count('.') == 1]
+        for issue in self.db.find_issues_by_suts(sut_name):
+            if not issue.get('invalid'):
+                self.add_validate_job(issue)
+
+    def reduce_all(self, sut_name=None):
+        sut_name = [sut_name] if sut_name else [section for section in self.config.sections() if section.startswith('sut.') and section.count('.') == 1]
+        for issue in self.db.find_issues_by_suts(sut_name):
+            if not issue.get('reported') and not issue.get('reduced'):
                 self.add_reduce_job(issue)
 
     def cancel_job(self, ident):

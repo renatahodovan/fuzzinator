@@ -42,6 +42,7 @@ setup(
         'pymongo',
         'pyperclip',
         'python-bugzilla',
+        'python-gitlab',
         'rainbow_logging_handler',
         'setuptools',
         'sphinx',

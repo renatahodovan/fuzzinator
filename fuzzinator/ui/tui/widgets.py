@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -35,7 +35,8 @@ class MainWindow(PopUpLauncher):
 
         self.logo = FuzzerLogo(max_load=controller.capacity)
         self.issues_table = IssuesTable(issues_baseline=[issue['_id'] for issue in self.db.all_issues()], db=self.db, initial_sort='sut')
-        self.stat_table = StatTable(['fuzzer'], stat_baseline=self.db.stat_snapshot(controller.fuzzers), db=self.db)
+        fuzzer_suts = {(fuzzer, self.config.get('fuzz.' + fuzzer, 'sut')) for fuzzer in self.controller.fuzzers}
+        self.stat_table = StatTable(['fuzzer'], stat_baseline={fuzzer_sut: stat for fuzzer_sut, stat in self.db.get_stats().items() if fuzzer_sut in fuzzer_suts}, db=self.db)
         self.job_table = JobsTable()
 
         self.data_tables = Pile([
@@ -280,18 +281,17 @@ class StatTable(Table):
 
     def show_all(self):
         self.show_current = False
-        self.query_data = list(self.db.stat_snapshot(None).values())
+        self.query_data = list(self.db.get_stats().values())
         self.requery(self.query_data)
         self.walker._modified()
 
     def show_less(self):
         self.show_current = True
-        snapshot = self.db.stat_snapshot([fuzzer for fuzzer in self.stat_baseline])
-        current_progress = dict((fuzzer, dict(fuzzer=fuzzer,
-                                              exec=snapshot[fuzzer]['exec'] - self.stat_baseline[fuzzer]['exec'],
-                                              issues=snapshot[fuzzer]['issues'] - self.stat_baseline[fuzzer]['issues'],
-                                              unique=snapshot[fuzzer]['unique'] - self.stat_baseline[fuzzer]['unique'], )) for fuzzer in self.stat_baseline)
-        self.query_data = list(current_progress.values())
+        snapshot = self.db.get_stats(show_all=False)
+        self.query_data = [dict(fuzzer=fuzzer,
+                                exec=snapshot[(fuzzer, sut)]['exec'] - self.stat_baseline[(fuzzer, sut)]['exec'],
+                                issues=snapshot[(fuzzer, sut)]['issues'] - self.stat_baseline[(fuzzer, sut)]['issues'],
+                                unique=snapshot[(fuzzer, sut)]['unique']) for fuzzer, sut in self.stat_baseline]
         self.requery(self.query_data)
         self.walker._modified()
 

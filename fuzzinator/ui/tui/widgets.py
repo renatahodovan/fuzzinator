@@ -34,7 +34,7 @@ class MainWindow(PopUpLauncher):
         self.trackers = dict()
 
         self.logo = FuzzerLogo(max_load=controller.capacity)
-        self.issues_table = IssuesTable(issues_baseline=[issue['_id'] for issue in self.db.all_issues()], db=self.db, initial_sort='sut')
+        self.issues_table = IssuesTable(db=self.db, initial_sort='sut')
         fuzzer_suts = {(fuzzer, self.config.get('fuzz.' + fuzzer, 'sut')) for fuzzer in self.controller.fuzzers}
         self.stat_table = StatTable(['fuzzer'], stat_baseline={fuzzer_sut: stat for fuzzer_sut, stat in self.db.get_stats().items() if fuzzer_sut in fuzzer_suts}, db=self.db)
         self.job_table = JobsTable()
@@ -197,8 +197,7 @@ class IssuesTable(Table):
         TableColumn('id', width=('weight', 3), label='Issue ID')
     ]
 
-    def __init__(self, issues_baseline, db, *args, **kwargs):
-        self.issues_baseline = issues_baseline
+    def __init__(self, db, *args, **kwargs):
         self.db = db
         super().__init__(*args, **kwargs)
 
@@ -240,13 +239,13 @@ class IssuesTable(Table):
 
     def show_all(self):
         self.all_issues = True
-        self.query_data = self.db.all_issues(self.show_invalid)
+        self.query_data = self.db.all_issues(include_invalid=self.show_invalid, show_all=True)
         self.requery(self.query_data)
         self.walker._modified()
 
     def show_less(self):
         self.all_issues = False
-        self.query_data = [issue for issue in self.db.all_issues() if issue['_id'] not in self.issues_baseline and (self.show_invalid or 'invalid' not in issue)]
+        self.query_data = self.db.all_issues(include_invalid=self.show_invalid, show_all=False)
         self.requery(self.query_data)
         self.walker._modified()
 

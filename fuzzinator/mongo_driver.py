@@ -62,8 +62,13 @@ class MongoDriver(object):
         # different from the value stored in `now` (on nanosecond level).
         return issue['first_seen'] == issue['last_seen']
 
-    def all_issues(self, include_invalid=False):
-        return list(self._db.fuzzinator_issues.find({'invalid': {'$exists': False}} if not include_invalid else {}))
+    def all_issues(self, include_invalid=False, show_all=True):
+        query = {}
+        if not show_all:
+            query['first_seen'] = { '$gte': self.session_start }
+        if not include_invalid:
+            query['invalid'] = { '$exists': False }
+        return list(self._db.fuzzinator_issues.find(query))
 
     def find_issue_by_id(self, _id):
         return self._db.fuzzinator_issues.find_one({'_id': ObjectId(_id)})

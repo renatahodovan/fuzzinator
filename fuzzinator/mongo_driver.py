@@ -86,7 +86,13 @@ class MongoDriver(object):
         self._db.fuzzinator_issues.update_one({'_id': ObjectId(_id)}, {'$set': {'invalid': datetime.utcnow()}})
 
     def get_stats(self, filter=None, skip=0, limit=0, sort=None, show_all=True):
-        start_time = self.session_start if not show_all else datetime.fromtimestamp(0)
+        issues_pipeline = []
+        if not show_all:
+            issues_pipeline.append({ '$match': { 'first_seen': { '$gte': self.session_start } } })
+        issues_pipeline.extend([
+            { '$group': { '_id': { 'sut': '$sut', 'fuzzer': '$fuzzer' }, 'unique': { '$sum': 1 } } },
+            { '$addFields': { 'sut': '$_id.sut', 'fuzzer': '$_id.fuzzer', 'exec': 0, 'crashes': 0 } }
+        ])
 
         aggregator = [
             # Get an empty document
@@ -97,11 +103,7 @@ class MongoDriver(object):
             # Get unique crash counts from the issues (exec and crash counts are set to 0).
             { '$lookup': {
                 'from': 'fuzzinator_issues',
-                'pipeline': [
-                    { '$match': { 'first_seen': { '$gte': start_time } } },
-                    { '$group': { '_id': { 'sut': '$sut', 'fuzzer': '$fuzzer' }, 'unique': { '$sum': 1 } } },
-                    { '$addFields': { 'sut': '$_id.sut', 'fuzzer': '$_id.fuzzer', 'exec': 0, 'crashes': 0 } },
-                ],
+                'pipeline': issues_pipeline,
                 'as': 'fuzzinator_issues',
             } },
 

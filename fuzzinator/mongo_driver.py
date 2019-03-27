@@ -20,7 +20,7 @@ class MongoDriver(object):
 
     @property
     def _db(self):
-        return MongoClient(self.uri).get_default_database()
+        return MongoClient(self.uri).get_database()
 
     def init_db(self, sut_fuzzer_pairs):
         """

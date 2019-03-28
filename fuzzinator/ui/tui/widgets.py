@@ -176,11 +176,11 @@ class MainWindow(PopUpLauncher):
     def show_all(self, btn):
         if btn.label == 'F9 Show all':
             btn.set_label('F9 Show less')
-            self.issues_table.show_all()
+            self.issues_table.update(show_all=True)
             self.stat_table.show_all()
         else:
             btn.set_label('F9 Show all')
-            self.issues_table.show_less()
+            self.issues_table.update(show_all=False)
             self.stat_table.show_less()
 
 
@@ -229,23 +229,11 @@ class IssuesTable(Table):
 
     def invert_invalid(self):
         self.show_invalid = not self.show_invalid
-        self.update()
+        self.update(self.all_issues)
 
-    def update(self):
-        if self.all_issues:
-            self.show_all()
-        else:
-            self.show_less()
-
-    def show_all(self):
-        self.all_issues = True
-        self.query_data = self.db.all_issues(include_invalid=self.show_invalid, show_all=True)
-        self.requery(self.query_data)
-        self.walker._modified()
-
-    def show_less(self):
-        self.all_issues = False
-        self.query_data = self.db.all_issues(include_invalid=self.show_invalid, show_all=False)
+    def update(self, show_all):
+        self.all_issues = show_all
+        self.query_data = self.db.all_issues(include_invalid=self.show_invalid, show_all=self.all_issues)
         self.requery(self.query_data)
         self.walker._modified()
 

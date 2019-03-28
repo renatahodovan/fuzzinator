@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -92,8 +92,7 @@ class StreamMonitoredSubprocessCall(object):
 
         Controller.kill_process_tree(proc.pid, sig=signal.SIGKILL)
 
-        logger.debug('{stdout}\n{stderr}'.format(stdout=streams['stdout'].decode('utf-8', errors='ignore'),
-                                                 stderr=streams['stderr'].decode('utf-8', errors='ignore')))
+        logger.debug('%s\n%s', streams['stdout'].decode('utf-8', errors='ignore'), streams['stderr'].decode('utf-8', errors='ignore'))
         if issue:
             issue.update(dict(exit_code=proc.returncode,
                               stderr=streams['stderr'],

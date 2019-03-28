@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -73,8 +73,7 @@ def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None,
                                 cwd=cwd or os.getcwd(),
                                 env=env)
         stdout, stderr = proc.communicate(timeout=timeout)
-        logger.debug('{stdout}\n{stderr}'.format(stdout=stdout.decode('utf-8', errors='ignore'),
-                                                 stderr=stderr.decode('utf-8', errors='ignore')))
+        logger.debug('%s\n%s', stdout.decode('utf-8', errors='ignore'), stderr.decode('utf-8', errors='ignore'))
 
         issue = {
             'exit_code': proc.returncode,

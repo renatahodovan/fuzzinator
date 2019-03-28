@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -72,12 +72,12 @@ class SubprocessPropertyDecorator(CallableDecorator):
                     if proc.returncode == 0:
                         issue[property] = stdout
                     else:
-                        logger.debug('SubprocessPropertyDecorator exited with non-zero exit code while setting the {property} property.\n'
-                                     '{stdout}\n{stderr}'.format(property=property,
-                                                                 stdout=stdout.decode('utf-8', errors='ignore'),
-                                                                 stderr=stderr.decode('utf-8', errors='ignore')))
+                        logger.debug('SubprocessPropertyDecorator exited with nonzero exit code while setting the \'%s\' property.\n%s\n%s',
+                                     property,
+                                     stdout.decode('utf-8', errors='ignore'),
+                                     stderr.decode('utf-8', errors='ignore'))
                 except subprocess.TimeoutExpired:
-                    logger.debug('Timeout expired in the SubprocessPropertyDecorator while setting the {property} property.'.format(property=property))
+                    logger.debug('Timeout expired in the SubprocessPropertyDecorator while setting the \'%s\' property.', property)
                     Controller.kill_process_tree(proc.pid)
 
                 return issue

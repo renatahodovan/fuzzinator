@@ -83,7 +83,7 @@ class SubprocessRunner(object):
                                     stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate(timeout=self.timeout)
             if proc.returncode != 0:
-                logger.warning('Fuzzer command returned with nonzero exitcode (%d): %s\n%s', proc.returncode,
+                logger.warning('Fuzzer command returned with nonzero exit code (%d).\n%s\n%s', proc.returncode,
                                stdout.decode('utf-8', errors='ignore'),
                                stderr.decode('utf-8', errors='ignore'))
         except subprocess.TimeoutExpired:

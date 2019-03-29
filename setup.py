@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -33,8 +33,8 @@ setup(
         'keyrings.alt',
         'markdown',
         'pexpect',
-        'picire==18.10',
-        'picireny==18.10',
+        'picire==19.3',
+        'picireny==19.3',
         'psutil',
         'PyGithub',
         'pymongo',

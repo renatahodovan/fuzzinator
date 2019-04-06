@@ -202,21 +202,21 @@ class IssuesTable(Table):
         super().__init__(*args, **kwargs)
 
     def keypress(self, size, key):
-        if key == "shift up":
+        if key == 'shift up':
             self.sort_by_column(reverse=True)
-        elif key == "shift down":
+        elif key == 'shift down':
             self.sort_by_column(reverse=False)
-        elif key == "ctrl s":
+        elif key == 'ctrl s':
             self.sort_by_column(toggle=True)
-        elif key in ["delete", 'd']:
+        elif key in ['delete', 'd']:
             if len(self):
                 ident = self[self.focus_position].data['_id']
                 self.db.invalidate_issue_by_id(ident)
                 self.invalidate_row(ident)
-        elif key in ["shift delete", "D"]:
+        elif key in ['shift delete', 'D']:
             if len(self):
                 self._emit('delete')
-        elif key in ["r", "ctrl r"]:
+        elif key in ['r', 'ctrl r']:
             self._emit('refresh')
         else:
             return super().keypress(size, key)

@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -47,7 +47,7 @@ class ListDirectory(object):
             [fuzz.foo-with-oldbugs.fuzzer.init]
             pattern=/home/alice/foo-old-bugs/**/*.js
     """
-    def __init__(self, pattern, contents='True', **kwargs):
+    def __init__(self, pattern, contents=True, **kwargs):
         self.contents = contents in [1, '1', True, 'True', 'true']
         path = Path(pattern)
         anchor, pattern = ('.', pattern) if not path.anchor else (path.anchor, str(path.relative_to(path.anchor)))

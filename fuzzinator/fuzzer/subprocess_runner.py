@@ -61,7 +61,7 @@ class SubprocessRunner(object):
             command=barfuzzer -n ${fuzz.foo-with-bar:batch} -o ${outdir}
     """
 
-    def __init__(self, outdir, command, cwd=None, env=None, timeout=None, contents='True', **kwargs):
+    def __init__(self, outdir, command, cwd=None, env=None, timeout=None, contents=True, **kwargs):
         # uid is used to make sure we create unique directory for the generated test cases.
         self.uid = '{pid}-{id}'.format(pid=os.getpid(), id=id(self))
 

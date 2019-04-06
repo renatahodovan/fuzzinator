@@ -55,7 +55,7 @@ def SubprocessUpdate(command, cwd=None, env=None, timeout=None):
                                 cwd=cwd or os.getcwd(),
                                 env=dict(os.environ, **json.loads(env or '{}')))
         stdout, stderr = proc.communicate(timeout=timeout)
-        stdout_str = stderr.decode('utf-8', errors='ignore')
+        stdout_str = stdout.decode('utf-8', errors='ignore')
         if proc.returncode != 0:
             logger.warning('Update command returned with nonzero exit code (%d).\n%s\n%s',
                            proc.returncode,

@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -29,16 +29,16 @@ class GithubTracker(BaseTracker):
     @property
     def logged_in(self):
         try:
-            self.gh.get_user().id
+            _ = self.gh.get_user().id
             return True
-        except:
+        except Exception:
             return False
 
     def login(self, username, pwd):
         try:
             self.gh = Github(username, pwd)
             # This expression has no effect but will throw an exception if the authentication failed.
-            self.gh.get_user().id
+            _ = self.gh.get_user().id
             self.ghapi = self.gh.get_repo(self.repository)
             return True
         except BadCredentialsException:

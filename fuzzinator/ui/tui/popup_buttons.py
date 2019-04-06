@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -24,15 +24,16 @@ class AboutButton(PopUpLauncher):
     def __init__(self, label):
         super().__init__(FormattedButton(label))
         self.about = AboutDialog()
+        connect_signal(self.original_widget, 'click', lambda btn: self.open_pop_up())
 
+    def get_pop_up_parameters(self):
         width = max([len(line) for line in self.about.content.splitlines()]) + 10
         height = self.about.content.count('\n') + 4
         cols, rows = get_terminal_size()
-        self.get_pop_up_parameters = lambda: dict(left=max(cols // 2 - width // 2, 1),
-                                                  top=min(-rows // 2 - height // 2, -1),
-                                                  overlay_width=width,
-                                                  overlay_height=height)
-        connect_signal(self.original_widget, 'click', lambda btn: self.open_pop_up())
+        return dict(left=max(cols // 2 - width // 2, 1),
+                    top=min(-rows // 2 - height // 2, -1),
+                    overlay_width=width,
+                    overlay_height=height)
 
     def create_pop_up(self):
         connect_signal(self.about, 'close', lambda button: self.close_pop_up())
@@ -46,7 +47,6 @@ class ViewButton(FullScreenPopupLauncher):
         self.issues_table = issues_table
         self.config = config
         self.trackers = trackers
-        self.pop_up_params = {'left': -40, 'top': -100, 'overlay_width': 200, 'overlay_height': 60}
         connect_signal(self.original_widget, 'click', lambda btn: self.open_pop_up())
 
     def create_pop_up(self):
@@ -101,8 +101,8 @@ class ReportButton(FullScreenPopupLauncher):
         issue = self.issues_table.db.find_issue_by_id(focus.data['_id'])
         try:
             tracker_cls = self.config.get('sut.' + issue['sut'], 'tracker').split('.')[-1]
-            popup_cls = eval(tracker_cls.replace('Tracker', 'ReportDialog'))
-        except:
+            popup_cls = globals()[tracker_cls.replace('Tracker', 'ReportDialog')]
+        except Exception:
             # If there is no reporter interface for the given tracker
             # then we only display the formatted issue.
             popup_cls = FormattedIssueDialog

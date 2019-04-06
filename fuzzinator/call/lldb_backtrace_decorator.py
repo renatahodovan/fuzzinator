@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -66,11 +66,10 @@ class LldbBacktraceDecorator(CallableDecorator):
                     return issue
 
                 try:
-                    expect_patterns = ['\(lldb\) ', pexpect.EOF, pexpect.TIMEOUT]
-                    child = pexpect.spawn('lldb -X -- {cmd}'.format(
-                        cmd=command.format(test=kwargs['test'])),
-                        cwd=cwd or os.getcwd(),
-                        env=dict(os.environ, **json.loads(env or '{}')))
+                    expect_patterns = [r'\(lldb\) ', pexpect.EOF, pexpect.TIMEOUT]
+                    child = pexpect.spawn('lldb -X -- {cmd}'.format(cmd=command.format(test=kwargs['test'])),
+                                          cwd=cwd or os.getcwd(),
+                                          env=dict(os.environ, **json.loads(env or '{}')))
                     while child.expect(expect_patterns, timeout=timeout) == 0:
                         pass
                     child.sendline('run')
@@ -84,7 +83,7 @@ class LldbBacktraceDecorator(CallableDecorator):
 
                     child.sendline('quit')
                     issue['backtrace'] = backtrace
-                except:
+                except Exception:
                     pass
 
                 return issue

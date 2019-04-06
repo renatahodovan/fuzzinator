@@ -30,7 +30,7 @@ class TestRunnerSubprocessCall(object):
 
     def __init__(self, command, cwd=None, env=None, end_texts=None, init_wait=None, timeout_per_test=None, **kwargs):
         self.end_texts = json.loads(end_texts) if end_texts else []
-        self.init_wait = eval(init_wait) if init_wait else False
+        self.init_wait = init_wait in [1, '1', True, 'True', 'true']
         self.timeout_per_test = int(timeout_per_test) if timeout_per_test else None
         self.cwd = cwd or os.getcwd()
         self.command = command
@@ -55,7 +55,7 @@ class TestRunnerSubprocessCall(object):
             self.proc.stdin.flush()
             issue = self.wait_til_end()
             return issue
-        except:
+        except Exception:
             return None
 
     def start(self, init_wait=True):

@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -62,10 +62,9 @@ class GdbBacktraceDecorator(CallableDecorator):
                     return issue
 
                 try:
-                    child = pexpect.spawn('gdb -ex "set width unlimited" -ex "set pagination off" --args {cmd}'.format(
-                        cmd=command.format(test=kwargs['test'])),
-                        cwd=cwd or os.getcwd(),
-                        env=dict(os.environ, **json.loads(env or '{}')))
+                    child = pexpect.spawn('gdb -ex "set width unlimited" -ex "set pagination off" --args {cmd}'.format(cmd=command.format(test=kwargs['test'])),
+                                          cwd=cwd or os.getcwd(),
+                                          env=dict(os.environ, **json.loads(env or '{}')))
                     child.expect_exact('(gdb) ')
                     child.sendline('run')
                     child.expect_exact('(gdb) ')
@@ -74,7 +73,7 @@ class GdbBacktraceDecorator(CallableDecorator):
                     backtrace = child.before
                     child.terminate(force=True)
                     issue['backtrace'] = backtrace
-                except:
+                except Exception:
                     pass
 
                 return issue

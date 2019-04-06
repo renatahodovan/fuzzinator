@@ -15,11 +15,12 @@ class ValidateJob(CallJob):
     """
 
     def __init__(self, id, config, issue, db, listener):
-        super().__init__(id=id, config=config, db=db, listener=listener)
+        sut_name = issue['sut']
+        fuzzer_name = issue['fuzzer']
+        super().__init__(id, config, sut_name, fuzzer_name, db, listener)
+
         self.issue = issue
-        self.sut_name = issue['sut']
-        self.fuzzer_name = issue['fuzzer']
-        self.cost = int(self.config.get('sut.' + self.sut_name, 'validate_cost', fallback=self.config.get('sut.' + self.sut_name, 'cost', fallback=1)))
+        self.cost = int(config.get('sut.' + sut_name, 'validate_cost', fallback=config.get('sut.' + sut_name, 'cost', fallback=1)))
 
     def run(self):
         _, new_issues = self.validate()

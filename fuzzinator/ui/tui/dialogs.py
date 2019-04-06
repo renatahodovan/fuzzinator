@@ -1,11 +1,13 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+from ast import literal_eval
 from datetime import datetime
+
 from urwid import *
 
 from ...config import config_get_callable
@@ -37,7 +39,8 @@ class Dialog(PopUpTarget):
     def keypress(self, size, key):
         if key in self.exit_keys:
             self._emit('close')
-        elif key in ['tab']:
+            return None
+        if key in ['tab']:
             if self.frame.focus_part == 'body':
                 try:
                     next_pos = self.walker.next_position(self.listbox.focus_position)
@@ -51,8 +54,8 @@ class Dialog(PopUpTarget):
                 else:
                     self.frame.focus_part = 'body'
                     self.listbox.focus_position = 0
-        else:
-            super().keypress(size, key)
+            return None
+        return super().keypress(size, key)
 
 
 class AboutDialog(Dialog):
@@ -97,8 +100,11 @@ class YesNoDialog(Dialog):
     def keypress(self, size, key):
         if key == 'enter':
             self._emit('yes')
-        elif key == 'esc':
+            return None
+        if key == 'esc':
             self._emit('no')
+            return None
+        return super().keypress(size, key)
 
     def __init__(self, msg):
         super().__init__(title='Question',
@@ -115,8 +121,8 @@ class FormattedIssueDialog(Dialog):
     def __init__(self, config, issue, db):
         formatter = config_get_callable(config, 'sut.' + issue['sut'], ['tui_formatter', 'formatter'])[0] or JsonFormatter
         super().__init__(title=formatter(issue=issue, format='short'),
-                                         body=[Padding(Text(line, wrap='clip'), left=2, right=2) for line in formatter(issue=issue).splitlines()],
-                                         footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))])
+                         body=[Padding(Text(line, wrap='clip'), left=2, right=2) for line in formatter(issue=issue).splitlines()],
+                         footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))])
 
 
 class BugEditor(Edit):
@@ -129,8 +135,8 @@ class BugEditor(Edit):
             after = ''.join(lines[line_cnt + 1:]) if line_cnt + 1 < len(lines) else ''
             self.set_edit_text(before + after)
             self.set_edit_pos(len(before))
-        else:
-            super().keypress(size, key)
+            return None
+        return super().keypress(size, key)
 
 
 class EditIssueDialog(Dialog):
@@ -185,7 +191,7 @@ class EditIssueDialog(Dialog):
             return datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
         if t is None:
             return value or None
-        return eval(value)
+        return literal_eval(value)
 
     def save_modifications(self, btn):
         updated = dict()

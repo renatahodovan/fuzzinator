@@ -6,12 +6,13 @@
 # according to those terms.
 
 import getpass
-import keyring
 import logging
 import platform
 import smtplib
 
 from email.mime.text import MIMEText
+
+import keyring
 
 from ..config import config_get_callable
 from .event_listener import EventListener
@@ -66,9 +67,9 @@ class EmailListener(EventListener):
 
         :param data: Information to fill subject and content fields with.
         """
-        if type(data) != dict:
+        if not isinstance(data, dict):
             data = dict((self.param_name, data.decode('utf-8', 'ignore')))
-        data = dict((name, raw.decode('utf-8', 'ignore') if type(raw) == bytes else raw) for name, raw in data.items())
+        data = dict((name, raw.decode('utf-8', 'ignore') if isinstance(raw, bytes) else raw) for name, raw in data.items())
 
         from ..formatter import JsonFormatter
         formatter = config_get_callable(self.config, 'sut.' + data['sut'], ['email_formatter', 'formatter'])[0] or JsonFormatter

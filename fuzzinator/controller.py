@@ -6,13 +6,14 @@
 # according to those terms.
 
 import os
-import psutil
 import shutil
 import signal
 import time
 import traceback
 
 from multiprocessing import Lock, Process, Queue
+
+import psutil
 
 from .config import config_get_callable, config_get_kwargs, config_get_name_from_section, config_get_with_writeback, import_entity
 from .job import FuzzJob, ReduceJob, UpdateJob, ValidateJob
@@ -309,7 +310,7 @@ class Controller(object):
                 if cycle > max_cycles or (not self.fuzzers and max_cycles != float('inf')):
                     while load > 0:
                         time.sleep(1)
-                        _poll_jobs() # only to let running jobs cancelled; newly added jobs don't get scheduled
+                        _poll_jobs()  # only to let running jobs cancelled; newly added jobs don't get scheduled
                         _update_load()
                     break
 
@@ -381,7 +382,8 @@ class Controller(object):
         try:
             for issue in job.run():
                 # Automatic reduction and/or validation if the job found something new
-                self.add_reduce_job(issue=issue) or self.add_validate_job(issue=issue)
+                if not self.add_reduce_job(issue=issue):
+                    self.add_validate_job(issue=issue)
         except Exception as e:
             self.listener.warning(ident=job.id, msg='Exception in {job}: {exception}\n{trace}'.format(
                 job=repr(job),

@@ -6,13 +6,14 @@
 # according to those terms.
 
 from functools import cmp_to_key
+
 from urwid import *
 
 from .decor_widgets import PatternBox
 from .graphics import fz_box_pattern
 
 
-class TableRowsListWalker(listbox.ListWalker):
+class TableRowsListWalker(ListWalker):
     def __init__(self, table, sort=None):
         self.table = table
         self.sort = sort
@@ -24,11 +25,7 @@ class TableRowsListWalker(listbox.ListWalker):
         if position < 0 or position >= len(self.rows):
             raise IndexError
 
-        try:
-            row = self.rows[position]
-        except:
-            raise
-        return row
+        return self.rows[position]
 
     def __delitem__(self, index):
         if -1 < index < len(self.rows):
@@ -91,26 +88,26 @@ class ScrollingListBox(WidgetWrap):
         super().__init__(self.listbox)
 
     def keypress(self, size, key):
-        if len(self.body):
-            if key == 'home':
+        if key == 'home':
+            if self.body:   # len(self.body) != 0
                 self.focus_position = 0
-                self.listbox._invalidate()
-                return key
-            elif key == 'end':
+                self._invalidate()
+            return key
+        if key == 'end':
+            if self.body:   # len(self.body) != 0
                 self.focus_position = len(self.body) - 1
                 self._invalidate()
-                return key
-            elif (self.infinite
-                  and key in ['page down', 'down']
-                  and len(self.body)
-                  and self.focus_position == len(self.body) - 1):
-                self.requery = True
-                self._invalidate()
-                return
-            elif key == 'enter':
+            return key
+        if key in ['page down', 'down'] and self.infinite and self.focus_position == len(self.body) - 1:
+            self.requery = True
+            self._invalidate()
+            return None
+        if key == 'enter':
+            if self.body:   # len(self.body) != 0
                 emit_signal(self, 'select', self, self.selection)
-            elif key == 'left':
-                return
+            return None
+        if key == 'left':
+            return None
         return super().keypress(size, key)
 
     def render(self, size, focus=False):
@@ -128,7 +125,7 @@ class ScrollingListBox(WidgetWrap):
 
     @property
     def focus_position(self):
-        if len(self.listbox.body) > 0:
+        if self.listbox.body:   # len(self.listbox.body) != 0
             return self.listbox.focus_position
         return 0
 
@@ -143,8 +140,9 @@ class ScrollingListBox(WidgetWrap):
 
     @property
     def selection(self):
-        if len(self.body):
+        if self.body:   # len(self.body) != 0
             return self.body[self.focus_position]
+        return None
 
 
 class TableColumn(object):
@@ -173,8 +171,6 @@ class TableColumn(object):
                 v = self.format_fn(v)
             except TypeError:
                 return Text('', align=self.align, wrap=self.wrap)
-            except:
-                raise
         return self.format(v)
 
     def format(self, v):
@@ -245,10 +241,10 @@ class TableCell(WidgetWrap):
     def set_focus_map(self, focus_map):
         self.attr.set_focus_map(focus_map)
 
-    def keypress(self, _, key):
-        if key != 'enter':
-            return key
-        emit_signal(self, 'select')
+    def keypress(self, size, key):
+        if key == 'enter':
+            emit_signal(self, 'select')
+        return key
 
     # Override the mouse_event method (param list is fixed).
     def mouse_event(self, size, event, button, col, row, focus):
@@ -261,6 +257,7 @@ class TableRow(WidgetWrap):
     focus_map = {}
 
     border_char = ' '
+    column_class = Columns  # To be redefined by subclasses.
     decorate = True
     _selectable = True
 
@@ -293,11 +290,11 @@ class TableRow(WidgetWrap):
 
         # Create tuples to describe the sizing of the column.
         for i, col in enumerate(self.table.columns):
-            l = list()
+            lst = list()
             if col.sizing == 'weight':
-                l.extend([col.sizing, col.width])
+                lst.extend([col.sizing, col.width])
             else:
-                l.append(col.width)
+                lst.append(col.width)
 
             cell = TableCell(self.table, col, self, self.data.get(col.name, None))
             if self.cell_click:
@@ -305,25 +302,19 @@ class TableRow(WidgetWrap):
             if self.cell_select:
                 connect_signal(cell, 'select', self.cell_select, i * 2)
 
-            l.append(cell)
-            self.contents.append(tuple(l))
+            lst.append(cell)
+            self.contents.append(tuple(lst))
 
         if isinstance(table.border, tuple):
-            if len(table.border) == 3:
-                border_width, border_char, border_attr = table.border
-            elif len(table.border) == 2:
-                border_width, border_char = table.border
-            else:
-                border_width = table.border
+            border_width = table.border[0]
         elif isinstance(table.border, int):
             border_width = table.border
         else:
             raise Exception('Invalid border specification: %s' % table.border)
 
+        self.row = self.column_class(self.contents)
         if self.header:
-            self.row = self.column_class(self.contents, header=self.header)
-        else:
-            self.row = self.column_class(self.contents)
+            self.row.header = self.header
         self.row.selected_column = None
 
         # content sep content sep ...
@@ -388,7 +379,7 @@ class TableHeaderRow(TableRow):
     column_class = HeaderColumns
     decorate = False
 
-    def __init__(self, table,  *args, **kwargs):
+    def __init__(self, table, *args, **kwargs):
         self.row = None
 
         self.attr_map = {None: 'table_head'}
@@ -429,7 +420,9 @@ class Table(WidgetWrap):
     focus_map = {}
     row_dict = {}
 
+    title = ''
     columns = []
+    query_data = []
     key_columns = None
     sort_field = None
     _selectable = True
@@ -450,9 +443,8 @@ class Table(WidgetWrap):
         self.sort_reverse = False
 
         # Forward 'select' signal to the caller of table.
-        connect_signal(
-            self.listbox, 'select',
-            lambda source, selection: emit_signal(self, 'select', self, selection))
+        connect_signal(self.listbox, 'select',
+                       lambda source, selection: emit_signal(self, 'select', self, selection))
 
         if self.limit:
             connect_signal(self.listbox, 'load_more', self.load_more)
@@ -520,8 +512,9 @@ class Table(WidgetWrap):
 
     @property
     def selection(self):
-        if len(self.body):
+        if self.body:   # len(self.body) != 0
             return self.body[self.focus_position]
+        return None
 
     def add_row(self, data, position=None, attr_map=None, focus_map=None):
         row = TableBodyRow(self, data, header=self.header.row, attr_map=attr_map, focus_map=focus_map)

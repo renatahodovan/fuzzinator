@@ -18,7 +18,7 @@ class PatternHLine(Widget):
 
     def __init__(self, pattern):
         super().__init__()
-        assert len(pattern) != 0
+        assert pattern
         self.pattern = pattern
 
     def _repr_words(self):
@@ -39,7 +39,7 @@ class PatternVLine(BoxWidget):
 
     def __init__(self, pattern):
         super().__init__()
-        assert len(pattern) != 0
+        assert pattern
         self.pattern = []
         self.cs = []
         for p in list(pattern):

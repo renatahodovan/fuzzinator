@@ -14,39 +14,38 @@ logger = logging.getLogger(__name__)
 
 class CliListener(EventListener):
 
-    # Override the ancestor's constructor to avoid the need for passing an unused config parameter.
     def __init__(self):
-        pass
+        super().__init__(None)
 
     def new_fuzz_job(self, ident, cost, sut, fuzzer, batch):
-        logger.debug('#{ident}: New fuzzer job for {fuzzer} to {sut} ({batch} tests).'.format(ident=ident, sut=sut, fuzzer=fuzzer, batch=batch))
+        logger.debug('#%s: New fuzzer job for %s to %s (%s tests).', ident, fuzzer, sut, batch)
 
     def new_update_job(self, ident, cost, sut):
-        logger.debug('#{ident}: New update job for {sut}.'.format(ident=ident, sut=sut))
+        logger.debug('#%s: New update job for %s.', ident, sut)
 
     def new_reduce_job(self, ident, cost, sut, issue_id, size):
-        logger.debug('#{ident}: New reduce job for {issue!r} in {sut} ({size} bytes).'.format(ident=ident, sut=sut, issue=issue_id, size=size))
+        logger.debug('#%s: New reduce job for %r in %s (%s bytes).', ident, issue_id, sut, size)
 
     def new_validate_job(self, ident, cost, sut, issue_id):
-        logger.debug('#{ident}: New validate job for {issue!r} in {sut}.'.format(ident=ident, sut=sut, issue=issue_id))
+        logger.debug('#%s: New validate job for %r in %s.', ident, issue_id, sut)
 
     def activate_job(self, ident):
-        logger.debug('#{ident}: Activate job.'.format(ident=ident))
+        logger.debug('#%s: Activate job.', ident)
 
     def remove_job(self, ident):
-        logger.debug('#{ident}: Remove job.'.format(ident=ident))
+        logger.debug('#%s: Remove job.', ident)
 
     def warning(self, ident, msg):
         if ident is not None:
-            logger.warning('#{ident}: {msg}'.format(ident=ident, msg=msg))
+            logger.warning('#%s: %s', ident, msg)
         else:
             logger.warning(msg)
 
     def new_issue(self, ident, issue):
-        logger.info('#{ident}: New issue {issue!r} in {sut}.'.format(ident=ident, issue=issue['id'], sut=issue['sut']))
+        logger.info('#%s: New issue %r in %s.', ident, issue['id'], issue['sut'])
 
     def update_issue(self, ident, issue):
-        logger.info('#{ident}: Updated issue {issue!r} in {sut}.'.format(ident=ident, issue=issue['id'], sut=issue['sut']))
+        logger.info('#%s: Updated issue %r in %s.', ident, issue['id'], issue['sut'])
 
     def invalid_issue(self, ident, issue):
-        logger.debug('#{ident}: Invalid issue {issue!r} in {sut}.'.format(ident=ident, issue=issue['id'], sut=issue['sut']))
+        logger.debug('#%s: Invalid issue %r in %s.', ident, issue['id'], issue['sut'])

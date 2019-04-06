@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -12,10 +12,7 @@ from inspect import isclass
 
 def import_entity(name):
     steps = name.split('.')
-    module_name = '.'.join(steps[0:-1])
-    entity_name = steps[-1]
-    module = importlib.import_module(module_name)
-    return eval('module.' + entity_name)
+    return getattr(importlib.import_module('.'.join(steps[0:-1])), steps[-1])
 
 
 def config_get_kwargs(config, section):
@@ -59,9 +56,8 @@ def config_get_callable(config, section, options):
         opt_prefix = option + '.decorate('
         opt_suffix = ')'
         decorator_options = [opt for opt in config.options(section)
-                             if opt.startswith(opt_prefix) and
-                             opt.endswith(opt_suffix)]
-        decorator_options.sort(key=lambda opt: int(opt[len(opt_prefix):-len(opt_suffix)]))
+                             if opt.startswith(opt_prefix) and opt.endswith(opt_suffix)]
+        decorator_options.sort(key=lambda opt, pre=opt_prefix, suf=opt_suffix: int(opt[len(pre):-len(suf)]))
         for decopt in decorator_options:
             decorator_class = import_entity(config.get(section, decopt))
             decorator_kwargs = config_get_kwargs(config, section + '.' + decopt)

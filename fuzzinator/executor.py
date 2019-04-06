@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -15,8 +15,8 @@ def execute():
     args, more_args = parser.parse_known_args()
 
     if args.tui:
-        from .ui.tui import execute
-        execute(args=more_args, parser=parser)
+        from .ui import tui
+        tui.execute(args=more_args, parser=parser)
     else:
-        from .ui.cli import execute
-        execute(args=more_args, parser=parser)
+        from .ui import cli
+        cli.execute(args=more_args, parser=parser)

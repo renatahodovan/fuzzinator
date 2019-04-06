@@ -13,12 +13,13 @@ class CallJob(object):
     Base class for jobs that call SUTs and can find new issues.
     """
 
-    def __init__(self, id, config, db, listener):
+    def __init__(self, id, config, sut_name, fuzzer_name, db, listener):
         self.id = id
         self.config = config
+        self.sut_name = sut_name
+        self.fuzzer_name = fuzzer_name
         self.db = db
         self.listener = listener
-        # expects self.sut_name and self.fuzzer_name to be set by descendants
 
     def add_issue(self, issue, new_issues):
         test = issue['test']

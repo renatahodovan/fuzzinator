@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -46,6 +46,7 @@ class MarkdownDecorator(CallableDecorator):
 
     def decorator(self, extensions=None, **kwargs):
         extensions = ['extra'] if extensions is None else json.loads(extensions) if isinstance(extensions, str) else extensions
+
         def wrapper(fn):
             def render(*args, **kwargs):
                 formatted = fn(*args, **kwargs)

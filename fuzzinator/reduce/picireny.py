@@ -1,14 +1,15 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import chardet
 import json
 import logging
 import os
+
+import chardet
 import picire
 import picireny
 
@@ -65,9 +66,6 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
             subset_iterator=skip
     """
 
-    def eval_arg(arg):
-        return eval(arg) if isinstance(arg, str) else arg
-
     logging.getLogger('picireny').setLevel(logger.level)
 
     antlr = picireny.process_antlr4_path(antlr)
@@ -84,23 +82,23 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
     file_name = issue.get('filename', 'test')
 
     hddmin = picireny.cli.args_hdd_choices[hddmin if hddmin else 'full']
-    parallel = eval_arg(parallel)
-    combine_loops = eval_arg(combine_loops)
+    parallel = parallel in [1, '1', True, 'True', 'true']
+    combine_loops = combine_loops in [1, '1', True, 'True', 'true']
     split_method = getattr(picire.config_splitters, split_method)
-    subset_first = eval_arg(subset_first)
+    subset_first = subset_first in [1, '1', True, 'True', 'true']
     subset_iterator = getattr(picire.config_iterators, subset_iterator)
     complement_iterator = getattr(picire.config_iterators, complement_iterator)
-    jobs = 1 if not parallel else eval_arg(jobs)
-    max_utilization = eval_arg(max_utilization)
+    jobs = 1 if not parallel else int(jobs)
+    max_utilization = int(max_utilization)
     encoding = encoding or chardet.detect(src)['encoding'] or 'utf-8'
-    hdd_star = eval_arg(hdd_star)
-    flatten_recursion = eval_arg(flatten_recursion)
-    squeeze_tree = eval_arg(squeeze_tree)
-    skip_unremovable = eval_arg(skip_unremovable)
-    skip_whitespace = eval_arg(skip_whitespace)
-    build_hidden_tokens = eval_arg(build_hidden_tokens)
-    granularity = eval_arg(granularity) if granularity != 'inf' else float('inf')
-    cleanup = eval_arg(cleanup)
+    hdd_star = hdd_star in [1, '1', True, 'True', 'true']
+    flatten_recursion = flatten_recursion in [1, '1', True, 'True', 'true']
+    squeeze_tree = squeeze_tree in [1, '1', True, 'True', 'true']
+    skip_unremovable = skip_unremovable in [1, '1', True, 'True', 'true']
+    skip_whitespace = skip_whitespace in [1, '1', True, 'True', 'true']
+    build_hidden_tokens = build_hidden_tokens in [1, '1', True, 'True', 'true']
+    granularity = int(granularity) if granularity != 'inf' else float('inf')
+    cleanup = cleanup in [1, '1', True, 'True', 'true']
 
     cache_class = getattr(picire, cache_class)
     if parallel:

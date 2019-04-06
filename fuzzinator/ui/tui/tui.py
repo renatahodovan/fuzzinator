@@ -15,7 +15,8 @@ import sys
 import time
 
 from multiprocessing import Lock, Process, Queue
-from urwid import connect_signal, raw_display, util, ExitMainLoop, MainLoop, PopUpLauncher
+
+from urwid import connect_signal, ExitMainLoop, MainLoop, raw_display, util
 
 from ... import Controller
 from .. import build_parser, process_args
@@ -25,7 +26,7 @@ from .widgets import MainWindow
 logger = logging.getLogger(__name__)
 
 
-class Tui(PopUpLauncher):
+class Tui(object):
     signals = ['close']
 
     def __init__(self, controller, style):
@@ -37,15 +38,14 @@ class Tui(PopUpLauncher):
         self.screen = raw_display.Screen()
         self.screen.set_terminal_properties(256)
 
-        self.loop = MainLoop(widget=self,
+        self.loop = MainLoop(widget=self.view,
                              palette=style,
                              screen=self.screen,
                              unhandled_input=Tui.exit_handler,
                              pop_ups=True)
 
         self.pipe = self.loop.watch_pipe(self.update_ui)
-        self.loop.set_alarm_in(0.1, Tui.update_timer, self.view.logo.timer)
-        super().__init__(self.view)
+        self.loop.set_alarm_in(0.1, self.update_timer, self.view.logo.timer)
 
         connect_signal(self.view.issues_table, 'refresh', lambda source: self.loop.draw_screen())
         connect_signal(self.view.stat_table, 'refresh', lambda source: self.loop.draw_screen())
@@ -56,12 +56,12 @@ class Tui(PopUpLauncher):
                 event = self.events.get_nowait()
                 if hasattr(self, event['fn']):
                     getattr(self, event['fn'])(**event['kwargs'])
-            except:
+            except Exception:
                 break
 
-    def update_timer(self, timer):
+    def update_timer(self, loop, timer):
         if timer.update():
-            self.set_alarm_in(0.1, Tui.update_timer, timer)
+            loop.set_alarm_in(0.1, self.update_timer, timer)
 
     def new_fuzz_job(self, ident, cost, sut, fuzzer, batch):
         self.view.job_table.add_fuzz_job(ident, fuzzer, sut, cost, batch)

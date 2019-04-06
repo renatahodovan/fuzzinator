@@ -17,13 +17,13 @@ class FuzzJob(CallJob):
     """
 
     def __init__(self, id, config, fuzzer_name, db, listener):
-        super().__init__(id, config, db, listener)
         fuzz_section = 'fuzz.' + fuzzer_name
-        self.fuzzer_name = fuzzer_name
-        self.sut_name = self.config.get(fuzz_section, 'sut')
-        self.cost = int(self.config.get('sut.' + self.sut_name, 'cost', fallback=1))
-        self.batch = float(self.config.get(fuzz_section, 'batch', fallback=1))
-        self.refresh = float(self.config.get(fuzz_section, 'refresh', fallback=self.batch))
+        sut_name = config.get(fuzz_section, 'sut')
+        super().__init__(id, config, sut_name, fuzzer_name, db, listener)
+
+        self.cost = int(config.get('sut.' + sut_name, 'cost', fallback=1))
+        self.batch = float(config.get(fuzz_section, 'batch', fallback=1))
+        self.refresh = float(config.get(fuzz_section, 'refresh', fallback=self.batch))
 
     def run(self):
         fuzzer, fuzzer_kwargs = config_get_callable(self.config, 'fuzz.' + self.fuzzer_name, 'fuzzer')

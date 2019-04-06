@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,6 +6,7 @@
 # according to those terms.
 
 from os import get_terminal_size
+
 from urwid import *
 
 from ...config import config_get_callable
@@ -54,7 +55,7 @@ class LoginButton(PopUpLauncher):
         return pop_up
 
     def get_pop_up_parameters(self):
-        cols, rows = get_terminal_size()
+        _, rows = get_terminal_size()
         return {'left': 0, 'top': -rows // 2 - 5, 'overlay_width': 50, 'overlay_height': 10}
 
     def done(self):
@@ -137,8 +138,8 @@ class ReportDialog(PopUpTarget):
     def keypress(self, size, key):
         if key in ['esc', 'f7']:
             self._emit('close')
-        else:
-            super().keypress(size, key)
+            return None
+        return super().keypress(size, key)
 
 
 class BugzillaReportDialog(ReportDialog):

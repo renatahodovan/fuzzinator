@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -25,13 +25,13 @@ class MockRepeatingFuzzer(object):
     """
 
     def __init__(self, test, n):
-        self.test = test
-        self.n = n
-        self.i = 0
+        self._test = test
+        self._n = n
+        self._i = 0
 
     def __call__(self, **kwargs):
-        if self.i >= self.n:
+        if self._i >= self._n:
             return None
 
-        self.i += 1
-        return self.test
+        self._i += 1
+        return self._test

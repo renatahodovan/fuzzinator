@@ -7,8 +7,9 @@
 
 import time
 
-from bson.objectid import ObjectId
 from datetime import datetime
+
+from bson.objectid import ObjectId
 from pymongo import ASCENDING, MongoClient, ReturnDocument
 
 
@@ -65,9 +66,9 @@ class MongoDriver(object):
     def all_issues(self, include_invalid=False, show_all=True):
         query = {}
         if not show_all:
-            query['first_seen'] = { '$gte': self.session_start }
+            query['first_seen'] = {'$gte': self.session_start}
         if not include_invalid:
-            query['invalid'] = { '$exists': False }
+            query['invalid'] = {'$exists': False}
         return list(self._db.fuzzinator_issues.find(query))
 
     def find_issue_by_id(self, _id):
@@ -88,43 +89,43 @@ class MongoDriver(object):
     def get_stats(self, filter=None, skip=0, limit=0, sort=None, show_all=True):
         issues_pipeline = []
         if not show_all:
-            issues_pipeline.append({ '$match': { 'first_seen': { '$gte': self.session_start } } })
+            issues_pipeline.append({'$match': {'first_seen': {'$gte': self.session_start}}})
         issues_pipeline.extend([
-            { '$group': { '_id': { 'sut': '$sut', 'fuzzer': '$fuzzer' }, 'unique': { '$sum': 1 } } },
-            { '$addFields': { 'sut': '$_id.sut', 'fuzzer': '$_id.fuzzer', 'exec': 0, 'crashes': 0 } }
+            {'$group': {'_id': {'sut': '$sut', 'fuzzer': '$fuzzer'}, 'unique': {'$sum': 1}}},
+            {'$addFields': {'sut': '$_id.sut', 'fuzzer': '$_id.fuzzer', 'exec': 0, 'crashes': 0}}
         ])
 
         aggregator = [
             # Get an empty document
-            { '$limit': 1 }, # Note: this works only if fuzzinator_stats has at least one element.
-            { '$project': { '_id': 1 } },
-            { '$project': { '_id': 0 } },
+            {'$limit': 1},  # Note: this works only if fuzzinator_stats has at least one element.
+            {'$project': {'_id': 1}},
+            {'$project': {'_id': 0}},
 
             # Get unique crash counts from the issues (exec and crash counts are set to 0).
-            { '$lookup': {
+            {'$lookup': {
                 'from': 'fuzzinator_issues',
                 'pipeline': issues_pipeline,
                 'as': 'fuzzinator_issues',
-            } },
+            }},
 
             # Get exec and crash counts from the stats (unique crash counts are set to 0).
-            { '$lookup': {
+            {'$lookup': {
                 'from': 'fuzzinator_stats',
                 'pipeline': [
-                    { '$addFields': { 'unique': 0 } },
+                    {'$addFields': {'unique': 0}},
                 ],
                 'as': 'fuzzinator_stats',
-            } },
+            }},
 
             # Union the two results.
-            { '$project': { 'union': { '$concatArrays': [ '$fuzzinator_issues', '$fuzzinator_stats' ] } } },
-            { '$unwind': '$union' },
-            { '$replaceRoot': { 'newRoot': '$union' } },
+            {'$project': {'union': {'$concatArrays': ['$fuzzinator_issues', '$fuzzinator_stats']}}},
+            {'$unwind': '$union'},
+            {'$replaceRoot': {'newRoot': '$union'}},
 
             # Sum the stats and drop all-zeros lines.
-            { '$group': { '_id': { 'sut': '$sut', 'fuzzer': '$fuzzer' }, 'exec': { '$sum': '$exec' }, 'crashes': { '$sum': '$crashes' }, 'unique': { '$sum': '$unique' } } },
-            { '$project': { '_id': 0, 'sut': '$_id.sut', 'fuzzer': '$_id.fuzzer', 'exec': 1, 'crashes': 1, 'unique': 1 } },
-            { '$match': { '$or': [ { 'exec': { '$gt': 0 } }, { 'crashes': { '$gt': 0 } }, { 'unique': { '$gt': 0 } } ] } }
+            {'$group': {'_id': {'sut': '$sut', 'fuzzer': '$fuzzer'}, 'exec': {'$sum': '$exec'}, 'crashes': {'$sum': '$crashes'}, 'unique': {'$sum': '$unique'}}},
+            {'$project': {'_id': 0, 'sut': '$_id.sut', 'fuzzer': '$_id.fuzzer', 'exec': 1, 'crashes': 1, 'unique': 1}},
+            {'$match': {'$or': [{'exec': {'$gt': 0}}, {'crashes': {'$gt': 0}}, {'unique': {'$gt': 0}}]}}
         ]
 
         if filter:

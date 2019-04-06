@@ -73,3 +73,5 @@ def process_args(args):
     logger.setLevel(args.log_level)
 
     sys.setrecursionlimit(args.sys_recursion_limit)
+
+    return None

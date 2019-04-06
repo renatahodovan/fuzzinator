@@ -6,12 +6,14 @@
 # according to those terms.
 
 import os
-import pyperclip
 import random
 import time
 
 from collections import OrderedDict
 from math import ceil
+
+import pyperclip
+
 from urwid import *
 
 from ...config import config_get_callable
@@ -59,8 +61,11 @@ class MainWindow(PopUpLauncher):
         self.footer_btns['reduce'] = FormattedButton('F6 Reduce', on_press=lambda btn: self.add_reduce_job())
         self.footer_btns['report'] = ReportButton('F7 Report', self.issues_table, self.config, self.trackers)
         self.footer_btns['delete'] = FormattedButton('F8 Delete')
-        self.footer_btns['show'] = FormattedButton('F9 Show all', on_press=lambda btn: self.show_all(btn))
+        self.footer_btns['show'] = FormattedButton('F9 Show all', on_press=self.show_all)
         self.footer_btns['quit'] = FormattedButton('F10 Quit', on_press=lambda btn: self._emit('close'))
+
+        self.pop_up = None
+        self.pop_up_params = None
 
         self.view = AttrMap(Frame(body=Pile([('fixed', 6, self.logo), self.content_columns]),
                                   footer=BoxAdapter(Filler(AttrMap(Columns(list(self.footer_btns.values()), dividechars=1), 'default')), height=1)),
@@ -77,10 +82,10 @@ class MainWindow(PopUpLauncher):
         width = max([len(line) for line in msg.splitlines()] + [20])
         height = msg.count('\n') + 4
         cols, rows = os.get_terminal_size()
-        self.get_pop_up_parameters = lambda: dict(left=max(cols // 2 - width // 2, 1),
-                                                  top=max(rows // 2 - height // 2, 1),
-                                                  overlay_width=width,
-                                                  overlay_height=height)
+        self.pop_up_params = dict(left=max(cols // 2 - width // 2, 1),
+                                  top=max(rows // 2 - height // 2, 1),
+                                  overlay_width=width,
+                                  overlay_height=height)
         return self.open_pop_up()
 
     def warning_popup(self, msg):
@@ -101,6 +106,9 @@ class MainWindow(PopUpLauncher):
         if ident in self.issues_table.row_dict:
             del self.issues_table[self.issues_table.body.rows.index(self.issues_table.row_dict[ident])]
         self.close_pop_up()
+
+    def get_pop_up_parameters(self):
+        return self.pop_up_params
 
     def create_pop_up(self):
         return self.pop_up
@@ -138,40 +146,52 @@ class MainWindow(PopUpLauncher):
             if self.content_columns.focus_col == 0:
                 self.content_columns.focus_col = 1
                 self.data_tables.focus_item = 0
-            elif self.content_columns.focus_col == 1:
+            else:
                 if self.data_tables.focus_position == 0:
                     self.data_tables.focus_position = 1
                 else:
                     self.content_columns.focus_col = 0
-        elif key == 'f1':
+            return None
+        if key == 'f1':
             self.footer_btns['about'].keypress((0, 0), 'enter')
-        elif key == 'f2':
+            return None
+        if key == 'f2':
             self.footer_btns['validate'].keypress((0, 0), 'enter')
-        elif key == 'f3':
+            return None
+        if key == 'f3':
             self.footer_btns['view'].keypress((0, 0), 'enter')
-        elif key == 'f4':
+            return None
+        if key == 'f4':
             self.footer_btns['edit'].keypress((0, 0), 'enter')
-        elif key == 'f5':
+            return None
+        if key == 'f5':
             self.footer_btns['copy'].keypress((0, 0), 'enter')
-        # Copy the test content as bytes to the clipboard.
-        elif key == 'shift f5':
+            return None
+        if key == 'shift f5':
+            # Copy the test content as bytes to the clipboard.
             self.copy_selected(test_bytes=True)
-        elif key == 'f6':
+            return None
+        if key == 'f6':
             self.footer_btns['reduce'].keypress((0, 0), 'enter')
-        elif key == 'shift f6':
+            return None
+        if key == 'shift f6':
             self.reduce_all()
-        elif key == 'f7':
+            return None
+        if key == 'f7':
             self.footer_btns['report'].keypress((0, 0), 'enter')
-        elif key == 'f8':
+            return None
+        if key == 'f8':
             self.footer_btns['delete'].keypress((0, 0), 'enter')
-        elif key == 'f9':
+            return None
+        if key == 'f9':
             self.footer_btns['show'].keypress((0, 0), 'enter')
-        elif key == 'shift f9':
+            return None
+        if key == 'shift f9':
             self.issues_table.invert_invalid()
-        elif key in ('q', 'Q', 'f10'):
+            return None
+        if key in ('q', 'Q', 'f10'):
             raise ExitMainLoop()
-        else:
-            super().keypress(size, key)
+        return super().keypress(size, key)
 
     def show_all(self, btn):
         if btn.label == 'F9 Show all':
@@ -204,22 +224,27 @@ class IssuesTable(Table):
     def keypress(self, size, key):
         if key == 'shift up':
             self.sort_by_column(reverse=True)
-        elif key == 'shift down':
+            return None
+        if key == 'shift down':
             self.sort_by_column(reverse=False)
-        elif key == 'ctrl s':
+            return None
+        if key == 'ctrl s':
             self.sort_by_column(toggle=True)
-        elif key in ['delete', 'd']:
-            if len(self):
+            return None
+        if key in ['delete', 'd']:
+            if self:    # len(self) != 0
                 ident = self[self.focus_position].data['_id']
                 self.db.invalidate_issue_by_id(ident)
                 self.invalidate_row(ident)
-        elif key in ['shift delete', 'D']:
-            if len(self):
+            return None
+        if key in ['shift delete', 'D']:
+            if self:    # len(self) != 0
                 self._emit('delete')
-        elif key in ['r', 'ctrl r']:
+            return None
+        if key in ['r', 'ctrl r']:
             self._emit('refresh')
-        else:
-            return super().keypress(size, key)
+            return None
+        return super().keypress(size, key)
 
     def invalidate_row(self, ident):
         if self.show_invalid:
@@ -364,15 +389,15 @@ class JobsTable(WidgetWrap):
         self.walker[idx].update_progress(progress)
 
     def keypress(self, size, key):
-        if not self.listbox.body:
-            return
-
         if key == 'down':
-            if self.listbox.focus_position < len(self.listbox.body) - 1:
+            if self.listbox.body and self.listbox.focus_position < len(self.listbox.body) - 1:
                 self.listbox.focus_position += 1
-        elif key == 'up':
-            if self.listbox.focus_position > 0:
+            return None
+        if key == 'up':
+            if self.listbox.body and self.listbox.focus_position > 0:
                 self.listbox.focus_position -= 1
+            return None
+        return super().keypress(size, key)
 
     # Override the mouse_event method (param list is fixed).
     def mouse_event(self, size, event, button, col, row, focus):
@@ -415,6 +440,9 @@ class JobWidget(WidgetWrap):
         'prop_value': 'selected'
     })
 
+    title = ''          # To be redefined by subclasses.
+    labels = dict()     # To be redefined by subclasses.
+
     def __init__(self, data, pb_done=None):
         self.values = dict()
         for x in data:
@@ -436,6 +464,9 @@ class JobWidget(WidgetWrap):
             self.progress = ProgressBar('progress_normal', 'progress_done', current=0, done=self.max_progress)
             body_content.append(Columns([('weight', 2, Text(('prop_name', 'Progress'))),
                                          ('weight', 8, self.progress)]))
+        else:
+            self.max_progress = None
+            self.progress = None
 
         self.attr = AttrMap(Pile(body_content), attr_map=self.inactive_map, focus_map=self.inactive_focus_map)
         super().__init__(self.attr)
@@ -460,6 +491,9 @@ class FuzzerJobWidget(JobWidget):
     labels = dict(fuzzer='Fuzzer', sut='Sut', cost='Cost')
     title = 'Fuzzer Job'
 
+    def __init__(self, data, pb_done):
+        super().__init__(data, pb_done)
+
 
 class ReduceJobWidget(JobWidget):
 
@@ -467,7 +501,7 @@ class ReduceJobWidget(JobWidget):
     title = 'Reduce Job'
     height = 8
 
-    def __init__(self, data, pb_done=None):
+    def __init__(self, data, pb_done):
         super().__init__(data, pb_done)
         self.progress.set_completion(pb_done)
 
@@ -495,7 +529,7 @@ class FuzzerLogo(WidgetWrap):
                                             Filler(self.timer)])),
                               ('weight', 1, Filler(Text(''))),
                               ('weight', 1, Columns([Filler(Text(('label', 'Load: '), align='right')),
-                                            Filler(self.load)]))
+                                                     Filler(self.load)]))
                               ], dividechars=1)])
         self.do_animate = False
         super().__init__(rows)

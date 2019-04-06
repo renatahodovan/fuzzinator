@@ -1,13 +1,14 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import chardet
 import logging
 import os
+
+import chardet
 import picire
 
 from .picire_tester import PicireTester
@@ -51,23 +52,20 @@ def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
             subset_iterator=skip
     """
 
-    def eval_arg(arg):
-        return eval(arg) if isinstance(arg, str) else arg
-
     logging.getLogger('picire').setLevel(logger.level)
 
     src = issue['test']
     file_name = issue.get('filename', 'test')
 
-    parallel = eval_arg(parallel)
-    jobs = 1 if not parallel else eval_arg(jobs)
+    parallel = parallel in [1, '1', True, 'True', 'true']
+    jobs = 1 if not parallel else int(jobs)
     encoding = encoding or chardet.detect(src)['encoding']
-    granularity = eval_arg(granularity) if granularity != 'inf' else float('inf')
-    cleanup = eval_arg(cleanup)
+    granularity = int(granularity) if granularity != 'inf' else float('inf')
+    cleanup = cleanup in [1, '1', True, 'True', 'true']
 
-    combine_loops = eval_arg(combine_loops)
-    subset_first = eval_arg(subset_first)
-    max_utilization = eval_arg(max_utilization)
+    combine_loops = combine_loops in [1, '1', True, 'True', 'true']
+    subset_first = subset_first in [1, '1', True, 'True', 'true']
+    max_utilization = int(max_utilization)
 
     split_method = getattr(picire.config_splitters, split_method)
     subset_iterator = getattr(picire.config_iterators, subset_iterator)

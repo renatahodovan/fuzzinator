@@ -62,7 +62,7 @@ def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None,
             env={"BAR": "1"}
     """
     env = dict(os.environ, **json.loads(env)) if env else None
-    no_exit_code = eval(no_exit_code) if no_exit_code else False
+    no_exit_code = no_exit_code in [1, '1', True, 'True', 'true']
     timeout = int(timeout) if timeout else None
     issue = {}
 
@@ -86,4 +86,4 @@ def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None,
         logger.debug('Timeout expired in the SUT\'s subprocess runner.')
         Controller.kill_process_tree(proc.pid)
 
-    return NonIssue(issue)
+    return NonIssue(issue) if issue else None

@@ -13,6 +13,7 @@ import subprocess
 import sys
 
 from .. import Controller
+from . import NonIssue
 
 logger = logging.getLogger(__name__)
 
@@ -54,9 +55,11 @@ def StdinSubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=Non
             cwd=/home/alice/foo
             env={"BAR": "1"}
     """
-
     env = dict(os.environ, **json.loads(env)) if env else None
+    no_exit_code = no_exit_code in [1, '1', True, 'True', 'true']
     timeout = int(timeout) if timeout else None
+    issue = {}
+
     try:
         proc = subprocess.Popen(shlex.split(command, posix=sys.platform != 'win32'),
                                 stdin=subprocess.PIPE,
@@ -66,13 +69,16 @@ def StdinSubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=Non
                                 env=env)
         stdout, stderr = proc.communicate(input=test, timeout=timeout)
         logger.debug('%s\n%s', stdout.decode('utf-8', errors='ignore'), stderr.decode('utf-8', errors='ignore'))
+
+        issue = {
+            'exit_code': proc.returncode,
+            'stdout': stdout,
+            'stderr': stderr,
+        }
         if no_exit_code or proc.returncode != 0:
-            return {
-                'exit_code': proc.returncode,
-                'stdout': stdout,
-                'stderr': stderr,
-            }
+            return issue
     except subprocess.TimeoutExpired:
         logger.debug('Timeout expired in the SUT\'s stdin subprocess runner.')
         Controller.kill_process_tree(proc.pid)
-    return None
+
+    return NonIssue(issue) if issue else None

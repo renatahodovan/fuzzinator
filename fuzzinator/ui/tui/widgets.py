@@ -79,7 +79,7 @@ class MainWindow(PopUpLauncher):
         connect_signal(self.stat_table, 'refresh', lambda source: self._emit('refresh'))
 
     def init_popup(self, msg):
-        width = max([len(line) for line in msg.splitlines()] + [20])
+        width = max(max(len(line) for line in msg.splitlines()), 20)
         height = msg.count('\n') + 4
         cols, rows = os.get_terminal_size()
         self.pop_up_params = dict(left=max(cols // 2 - width // 2, 1),

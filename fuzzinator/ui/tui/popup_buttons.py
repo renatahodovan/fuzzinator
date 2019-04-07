@@ -27,7 +27,7 @@ class AboutButton(PopUpLauncher):
         connect_signal(self.original_widget, 'click', lambda btn: self.open_pop_up())
 
     def get_pop_up_parameters(self):
-        width = max([len(line) for line in self.about.content.splitlines()]) + 10
+        width = max(len(line) for line in self.about.content.splitlines()) + 10
         height = self.about.content.count('\n') + 4
         cols, rows = get_terminal_size()
         return dict(left=max(cols // 2 - width // 2, 1),

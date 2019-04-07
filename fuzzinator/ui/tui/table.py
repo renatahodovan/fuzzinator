@@ -318,7 +318,7 @@ class TableRow(WidgetWrap):
         self.row.selected_column = None
 
         # content sep content sep ...
-        self.row.contents = sum([[x, (Divider(self.border_char), ('given', border_width, False))] for x in self.row.contents], [])
+        self.row.contents = sum(([x, (Divider(self.border_char), ('given', border_width, False))] for x in self.row.contents), [])
         self.attr = AttrMap(self.row, attr_map=self.attr_map, focus_map=self.focus_map)
 
         super().__init__(self.attr)

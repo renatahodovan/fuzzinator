@@ -46,7 +46,7 @@ setup(
         'setuptools',
         'sphinx',
         'sphinx_rtd_theme',
-        'tornado',
+        'tornado<6.0',  # no Tornado 6 for Python < 3.5
         'urwid',
     ],
     entry_points={

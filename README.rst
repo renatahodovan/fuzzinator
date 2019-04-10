@@ -55,7 +55,7 @@ Requirements
 * Python_ >= 3.4
 * pip_ and setuptools Python packages (the latter is automatically installed by
   pip)
-* MongoDB_ (either local installation or access to remote database)
+* MongoDB_ >= 3.6 (either local installation or access to remote database)
 
 .. _Python: https://www.python.org
 .. _pip: https://pip.pypa.io

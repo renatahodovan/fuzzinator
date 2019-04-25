@@ -15,7 +15,7 @@ from multiprocessing import Lock, Process, Queue
 
 import psutil
 
-from .config import config_get_callable, config_get_kwargs, config_get_name_from_section, config_get_with_writeback, import_entity
+from .config import config_get_callable, config_get_fuzzers, config_get_kwargs, config_get_with_writeback, import_entity
 from .job import FuzzJob, ReduceJob, UpdateJob, ValidateJob
 from .listener import ListenerManager
 from .mongo_driver import MongoDriver
@@ -196,15 +196,13 @@ class Controller(object):
         """
         self.config = config
 
-        # Extract fuzzer names from sections describing fuzzing jobs.
-        self.fuzzers = [config_get_name_from_section(section) for section in config.sections() if section.startswith('fuzz.') and section.count('.') == 1]
-
+        self.fuzzers = config_get_fuzzers(self.config)
         self.capacity = int(config_get_with_writeback(self.config, 'fuzzinator', 'cost_budget', str(os.cpu_count())))
         self.work_dir = config_get_with_writeback(self.config, 'fuzzinator', 'work_dir', os.path.join(os.getcwd(), '.fuzzinator-{uid}')).format(uid=os.getpid())
         self.config.set('fuzzinator', 'work_dir', self.work_dir)
 
         self.db = MongoDriver(config_get_with_writeback(self.config, 'fuzzinator', 'db_uri', 'mongodb://localhost/fuzzinator'))
-        self.db.init_db([(self.config.get('fuzz.' + fuzzer, 'sut'), fuzzer) for fuzzer in self.fuzzers])
+        self.db.init_db(self.fuzzers)
 
         self.listener = ListenerManager()
         for name in config_get_kwargs(self.config, 'listeners'):
@@ -224,6 +222,7 @@ class Controller(object):
         max_cycles = max_cycles if max_cycles is not None else float('inf')
         cycle = 0
         fuzz_idx = 0
+        fuzz_names = list(self.fuzzers)
         load = 0
         job_id = 0
         job_queue = []
@@ -322,7 +321,7 @@ class Controller(object):
 
                     # Determine fuzz job to be queued and then update fuzz_idx
                     # to point to the next job's parameters.
-                    fuzzer_name = self.fuzzers[fuzz_idx]
+                    fuzzer_name = fuzz_names[fuzz_idx]
                     fuzz_section = 'fuzz.' + fuzzer_name
                     fuzz_idx = (fuzz_idx + 1) % len(self.fuzzers)
 
@@ -394,7 +393,7 @@ class Controller(object):
         # Added for the sake of completeness and consistency.
         # Should not be used by UI to add fuzz jobs.
         with self._shared_lock:
-            self._shared_queue.put((FuzzJob, dict(fuzzer_name=fuzzer_name), priority))
+            self._shared_queue.put((FuzzJob, dict(fuzzer_name=fuzzer_name, subconfig_id=self.fuzzers[fuzzer_name]['subconfig']), priority))
         return True
 
     def add_validate_job(self, issue, priority=False):

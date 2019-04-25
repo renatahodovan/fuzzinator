@@ -13,9 +13,10 @@ class CallJob(object):
     Base class for jobs that call SUTs and can find new issues.
     """
 
-    def __init__(self, id, config, sut_name, fuzzer_name, db, listener):
+    def __init__(self, id, config, subconfig_id, sut_name, fuzzer_name, db, listener):
         self.id = id
         self.config = config
+        self.subconfig_id = subconfig_id
         self.sut_name = sut_name
         self.fuzzer_name = fuzzer_name
         self.db = db
@@ -27,6 +28,7 @@ class CallJob(object):
         # Save issue details.
         issue.update(dict(sut=self.sut_name,
                           fuzzer=self.fuzzer_name,
+                          subconfig=self.subconfig_id,
                           test=test,
                           reduced=None,
                           reported=False))

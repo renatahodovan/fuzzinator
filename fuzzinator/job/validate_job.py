@@ -19,7 +19,7 @@ class ValidateJob(CallJob):
     def __init__(self, id, config, issue, db, listener):
         sut_name = issue['sut']
         fuzzer_name = issue['fuzzer']
-        super().__init__(id, config, sut_name, fuzzer_name, db, listener)
+        super().__init__(id, config, issue.get('subconfig'), sut_name, fuzzer_name, db, listener)
 
         self.issue = issue
         self.cost = int(config.get('sut.' + sut_name, 'validate_cost', fallback=config.get('sut.' + sut_name, 'cost', fallback=1)))

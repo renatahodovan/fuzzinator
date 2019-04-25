@@ -23,27 +23,36 @@ class MongoDriver(object):
     def _db(self):
         return MongoClient(self.uri).get_database()
 
-    def init_db(self, sut_fuzzer_pairs):
+    def init_db(self, fuzzers):
         """
-        Creates a 'fuzzinator_issues' collection with appropriate indexes (if
-        not existing already), and initializes a 'fuzzinator_stats' collection
-        for (sut, fuzzer) pairs (with 0 exec and issue counts if not existing
-        already).
+        Initializes the 'fuzzinator_issues', 'fuzzinator_stats', and
+        'fuzzinator_configs' collections: creates the collections and
+        their indexes if they don't exist already. Additionally, it saves
+        the subconfigs of the current sut-fuzzer pairs, and zero-initializes
+        the exec and issue count statistics of any new sut-fuzzer-subconfigs.
         """
         db = self._db
 
         issues = db.fuzzinator_issues
         issues.create_index([('sut', ASCENDING), ('id', ASCENDING)])
-        issues.create_index([('sut', ASCENDING), ('fuzzer', ASCENDING)])
+        issues.create_index([('sut', ASCENDING), ('fuzzer', ASCENDING), ('subconfig', ASCENDING)])
         issues.create_index('first_seen')
         issues.create_index('invalid')
 
         stats = db.fuzzinator_stats
-        stats.create_index([('sut', ASCENDING), ('fuzzer', ASCENDING)])
+        stats.create_index([('sut', ASCENDING), ('fuzzer', ASCENDING), ('subconfig', ASCENDING)])
 
-        for sut, fuzzer in sut_fuzzer_pairs:
-            if stats.find({'sut': sut, 'fuzzer': fuzzer}).count() == 0:
-                stats.insert_one({'sut': sut, 'fuzzer': fuzzer, 'exec': 0, 'crashes': 0})
+        configs = db.fuzzinator_configs
+        configs.create_index('subconfig')
+
+        for fuzz_name, fuzz_data in fuzzers.items():
+            configs.find_one_and_update(filter={'subconfig': fuzz_data['subconfig']},
+                                        update={'$setOnInsert': {'subconfig': fuzz_data['subconfig'], 'src': fuzz_data['src']}},
+                                        upsert=True)
+
+            stats.find_one_and_update(filter={'sut': fuzz_data['sut'], 'fuzzer': fuzz_name, 'subconfig': fuzz_data['subconfig']},
+                                      update={'$setOnInsert': {'sut': fuzz_data['sut'], 'fuzzer': fuzz_name, 'subconfig': fuzz_data['subconfig'], 'exec': 0, 'crashes': 0}},
+                                      upsert=True)
 
     def add_issue(self, issue):
         # MongoDB assumes that dates and times are in UTC, hence it must
@@ -84,13 +93,15 @@ class MongoDriver(object):
         self._db.fuzzinator_issues.delete_one({'_id': ObjectId(_id)})
 
     def get_stats(self, filter=None, skip=0, limit=0, sort=None, show_all=True):
-        issues_pipeline = []
+        issues_pipeline = [
+            {'$group': {
+                '_id': {'sut': '$sut', 'fuzzer': '$fuzzer', 'subconfig': '$subconfig'},
+                'sut': {'$first': '$sut'}, 'fuzzer': {'$first': '$fuzzer'}, 'subconfig': {'$first': '$subconfig'},
+                'exec': {'$sum': 0}, 'crashes': {'$sum': 0}, 'unique': {'$sum': 1},
+            }},
+        ]
         if not show_all:
-            issues_pipeline.append({'$match': {'first_seen': {'$gte': self.session_start}}})
-        issues_pipeline.extend([
-            {'$group': {'_id': {'sut': '$sut', 'fuzzer': '$fuzzer'}, 'unique': {'$sum': 1}}},
-            {'$addFields': {'sut': '$_id.sut', 'fuzzer': '$_id.fuzzer', 'exec': 0, 'crashes': 0}}
-        ])
+            issues_pipeline.insert(0, {'$match': {'first_seen': {'$gte': self.session_start}}})
 
         aggregator = [
             # Get an empty document
@@ -109,7 +120,7 @@ class MongoDriver(object):
             {'$lookup': {
                 'from': 'fuzzinator_stats',
                 'pipeline': [
-                    {'$addFields': {'unique': 0}},
+                    {'$addFields': {'subconfig': '$subconfig'}},
                 ],
                 'as': 'fuzzinator_stats',
             }},
@@ -120,9 +131,31 @@ class MongoDriver(object):
             {'$replaceRoot': {'newRoot': '$union'}},
 
             # Sum the stats and drop all-zeros lines.
-            {'$group': {'_id': {'sut': '$sut', 'fuzzer': '$fuzzer'}, 'exec': {'$sum': '$exec'}, 'crashes': {'$sum': '$crashes'}, 'unique': {'$sum': '$unique'}}},
-            {'$project': {'_id': 0, 'sut': '$_id.sut', 'fuzzer': '$_id.fuzzer', 'exec': 1, 'crashes': 1, 'unique': 1}},
-            {'$match': {'$or': [{'exec': {'$gt': 0}}, {'crashes': {'$gt': 0}}, {'unique': {'$gt': 0}}]}}
+            {'$group': {
+                '_id': {'sut': '$sut', 'fuzzer': '$fuzzer', 'subconfig': '$subconfig'},
+                'sut': {'$first': '$sut'}, 'fuzzer': {'$first': '$fuzzer'}, 'subconfig': {'$first': '$subconfig'},
+                'exec': {'$sum': '$exec'}, 'crashes': {'$sum': '$crashes'}, 'unique': {'$sum': '$unique'},
+            }},
+            {'$match': {'$or': [{'exec': {'$gt': 0}}, {'crashes': {'$gt': 0}}, {'unique': {'$gt': 0}}]}},
+
+            # Extend stats with the ini snippet
+            {'$lookup': {
+                'from': 'fuzzinator_configs',
+                'localField': 'subconfig',
+                'foreignField': 'subconfig',
+                'as': 'fuzzinator_configs',
+            }},
+            {'$unwind': {'path': '$fuzzinator_configs', 'preserveNullAndEmptyArrays': True}},
+
+            # Create a 2-level hierarchy of stats grouped by fuzzer and sut, detailed by config
+            {'$group': {
+                '_id': {'sut': '$sut', 'fuzzer': '$fuzzer'},
+                'sut': {'$first': '$sut'}, 'fuzzer': {'$first': '$fuzzer'},
+                'exec': {'$sum': '$exec'}, 'crashes': {'$sum': '$crashes'}, 'unique': {'$sum': '$unique'},
+                'configs': {'$push': {'subconfig': '$subconfig', 'src': '$fuzzinator_configs.src', 'exec': '$exec',
+                                      'crashes': '$crashes', 'unique': '$unique'}},
+            }},
+            {'$project': {'_id': 0}},
         ]
 
         if filter:
@@ -140,12 +173,14 @@ class MongoDriver(object):
         result = dict()
         for document in self._db.fuzzinator_stats.aggregate(aggregator):
             result[(document['fuzzer'], document['sut'])] = dict(fuzzer=document['fuzzer'],
+                                                                 sut=document['sut'],
                                                                  exec=document['exec'],
                                                                  issues=document['crashes'],
-                                                                 unique=document['unique'])
+                                                                 unique=document['unique'],
+                                                                 configs=document['configs'])
         return result
 
-    def update_stat(self, sut, fuzzer, batch, issues):
-        self._db.fuzzinator_stats.find_one_and_update({'sut': sut, 'fuzzer': fuzzer},
+    def update_stat(self, sut, fuzzer, subconfig, batch, issues):
+        self._db.fuzzinator_stats.find_one_and_update({'sut': sut, 'fuzzer': fuzzer, 'subconfig': subconfig},
                                                       {'$inc': {'exec': int(batch), 'crashes': issues}},
                                                       upsert=True)

@@ -38,7 +38,7 @@ class MainWindow(PopUpLauncher):
 
         self.logo = FuzzerLogo(max_load=controller.capacity)
         self.issues_table = IssuesTable(db=self.db, initial_sort='sut')
-        fuzzer_suts = {(fuzzer, self.config.get('fuzz.' + fuzzer, 'sut')) for fuzzer in self.controller.fuzzers}
+        fuzzer_suts = {(fuzzer, data['sut']) for fuzzer, data in self.controller.fuzzers.items()}
         self.stat_table = StatTable(['fuzzer'], stat_baseline={fuzzer_sut: stat for fuzzer_sut, stat in self.db.get_stats().items() if fuzzer_sut in fuzzer_suts}, db=self.db)
         self.job_table = JobsTable()
 

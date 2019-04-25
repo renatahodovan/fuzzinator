@@ -16,10 +16,10 @@ class FuzzJob(CallJob):
     Class for running fuzzer jobs.
     """
 
-    def __init__(self, id, config, fuzzer_name, db, listener):
+    def __init__(self, id, config, subconfig_id, fuzzer_name, db, listener):
         fuzz_section = 'fuzz.' + fuzzer_name
         sut_name = config.get(fuzz_section, 'sut')
-        super().__init__(id, config, sut_name, fuzzer_name, db, listener)
+        super().__init__(id, config, subconfig_id, sut_name, fuzzer_name, db, listener)
 
         self.cost = int(config.get('sut.' + sut_name, 'cost', fallback=1))
         self.batch = float(config.get(fuzz_section, 'batch', fallback=1))
@@ -79,7 +79,7 @@ class FuzzJob(CallJob):
 
                         self.listener.job_progress(ident=self.id, progress=index)
                         if index - stat_updated >= self.refresh:
-                            self.db.update_stat(self.sut_name, self.fuzzer_name, index - stat_updated, issue_count)
+                            self.db.update_stat(self.sut_name, self.fuzzer_name, self.subconfig_id, index - stat_updated, issue_count)
                             self.listener.update_fuzz_stat()
                             issue_count = 0
                             stat_updated = index
@@ -89,6 +89,6 @@ class FuzzJob(CallJob):
                             break
 
         # Update statistics.
-        self.db.update_stat(self.sut_name, self.fuzzer_name, index - stat_updated, issue_count)
+        self.db.update_stat(self.sut_name, self.fuzzer_name, self.subconfig_id, index - stat_updated, issue_count)
         self.listener.update_fuzz_stat()
         return new_issues

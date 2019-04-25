@@ -127,10 +127,8 @@ class MainWindow(PopUpLauncher):
     def add_validate_job(self):
         if self.issues_table.selection:
             issue = self.db.find_issue_by_id(self.issues_table.selection.data['_id'])
-            if not self.config.has_section('sut.' + issue['sut']):
+            if not self.controller.add_validate_job(issue):
                 self.warning_popup(msg='{sut} is not defined.'.format(sut=issue['sut']))
-            else:
-                self.controller.add_validate_job(issue)
 
     def copy_selected(self, test_bytes=False):
         if self.issues_table.selection:

@@ -398,6 +398,9 @@ class Controller(object):
         return True
 
     def add_validate_job(self, issue, priority=False):
+        if not self.config.has_section('sut.' + issue['sut']):
+            return False
+
         with self._shared_lock:
             self._shared_queue.put((ValidateJob, dict(issue=issue), priority))
         return True

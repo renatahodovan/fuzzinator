@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+
+<!--
+ Copyright (c) 2019 Tamas Keri.
+ Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+
+ Licensed under the BSD 3-Clause License
+ <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
+ This file may not be copied, modified, or distributed except
+ according to those terms.
+-->
+
+{% extends "base.html" %}
+{% block nav %}
+  <li class="nav-item">
+    <a class="nav-link disabled" id="chevron-tab" aria-selected="false"><i class="material-icons-outlined md-18 align-text-top">chevron_right</i></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link active" id="issue-tab" role="tab" aria-controls="issue" aria-selected="true">Issue</a>
+  </li>
+{% end nav %}
+
+{% block body %}
+  <!-- issue summary start -->
+  <td width="100%" style="padding: 0px">
+    <div class="detailed-card container-fluid border-light mb-1 pl-2 bg-warning rounded-0 pr-0 mb-3">
+      <div class="bg-white ml-1">
+        <div class="row">
+          <h5 class="col-10 col-md-10">
+            <i class="material-icons-outlined md-10 align-text-bottom text-warning">priority_high</i>
+            <span class="text-warning font-weight-bold" data-toggle="tool-tip" title="issue">{{ issue.get('id', 'N/A') }}</span>
+          </h5>
+        </div>
+        <div>
+          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="sut">
+            <i class="material-icons-outlined md-14 align-text-center">my_location</i> <span class="sut-id">{{ issue.get('sut', 'N/A') }}</span>
+          </div>
+          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="fuzzer">
+            <i class="material-icons-outlined md-14 align-text-center">shuffle</i> <span class="fuzzer-id">{{ issue.get('fuzzer', 'N/A') }}</span>
+          </div>
+          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="date range">
+            <i class="material-icons-outlined md-14 align-text-center">date_range</i> <span class="date_range">{{ issue.get('first_seen') and issue.get('first_seen').strftime('%Y-%m-%d %H:%M:%S') }} .. {{ issue.get('last_seen') and issue.get('last_seen').strftime('%Y-%m-%d %H:%M:%S') }}</span>
+          </div>
+          <div class="col-12 col-md-12 text-nowrap text-secondary" data-toggle="tool-tip" title="count">
+            <i class="material-icons-outlined md-14 align-text-center">repeat</i> <span class="count">{{ issue.get('count', 1) }}</span>
+          </div>
+          <div class="col-12 col-md-12 text-secondary" data-toggle="tool-tip" title="actions">
+            <div class="col-12 col-md-12"></div>
+            <div class="float-right"><button type="button" class="btn btn-outline-secondary reduce-issue btn-sm btn-block" title="reduce" onclick="reduceIssue('{{ issue['_id'] }}')"><i class="material-icons-outlined md-14 align-middle">crop</i> Reduce</button></div>
+            <div class="float-right"><button type="button" class="btn btn-outline-secondary validate-issue btn-sm btn-block" title="validate" onclick="validateIssue('{{ issue['_id'] }}')"><i class="material-icons md-14 align-middle">replay</i> Validate</button></div>
+            <div class="float-right"><button type="button" class="btn btn-outline-secondary delete-issue btn-sm btn-block" title="delete" onclick="deleteIssue('{{ issue['_id'] }}'); location.href='/'"><i class="material-icons-outlined md-14 align-middle">delete</i> Delete</button></div>
+          </div>
+
+          {% if issue.get('subconfig') %}
+          <div class="col-2 col-md-2 text-truncate text-secondary" data-toggle="tool-tip" title="config">
+            <i class="material-icons-outlined md-14 align-text-center">description</i> <a class="config-ref" href="/config/{{ issue['subconfig'] }}/{{ issue['_id'] }}">{{ issue['subconfig'] }}</a>
+          </div>
+          {% end %}
+        </div>
+      </div>
+    </div>
+  </td>
+  <!-- issue summary end -->
+
+  {% raw issue_body %}
+{% end body %}

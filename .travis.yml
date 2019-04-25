@@ -17,6 +17,12 @@ jobs:
       dist: xenial
     - python: 3.4
       env: TOXENV=lint
+    - python: 3.7
+      env: TOXENV=eslint
+      dist: xenial
+      before_script:
+        - sudo apt-get install npm
+        - sudo npm install -g npx
 
     - stage: deploy
       python: 3.4

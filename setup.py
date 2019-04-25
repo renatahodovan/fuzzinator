@@ -43,6 +43,7 @@ setup(
         'google-api-python-client',
         'oauth2client',
         'rainbow_logging_handler',
+        'setuptools',
         'sphinx',
         'sphinx_rtd_theme',
         'tornado',

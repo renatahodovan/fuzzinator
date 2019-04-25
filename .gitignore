@@ -10,3 +10,5 @@ dist
 .tox
 .coverage*
 docs/_build
+node_modules
+package-lock.json

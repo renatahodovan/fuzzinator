@@ -4,5 +4,6 @@ include RELNOTES.rst
 include MANIFEST.in
 include fuzzinator/PKGDATA.json
 recursive-include fuzzinator/ui/tui/resources *
+recursive-include fuzzinator/ui/wui/resources *
 global-exclude __pycache__
 global-exclude *.py[co]

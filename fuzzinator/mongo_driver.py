@@ -1,4 +1,5 @@
 # Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2019 Tamas Keri.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -37,6 +38,10 @@ class MongoDriver(object):
         issues.create_index([('sut', ASCENDING), ('id', ASCENDING)])
         issues.create_index([('sut', ASCENDING), ('fuzzer', ASCENDING), ('subconfig', ASCENDING)])
         issues.create_index('first_seen')
+        issues.create_index('last_seen')
+        issues.create_index('invalid')
+        issues.create_index('count')
+        issues.create_index('fuzzer')
         issues.create_index('invalid')
 
         stats = db.fuzzinator_stats
@@ -72,13 +77,13 @@ class MongoDriver(object):
         # different from the value stored in `now` (on nanosecond level).
         return issue['first_seen'] == issue['last_seen']
 
-    def all_issues(self, include_invalid=False, show_all=True):
-        query = {}
+    def get_issues(self, filter=None, skip=0, limit=0, sort=None, include_invalid=True, show_all=True):
+        filter = filter or {}
         if not show_all:
-            query['first_seen'] = {'$gte': self.session_start}
+            filter['first_seen'] = {'$gte': self.session_start}
         if not include_invalid:
-            query['invalid'] = {'$exists': False}
-        return list(self._db.fuzzinator_issues.find(query))
+            filter['invalid'] = {'$exists': False}
+        return list(self._db.fuzzinator_issues.find(filter=filter, skip=skip, limit=limit, sort=sort))
 
     def find_issue_by_id(self, _id):
         return self._db.fuzzinator_issues.find_one({'_id': ObjectId(_id)})
@@ -91,6 +96,9 @@ class MongoDriver(object):
 
     def remove_issue_by_id(self, _id):
         self._db.fuzzinator_issues.delete_one({'_id': ObjectId(_id)})
+
+    def find_config_by_id(self, id):
+        return self._db.fuzzinator_configs.find_one({'subconfig': id})
 
     def get_stats(self, filter=None, skip=0, limit=0, sort=None, show_all=True):
         issues_pipeline = [

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<!--
+ Copyright (c) 2019 Tamas Keri.
+ Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+
+ Licensed under the BSD 3-Clause License
+ <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
+ This file may not be copied, modified, or distributed except
+ according to those terms.
+-->
+
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Google fonts -->
+    <link href="/static/assets/google-fonts/google-fonts.css" type="text/css" rel="stylesheet"/>
+    <!-- Bootstrap & bootstrap-table CSS -->
+    <link href="/static/assets/bootstrap-4/css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
+    <link href="/static/assets/bootstrap-table/bootstrap-table.min.css" type="text/css" rel="stylesheet"/>
+    <!-- Fuzzinator CSS -->
+    <link href="/static/assets/codehilite-colorful.css" type="text/css" rel="stylesheet"/>
+    <link href="/static/styles/fuzzinator.css" type="text/css" rel="stylesheet"/>
+    <!-- Script sources -->
+    <script src="/static/assets/jquery.slim.min.js" type="text/javascript"></script>
+    <script src="/static/assets/bootstrap-4/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+    <script src="/static/assets/bootstrap-table/bootstrap-table.min.js" type="text/javascript"></script>
+    <script src="/static/assets/bootstrap-table/extensions/cookie/bootstrap-table-cookie.min.js" type="text/javascript"></script>
+    <!-- Custom Fuzzinator scripts -->
+    <script>var activePage = "{{ active_page }}";</script>
+    <script src="/static/scripts/bs-table-details.js" type="text/javascript"></script>
+    <script src="/static/scripts/bs-table-toolbar.js" type="text/javascript"></script>
+    <script src="/static/scripts/websocket.js" type="text/javascript"></script>
+    <script src="/static/scripts/wui.js" type="text/javascript"></script>
+    <title>Fuzzinator</title>
+  </head>
+  <body>
+    <!-- Fuzzinator header -->
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+      <a class="navbar-brand font-weight-bold" href="#"><span class="fz-brand">F</span><span class="fz-brand">u</span><span class="fz-brand">z</span><span class="fz-brand">z</span><span class="fz-brand">i</span><span class="fz-brand">n</span><span class="fz-brand">a</span><span class="fz-brand">t</span><span class="fz-brand">o</span><span class="fz-brand">r</span></a>
+      <span class="websocket-status websocket-error">
+      In Bug We Trust
+      </span>
+    </nav>
+    <!-- Main content -->
+    <main role="main" class="container-fluid">
+      <div class="row">
+        <div class="col-lg-9">
+          <nav class="navbar navbar-expand-md">
+            <div class="w-100 order-1 order-md-0 dual-collapse2">
+              <ul class="nav nav-tabs" id="mainTab" role="tablist">
+                <li class="nav-item">
+                  <a class="nav-link {% if active_page=='issues' %} active {% end %}" id="issues-tab" onclick="location.href='/'" data-toggle="tab" href="/" role="tab" aria-controls="issues" aria-selected="true">Issues <span class="badge badge-pill badge-primary"></span></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link {% if active_page=='stats' %} active {% end %}" id="stats-tab" onclick="location.href='/stats'" href="/stats" data-toggle="tab" role="tab" aria-controls="stats" aria-selected="false">Stats</a>
+                </li>
+                {% block nav %}
+                {% end nav %}
+              </ul>
+            </div>
+          </nav>
+          <!--mainTab -->
+          <div class="tab-content" id="mainTabContent">
+            {% block body %}
+            {% end body  %}
+          </div>
+          <!-- mainTab -->
+        </div>
+        <div class="col-lg-3 order-lg-first">
+          <nav class="navbar navbar-expand-md">
+            <div class="w-100 order-1 order-md-0 dual-collapse2">
+              <ul class="nav nav-tabs" id="sideTab" role="tablist">
+                <li class="nav-item">
+                  <a class="nav-link active" id="jobs-tab" data-toggle="tab" href="#jobs" role="tab" aria-controls="jobs" aria-selected="true">Jobs</a>
+                </li>
+              </ul>
+              <div class="tab-content" id="sideTabContent">
+                <div class="tab-pane show active" id="jobs" role="tabpanel" aria-labelledby="jobs-tab"></div>
+                <!--jobs-->
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </main> <!-- Main content end -->
+    <!-- templates start -->
+    <template id="issue-card-template">
+      <!-- issue card start -->
+      <td width="100%" style="padding: 0px">
+        <div class="card container-fluid border-light pl-2 rounded-0">
+          <div class="row bg-white ml-0">
+            <div class="col-10 order-1 col-md-10 text-truncate"><i class="material-icons-outlined md-18 align-text-top">priority_high</i> <span class="issue-id" data-toggle="tool-tip" title="issue"><a class="issue-ref"></a></span></div>
+            <div class="col-12 order-3 col-md-3 text-truncate text-secondary small" data-toggle="tool-tip" title="sut"><i class="material-icons-outlined md-14 align-text-top">my_location</i> <span class="sut-id"></span></div>
+            <div class="col-12 order-4 col-md-3 text-truncate text-secondary small" data-toggle="tool-tip" title="fuzzer"><i class="material-icons-outlined md-14 align-text-top">shuffle</i> <span class="fuzzer-id"></span></div>
+            <div class="col-12 order-5 col-md-4 text-truncate text-secondary small" data-toggle="tool-tip" title="date range"><i class="material-icons-outlined md-14 align-text-top">date_range</i> <span class="date_range"></span></div>
+            <div class="col-12 order-6 col-md-2 text-nowrap text-md-right text-secondary small" data-toggle="tool-tip" title="count"><i class="material-icons-outlined md-14 align-text-top">repeat</i><span class="count"></span></div>
+            <div class="col-2 order-2 col-md-2 text-nowrap text-right text-secondary small">
+              <i class="reduced material-icons-outlined md-14 align-text-top" title="reduced"></i>
+              <i class="reported material-icons-outlined md-14 align-text-top" title="reported"></i>
+              <div class="dropdown btn-group dropleft" >
+                <button class="btn btn-light btn-sm dropdown-toggle pl-1 pr-3" type="button"  id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="float: right"></button>
+                <div class="dropdown-menu m-0 p-0" style="min-width: auto" aria-labelledby="dropdownMenuButton">
+                  <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-light reduce-issue" title="reduce"><i class="material-icons-outlined md-14 align-text-top">crop</i></button>
+                    <button type="button" class="btn btn-light validate-issue" title="validate"><i class="material-icons md-14 align-text-top">replay</i></button>
+                    <button type="button" class="btn btn-light delete-issue" title="delete"><i class="material-icons-outlined md-14 align-text-top">delete</i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+      <!-- issue card end -->
+    </template>
+    <template id="stat-card-template">
+      <!-- stat card start -->
+      <td width="100%" style="padding: 0px">
+        <div class="card stat container-fluid border-light pl-2 bg-danger rounded-0 detail-icon">
+          <div class="row bg-white ml-0">
+            <div class="col-12 col-md-7 text-truncate" data-toggle="tool-tip" title="fuzzer"><span class="material-icons-outlined md-18 align-text-top">shuffle</span><span class="fuzzer"></span></div>
+            <div class="col-12 col-md-2 text-truncate" data-toggle="tool-tip" title="executed"><span class="material-icons-outlined md-18 align-text-top">repeat</span><span class="exec"></span></div>
+            <div class="col-12 col-md-2 text-truncate" data-toggle="tool-tip" title="issues"><span class="material-icons-outlined md-18 align-text-top">error_outline</span><span class="issues"></span></div>
+            <div class="col-12 col-md-1 text-truncate" data-toggle="tool-tip" title="unique issues"><span class="material-icons-outlined md-18 align-text-top">priority_high</span><span class="unique"></span></div>
+          </div>
+        </div>
+      </td>
+      <!-- stat card end -->
+    </template>
+    <template id="stat-row-template">
+      <!-- stat row card start -->
+      <div class="card container-fluid border-light pl-2 bg-info rounded-0">
+        <div class="row bg-white ml-0">
+          <div class="col-12 col-md-2 text-truncate" data-toggle="tool-tip" title="config"><span class="material-icons-outlined md-18 align-text-top">description</span><a class="config-ref"></a></div>
+          <div class="col-12 col-md-3 text-truncate" data-toggle="tool-tip" title="fuzzer"><span class="material-icons-outlined md-18 align-text-top">shuffle</span><span class="fuzzer"></span></div>
+          <div class="col-12 col-md-2 text-truncate" data-toggle="tool-tip" title="sut"><span class="material-icons-outlined md-18 align-text-top">my_location</span><span class="sut"></span></div>
+          <div class="col-12 col-md-2 text-truncate" data-toggle="tool-tip" title="executed"><span class="material-icons-outlined md-18 align-text-top">repeat</span><span class="exec"></span></div>
+          <div class="col-12 col-md-2 text-truncate" data-toggle="tool-tip" title="issues"><span class="material-icons-outlined md-18 align-text-top">error_outline</span><span class="issues"></span></div>
+          <div class="col-12 col-md-1 text-truncate" data-toggle="tool-tip" title="unique issues"><span class="material-icons-outlined md-18 align-text-top">priority_high</span><span class="unique"></span></div>
+        </div>
+      </div>
+      <!-- stat row card end -->
+    </template>
+    <template id="fuzz-job-template">
+      <!-- fuzzer job card begin -->
+      <div class="card container-fluid border-light mb-1 pl-2 rounded-0">
+        <div class="row bg-white ml-0">
+          <div class="col-12 text-truncate">
+            <i class="material-icons-outlined md-18 align-text-top">shuffle</i>
+            <span class="fuzz-job-id"> </span>
+            <button type="button" class="close" aria-label="Close"><i class="material-icons-outlined align-text-top">close</i></button>
+          </div>
+          <div class="col-12 text-truncate text-secondary small"><i class="material-icons-outlined md-14 align-text-top">shuffle</i> <span class="fuzz-job-fuzzer"> </span></div>
+          <div class="col-12 text-truncate text-secondary small"><i class="material-icons-outlined md-14 align-text-top">my_location</i> <span class="fuzz-job-sut"> </span></div>
+          <div class="col-12 text-truncate text-secondary small">
+            <div class="progress">
+              <div class="progress-bar progress-bar-success" style="width: 0%" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" data-valuemax="">
+                <span class="progress-text">0%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- fuzzer job card end -->
+    </template>
+    <template id="reduce-job-template">
+      <!-- reduce job card begin -->
+      <div class="card container-fluid border-light mb-1 pl-2 rounded-0">
+        <div class="row bg-white ml-0">
+          <div class="col-12 text-truncate">
+            <i class="material-icons-outlined md-18 align-text-top">crop</i>
+            <span class="reduce-job-id"> </span>
+            <button type="button" class="close" aria-label="Close"><i class="material-icons-outlined align-text-top">close</i></button>
+          </div>
+          <div class="col-12 text-truncate text-secondary small"><i class="material-icons-outlined md-14 align-text-top">my_location</i> <span class="reduce-job-sut"> </span></div>
+          <div class="ol-12 text-truncate text-secondary small"><i class="material-icons-outlined md-14 align-text-top">priority_high</i> <span class="reduce-job-issue"> </span></div>
+          <div class="col-12 text-truncate text-secondary small">
+            <div class="progress">
+              <div class="progress-bar progress-bar-success" style="width: 0%" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" data-valuemax="">
+                <span class="progress-text"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- reduce job card end -->
+    </template>
+    <template id="update-job-template">
+      <!-- update job card begin -->
+      <div class="card container-fluid border-light mb-1 pl-2 rounded-0">
+        <div class="row bg-white ml-0">
+          <div class="col-12 text-truncate">
+            <i class="material-icons md-18 align-text-top">update</i>
+            <span class="update-job-id"> </span>
+            <button type="button" class="close" aria-label="Close"><i class="material-icons-outlined align-text-top">close</i></button>
+          </div>
+          <div class="col-12 text-truncate text-secondary small"><i class="material-icons-outlined md-14 align-text-top">my_location</i> <span class="update-job-sut"> </span></div>
+        </div>
+      </div>
+      <!-- update job card end -->
+    </template>
+    <template id="validate-job-template">
+      <!-- validate job card begin -->
+      <div class="card container-fluid border-light mb-1 pl-2 rounded-0">
+        <div class="row bg-white ml-0">
+          <div class="col-12 text-truncate">
+            <i class="material-icons md-18 align-text-top">replay</i>
+            <span class="validate-job-id"> </span>
+            <button type="button" class="close" aria-label="Close"><i class="material-icons-outlined align-text-top">close</i></button>
+          </div>
+          <div class="col-12 text-truncate text-secondary small"><i class="material-icons-outlined md-14 align-text-top">my_location</i> <span class="validate-job-sut"> </span></div>
+          <div class="col-12 text-truncate text-secondary small"><i class="material-icons-outlined md-14 align-text-top">priority_high</i> <span class="validate-job-issue"> </span></div>
+        </div>
+      </div>
+      <!-- validate job card end -->
+    </template>
+    <!-- templates end -->
+  </body>
+</html>

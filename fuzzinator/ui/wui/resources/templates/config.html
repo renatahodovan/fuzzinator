@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+
+<!--
+ Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+
+ Licensed under the BSD 3-Clause License
+ <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
+ This file may not be copied, modified, or distributed except
+ according to those terms.
+-->
+
+{% extends "base.html" %}
+{% block nav %}
+  <li class="nav-item">
+    <a class="nav-link disabled" id="chevron-tab" aria-selected="false"><i class="material-icons-outlined md-18 align-text-top">chevron_right</i></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link active" id="config-tab" role="tab" aria-controls="config" aria-selected="true">Config</a>
+  </li>
+{% end nav %}
+
+{% block body %}
+  <!-- stat card start -->
+  <td width="100%" style="padding: 0px">
+    <div class="detailed-card container-fluid border-light mb-1 pl-2 bg-info rounded-0 pr-0 mb-3">
+      <div class="bg-white ml-1">
+        <div class="row">
+          <h5 class="col-12 col-md-12">
+            <i class="material-icons-outlined md-10 align-text-bottom text-info outline">description</i>
+            <span class="text-info font-weight-bold" data-toggle="tool-tip" title="config">{{ ident }}</span>
+          </h5>
+        </div>
+
+        <div>
+          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="fuzzer">
+            <i class="material-icons-outlined md-14 align-text-top">shuffle</i> <span class="fuzzer">{{ data.get('fuzzer', 'N/A') }}</span>
+          </div>
+          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="fuzzer">
+            <i class="material-icons-outlined md-14 align-text-top">my_location</i> <span class="sut">{{ data.get('sut', 'N/A') }}</span>
+          </div>
+
+        {% if frm == 'stat' %}
+          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="executed">
+            <i class="material-icons-outlined md-14 align-text-top">repeat</i> <span class="exec"></span>{{ data.get('exec', 'N/A') }}
+          </div>
+          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="issues">
+            <i class="material-icons-outlined md-14 align-text-top">error_outline</i> <span class="issues">{{ data.get('issues', 'N/A') }}</span>
+          </div>
+          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="unique issues">
+            <i class="material-icons-outlined md-14 align-text-top">priority_high</i> <span class="unique">{{ data.get('unique', 'N/A') }}</span>
+          </div>
+        {% else %}
+          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="date range">
+            <i class="material-icons-outlined md-14 align-text-center">date_range</i> <span class="date_range">{{ data.get('first_seen') and data.get('first_seen').strftime('%Y-%m-%d %H:%M:%S') }} .. {{ data.get('last_seen') and data.get('last_seen').strftime('%Y-%m-%d %H:%M:%S') }}</span>
+          </div>
+          <div class="col-12 col-md-12 text-nowrap text-secondary" data-toggle="tool-tip" title="count">
+            <i class="material-icons-outlined md-14 align-text-center">repeat</i> <span class="count">{{ data.get('count', 1) }}</span>
+          </div>
+          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="sut">
+            <i class="material-icons-outlined md-14 align-text-center">priority_high</i> <a href="/issue/{{ data.get('_id') }}" class="sut-id">{{ data.get('id', 'N/A') }}</a>
+          </div>
+        {% end %}
+        </div>
+
+      </div>
+    </div>
+  </td>
+  <!-- stat card end -->
+
+  {% raw config_src %}
+{% end body %}

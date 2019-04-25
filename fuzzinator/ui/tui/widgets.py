@@ -257,7 +257,7 @@ class IssuesTable(Table):
 
     def update(self, show_all):
         self.all_issues = show_all
-        self.query_data = self.db.all_issues(include_invalid=self.show_invalid, show_all=self.all_issues)
+        self.query_data = self.db.get_issues(include_invalid=self.show_invalid, show_all=self.all_issues)
         self.requery(self.query_data)
         self.walker._modified()
 

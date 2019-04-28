@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,10 +7,6 @@
 
 
 class BaseTracker(object):
-
-    @property
-    def logged_in(self):
-        return True
 
     def find_issue(self, issue):
         pass

@@ -13,17 +13,9 @@ from .base import BaseTracker
 class GitlabTracker(BaseTracker):
 
     def __init__(self, url, project, private_token=None):
-        self.url = url
-        self.gl = Gitlab(self.url, private_token=private_token)
-        self.gl.auth()
-        self.project = self.gl.projects.get(self.gl.search('projects', project)[0]['id'])
-
-    @property
-    def logged_in(self):
-        return self.gl and self.gl.user
-
-    def login(self, username, pwd):
-        pass
+        gl = Gitlab(url, private_token=private_token)
+        gl.auth()
+        self.project = gl.projects.get(gl.search('projects', project)[0]['id'])
 
     def find_issue(self, query):
         return [issue for issue in self.project.search('issues', query) if issue['state'] == 'opened']

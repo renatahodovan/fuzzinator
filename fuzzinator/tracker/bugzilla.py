@@ -16,26 +16,15 @@ from .base import BaseTracker
 
 class BugzillaTracker(BaseTracker):
 
-    def __init__(self, product, url):
+    def __init__(self, product, url, api_key=None):
         self.product = product
-        self.bzapi = Bugzilla(url)
+        self.bzapi = Bugzilla(url, api_key=api_key)
 
         # Remove old token and cookie files since they may be outdated.
         if os.path.exists(self.bzapi.tokenfile):
             os.remove(self.bzapi.tokenfile)
         if os.path.exists(self.bzapi.cookiefile):
             os.remove(self.bzapi.cookiefile)
-
-    @property
-    def logged_in(self):
-        return self.bzapi.user
-
-    def login(self, username, pwd):
-        try:
-            self.bzapi.login(user=username, password=pwd)
-            return True
-        except BugzillaError:
-            return False
 
     def find_issue(self, query):
         return self.bzapi.query(self.bzapi.build_query(product=self.product,

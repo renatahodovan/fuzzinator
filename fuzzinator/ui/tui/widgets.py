@@ -34,7 +34,6 @@ class MainWindow(PopUpLauncher):
         self.controller = controller
         self.config = controller.config
         self.db = controller.db
-        self.trackers = dict()
 
         self.logo = FuzzerLogo(max_load=controller.capacity)
         self.issues_table = IssuesTable(db=self.db, initial_sort='sut')
@@ -56,11 +55,11 @@ class MainWindow(PopUpLauncher):
         self.footer_btns = OrderedDict()
         self.footer_btns['about'] = AboutButton('F1 About')
         self.footer_btns['validate'] = FormattedButton('F2 Validate', on_press=lambda btn: self.add_validate_job())
-        self.footer_btns['view'] = ViewButton('F3 View', self.issues_table, self.config, self.trackers)
+        self.footer_btns['view'] = ViewButton('F3 View', self.issues_table, self.config)
         self.footer_btns['edit'] = EditButton('F4 Edit', self.issues_table)
         self.footer_btns['copy'] = FormattedButton('F5 Copy', on_press=lambda btn: self.copy_selected())
         self.footer_btns['reduce'] = FormattedButton('F6 Reduce', on_press=lambda btn: self.add_reduce_job())
-        self.footer_btns['report'] = ReportButton('F7 Report', self.issues_table, self.config, self.trackers)
+        self.footer_btns['report'] = ReportButton('F7 Report', self.issues_table, self.config)
         self.footer_btns['delete'] = FormattedButton('F8 Delete')
         self.footer_btns['show'] = FormattedButton('F9 Show all', on_press=self.show_all)
         self.footer_btns['quit'] = FormattedButton('F10 Quit', on_press=lambda btn: self._emit('close'))

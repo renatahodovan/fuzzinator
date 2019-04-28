@@ -5,8 +5,6 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-from os import get_terminal_size
-
 from urwid import *
 
 from ...config import config_get_callable
@@ -14,53 +12,8 @@ from ...formatter import JsonFormatter
 from ...tracker import BaseTracker
 from .button import FormattedButton
 from .decor_widgets import PatternBox
-from .dialogs import BugEditor, Dialog
+from .dialogs import BugEditor
 from .graphics import fz_box_pattern
-
-
-class LoginDialog(Dialog):
-    signals = ['close']
-
-    def __init__(self, tracker):
-        self.tracker = tracker
-        name = Edit(caption='Username: ', edit_text='')
-        pwd = Edit(caption='Password: ', edit_text='', mask='*')
-        self.result = Text('')
-        super().__init__(title='Login',
-                         body=[self.result, name, pwd],
-                         footer_btns=[FormattedButton(label='Login',
-                                                      on_press=self.send_credentials,
-                                                      user_data=(name, pwd)),
-                                      FormattedButton(label='Cancel', on_press=lambda btn: self._emit('close'))])
-
-    def send_credentials(self, _, details):
-        result = self.tracker.login(details[0].edit_text, details[1].edit_text)
-        if not result:
-            self.result.set_text(('warning', 'Login failed!'))
-        else:
-            self._emit('close')
-
-
-class LoginButton(PopUpLauncher):
-    signals = ['click', 'ready']
-
-    def __init__(self, tracker):
-        self.tracker = tracker
-        super().__init__(FormattedButton('', style='dialog'))
-        connect_signal(self.original_widget, 'click', lambda btn: self.open_pop_up())
-
-    def create_pop_up(self):
-        pop_up = LoginDialog(self.tracker)
-        connect_signal(pop_up, 'close', lambda dialog: self.done())
-        return pop_up
-
-    def get_pop_up_parameters(self):
-        _, rows = get_terminal_size()
-        return {'left': 0, 'top': -rows // 2 - 5, 'overlay_width': 50, 'overlay_height': 10}
-
-    def done(self):
-        self.close_pop_up()
-        self._emit('ready')
 
 
 class ReportDialog(PopUpTarget):
@@ -81,23 +34,16 @@ class ReportDialog(PopUpTarget):
                                                ('weight', 10, self.issue_title)], dividechars=1),
                                       Columns([('fixed', 13, Text(('dialog_secondary', 'Description: '))),
                                                ('weight', 10, self.issue_desc)], dividechars=1)])
-
-        login_button = LoginButton(self.tracker)
-        connect_signal(login_button, 'ready', lambda btn: self.find_duplicates())
         frame = Frame(body=AttrMap(Columns([('weight', 10, ListBox(self.body)),
                                             ('weight', 3, AttrMap(ListBox(SimpleListWalker(side_bar or [])), attr_map='dialog_secondary'))]),
                                    'dialog'),
                       footer=Columns([('pack', FormattedButton('Close', lambda button: self._emit('close_reporter'))),
                                       ('pack', FormattedButton('Report', lambda button: self.send_report())),
-                                      ('pack', FormattedButton('Save as reported', lambda button: self.save_reported())),
-                                      ('pack', login_button)], dividechars=2),
+                                      ('pack', FormattedButton('Save as reported', lambda button: self.save_reported()))], dividechars=2),
                       focus_part='body')
 
         super().__init__(AttrMap(PatternBox(frame, title=('dialog_title', issue['id']), **fz_box_pattern()), attr_map='dialog_border'))
-        if not self.tracker.logged_in:
-            login_button.keypress((0, 0), 'enter')
-        else:
-            self.find_duplicates()
+        self.find_duplicates()
 
     def set_duplicate(self, btn, state):
         if state:

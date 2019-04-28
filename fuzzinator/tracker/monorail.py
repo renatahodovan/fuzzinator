@@ -18,14 +18,6 @@ class MonorailTracker(BaseTracker):
 
     def __init__(self, project_id):
         self.project_id = project_id
-        self.monorail = None
-        self.login()
-
-    @property
-    def logged_in(self):
-        return self.monorail is not None
-
-    def login(self, *args):
         credentials = GoogleCredentials.get_application_default()
         credentials = credentials.create_scoped(['https://www.googleapis.com/auth/userinfo.email'])
 

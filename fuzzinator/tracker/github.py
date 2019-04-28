@@ -12,7 +12,7 @@ try:
     # for now if we cannot load the github module at all. This workaround just
     # postpones the error to the point when ``GithubReport`` is actually used,
     # so be warned, don't do that on Windows!
-    from github import Github, BadCredentialsException
+    from github import Github
 except ImportError:
     pass
 
@@ -21,32 +21,14 @@ from .base import BaseTracker
 
 class GithubTracker(BaseTracker):
 
-    def __init__(self, repository):
+    def __init__(self, repository, token=None):
         self.repository = repository
-        self.ghapi = Github().get_repo(self.repository)
-        self.gh = None
-
-    @property
-    def logged_in(self):
-        try:
-            _ = self.gh.get_user().id
-            return True
-        except Exception:
-            return False
-
-    def login(self, username, pwd):
-        try:
-            self.gh = Github(username, pwd)
-            # This expression has no effect but will throw an exception if the authentication failed.
-            _ = self.gh.get_user().id
-            self.ghapi = self.gh.get_repo(self.repository)
-            return True
-        except BadCredentialsException:
-            return False
+        self.ghapi = Github(login_or_token=token)
+        self.project = self.ghapi.get_repo(self.repository)
 
     def find_issue(self, query):
         options = []
-        pages = self.ghapi.get_issues(state='open')
+        pages = self.project.get_issues(state='open')
         idx = 0
         while True:
             page = pages.get_page(idx)
@@ -59,7 +41,7 @@ class GithubTracker(BaseTracker):
         return options
 
     def report_issue(self, title, body):
-        return self.ghapi.create_issue(title=title, body=body)
+        return self.project.create_issue(title=title, body=body)
 
     def __call__(self, issue):
         pass

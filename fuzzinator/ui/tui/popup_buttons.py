@@ -5,9 +5,8 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-from urwid import *
+from os import get_terminal_size
 
-from .button import FormattedButton
 from .dialogs import AboutDialog, EditIssueDialog, FormattedIssueDialog
 from .reporter_dialogs import *
 
@@ -42,11 +41,10 @@ class AboutButton(PopUpLauncher):
 
 class ViewButton(FullScreenPopupLauncher):
 
-    def __init__(self, label, issues_table, config, trackers):
+    def __init__(self, label, issues_table, config):
         super().__init__(FormattedButton(label))
         self.issues_table = issues_table
         self.config = config
-        self.trackers = trackers
         connect_signal(self.original_widget, 'click', lambda btn: self.open_pop_up())
 
     def create_pop_up(self):
@@ -81,11 +79,10 @@ class EditButton(FullScreenPopupLauncher):
 
 class ReportButton(FullScreenPopupLauncher):
 
-    def __init__(self, label, issues_table, config, trackers):
+    def __init__(self, label, issues_table, config):
         super().__init__(FormattedButton(label))
         self.issues_table = issues_table
         self.config = config
-        self.trackers = trackers
 
         connect_signal(self.original_widget, 'click', lambda btn: self.open_pop_up())
 

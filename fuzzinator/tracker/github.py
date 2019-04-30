@@ -22,23 +22,12 @@ from .base import BaseTracker
 class GithubTracker(BaseTracker):
 
     def __init__(self, repository, token=None):
-        self.repository = repository
+        self.org, self.repository = repository.split('/')
         self.ghapi = Github(login_or_token=token)
-        self.project = self.ghapi.get_repo(self.repository)
+        self.project = self.ghapi.get_repo(repository)
 
     def find_issue(self, query):
-        options = []
-        pages = self.project.get_issues(state='open')
-        idx = 0
-        while True:
-            page = pages.get_page(idx)
-            idx += 1
-            if not page:
-                break
-            for entry in page:
-                if all(word in entry.body for word in query.split()):
-                    options.append(entry)
-        return options
+        return list(self.ghapi.search_issues('+'.join(query.split()), state='open', org=self.org, repo=self.repository))
 
     def report_issue(self, title, body):
         return self.project.create_issue(title=title, body=body)

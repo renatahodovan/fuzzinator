@@ -197,5 +197,5 @@ class EditIssueDialog(Dialog):
         updated = dict()
         for prop, box in self.edit_boxes.items():
             updated[prop] = self._from_str(prop, box.edit_text)
-        self.db.update_issue(self.issue, updated)
+        self.db.update_issue_by_id(self.issue['_id'], updated)
         self._emit('close')

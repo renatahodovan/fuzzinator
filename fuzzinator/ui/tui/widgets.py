@@ -10,6 +10,7 @@ import random
 import time
 
 from collections import OrderedDict
+from datetime import datetime
 from math import ceil
 
 import pyperclip
@@ -232,7 +233,7 @@ class IssuesTable(Table):
         if key in ['delete', 'd']:
             if self:    # len(self) != 0
                 ident = self[self.focus_position].data['_id']
-                self.db.invalidate_issue_by_id(ident)
+                self.db.update_issue_by_id(ident, {'invalid': datetime.utcnow()})
                 self.invalidate_row(ident)
             return None
         if key in ['shift delete', 'D']:

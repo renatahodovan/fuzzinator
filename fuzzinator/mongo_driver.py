@@ -77,14 +77,11 @@ class MongoDriver(object):
     def find_issues_by_suts(self, suts):
         return list(self._db.fuzzinator_issues.find({'sut': {'$in': suts}}))
 
-    def update_issue(self, issue, _set):
-        self._db.fuzzinator_issues.update_one({'sut': issue['sut'], 'id': issue['id']}, {'$set': _set})
+    def update_issue_by_id(self, _id, _set):
+        self._db.fuzzinator_issues.update_one({'_id': ObjectId(_id)}, {'$set': _set})
 
     def remove_issue_by_id(self, _id):
         self._db.fuzzinator_issues.delete_one({'_id': ObjectId(_id)})
-
-    def invalidate_issue_by_id(self, _id):
-        self._db.fuzzinator_issues.update_one({'_id': ObjectId(_id)}, {'$set': {'invalid': datetime.utcnow()}})
 
     def get_stats(self, filter=None, skip=0, limit=0, sort=None, show_all=True):
         issues_pipeline = []

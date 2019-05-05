@@ -1,7 +1,6 @@
-==========
-Fuzzinator
-==========
-*Random Testing Framework*
+.. image:: docs/img/fuzzinator-black-on-trans-289x49.png
+
+*Fuzzinator: Random Testing Framework*
 
 .. image:: https://badge.fury.io/py/fuzzinator.svg
    :target: https://badge.fury.io/py/fuzzinator

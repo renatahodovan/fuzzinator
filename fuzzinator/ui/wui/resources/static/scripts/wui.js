@@ -15,11 +15,11 @@ var ws = new WUIWebSocket();
 var successQueue = [];
 
 ws.onopen = function () {
-  $('.websocket-status').attr('title', 'online').addClass('navbar-text');
+  $('.fz-motto').attr('title', 'online').removeClass('websocket-error');
 };
 
 ws.onclose = function () {
-  $('.websocket-status').attr('title', 'offline').removeClass('navbar-text');
+  $('.fz-motto').attr('title', 'offline').addClass('websocket-error');
 };
 
 ws.onmessage['new_fuzz_job'] = function (data) {
@@ -236,9 +236,9 @@ function createStatTable () {
 }
 
 function fireworks () {
-  $('.fz-brand').addClass('fz-brand-fireworks');
-  $('.fz-brand').one('animationend', function () {
-    $(this).removeClass('fz-brand-fireworks');
+  $('.fz-logo').addClass('fz-logo-fireworks');
+  $('.fz-logo').one('animationend', function () {
+    $(this).removeClass('fz-logo-fireworks');
   });
 }
 
@@ -280,11 +280,11 @@ $(document).ready(function () {
       }
   });
 
-  $('.websocket-status').click(function () {
+  $('.fz-motto').click(function () {
     ws.toggle();
   });
 
-  $('.navbar-brand').click(function () {
+  $('.fz-logo').click(function () {
     fireworks();
   });
 });

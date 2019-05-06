@@ -20,23 +20,23 @@
 {% end nav %}
 
 {% block body %}
-  <!-- stat card start -->
+  <!-- config summary start -->
   <td width="100%" style="padding: 0px">
     <div class="detailed-card container-fluid border-light mb-1 pl-2 bg-info rounded-0 pr-0 mb-3">
       <div class="bg-white ml-1">
         <div class="row">
           <h5 class="col-12 col-md-12">
-            <i class="material-icons-outlined md-10 align-text-bottom text-info outline">description</i>
+            <i class="material-icons-outlined align-text-bottom text-info outline">description</i>
             <span class="text-info font-weight-bold" data-toggle="tool-tip" title="config">{{ ident }}</span>
           </h5>
         </div>
 
         <div>
-          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="fuzzer">
-            <i class="material-icons-outlined md-14 align-text-top">shuffle</i> <span class="fuzzer">{{ data.get('fuzzer', 'N/A') }}</span>
+          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="sut">
+            <i class="material-icons-outlined md-14 align-text-top">my_location</i> <span class="sut">{{ data.get('sut', 'N/A') }}</span>
           </div>
           <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="fuzzer">
-            <i class="material-icons-outlined md-14 align-text-top">my_location</i> <span class="sut">{{ data.get('sut', 'N/A') }}</span>
+            <i class="material-icons-outlined md-14 align-text-top">shuffle</i> <span class="fuzzer">{{ data.get('fuzzer', 'N/A') }}</span>
           </div>
 
         {% if frm == 'stat' %}
@@ -56,7 +56,7 @@
           <div class="col-12 col-md-12 text-nowrap text-secondary" data-toggle="tool-tip" title="count">
             <i class="material-icons-outlined md-14 align-text-center">repeat</i> <span class="count">{{ data.get('count', 1) }}</span>
           </div>
-          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="sut">
+          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="issue">
             <i class="material-icons-outlined md-14 align-text-center">priority_high</i> <a href="/issue/{{ data.get('_id') }}" class="sut-id">{{ data.get('id', 'N/A') }}</a>
           </div>
         {% end %}
@@ -65,7 +65,7 @@
       </div>
     </div>
   </td>
-  <!-- stat card end -->
+  <!-- config summary end -->
 
   {% raw config_src %}
 {% end body %}

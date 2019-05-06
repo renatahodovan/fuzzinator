@@ -212,7 +212,7 @@ function statRowDetailFormatter (index, row) {
     if (detail.subconfig !== null) {
         $(statRowDetail).find('.config-ref').attr('href', `/config/${detail.subconfig}/stat`);
     }
-    $(statRowDetail).find('.config-ref').text(detail.subconfig === null ? 'No config' : `${detail.subconfig}`);
+    $(statRowDetail).find('.config-ref').text(detail.subconfig === null ? 'N/A' : `${detail.subconfig}`);
     $(statRowDetail).find('.fuzzer').text(row.fuzzer);
     $(statRowDetail).find('.sut').text(row.sut);
     $(statRowDetail).find('.exec').text(detail.exec);

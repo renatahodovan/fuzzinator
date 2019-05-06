@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<!--
+ Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+
+ Licensed under the BSD 3-Clause License
+ <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
+ This file may not be copied, modified, or distributed except
+ according to those terms.
+-->
+
+{% extends "base.html" %}
+
+{% block body %}
+  <td width="100%" style="padding: 0px">
+    <div class="detailed-card container-fluid border-light mb-1 pl-2 bg-danger rounded-0 pr-0 mb-3">
+      <div class="bg-white ml-1">
+        <div class="row">
+          <h5 class="col-12 col-md-12">
+            <i class="material-icons-outlined align-text-bottom text-danger">{{ icon }}</i>
+            <span class="text-danger font-weight-bold">Fzzz! ({{ code }})</span>
+          </h5>
+        </div>
+      </div>
+    </div>
+  </td>
+
+  {% raw exc_info %}
+{% end body %}

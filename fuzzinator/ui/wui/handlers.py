@@ -8,6 +8,7 @@
 
 import json
 import logging
+import traceback
 
 from bson.json_util import dumps, RELAXED_JSON_OPTIONS
 from markdown import markdown
@@ -115,13 +116,28 @@ class SocketHandler(websocket.WebSocketHandler):
             self.on_close()
 
 
-class IndexHandler(web.RequestHandler):
+class BaseHandler(web.RequestHandler):
+
+    def write_error(self, status_code, **kwargs):
+        if 'exc_info' in kwargs:
+            icon = 'sentiment_very_dissatisfied'
+            if self.application.settings.get('serve_traceback'):
+                exc_info = markdown('```\n%s\n```' % ''.join(traceback.format_exception(*kwargs['exc_info'])), extensions=['extra', 'fenced_code', 'codehilite'])
+            else:
+                exc_info = ''
+        else:
+            icon = 'mood_bad'
+            exc_info = ''
+        self.render('error.html', active_page='error', code=status_code, icon=icon, exc_info=exc_info)
+
+
+class IndexHandler(BaseHandler):
 
     def get(self):
         self.render('index.html', active_page='issues')
 
 
-class IssueHandler(web.RequestHandler):
+class IssueHandler(BaseHandler):
 
     def __init__(self, *args, db, config, **kwargs):
         super().__init__(*args, **kwargs)
@@ -131,13 +147,13 @@ class IssueHandler(web.RequestHandler):
     def get(self, issue_id):
         issue = self.db.find_issue_by_id(issue_id)
         if issue is None:
-            self.set_status(404)
+            self.send_error(404)
             return
         formatter = config_get_callable(self.config, 'sut.' + issue['sut'], ['wui_formatter', 'formatter'])[0] or JsonFormatter
         self.render('issue.html', active_page='issue', issue=issue, issue_body=formatter(issue=issue))
 
 
-class ConfigHandler(web.RequestHandler):
+class ConfigHandler(BaseHandler):
 
     def __init__(self, *args, db, **kwargs):
         super().__init__(*args, **kwargs)
@@ -146,7 +162,7 @@ class ConfigHandler(web.RequestHandler):
     def get(self, subconfig, frm):
         config = self.db.find_config_by_id(subconfig)
         if not config:
-            self.set_status(404)
+            self.send_error(404)
             return
 
         if frm == 'stat':
@@ -155,14 +171,20 @@ class ConfigHandler(web.RequestHandler):
             data = self.db.find_issue_by_id(frm)
 
         if not data:
-            self.set_status(404)
+            self.send_error(404)
             return
 
         config_src = markdown('```ini\n%s\n```' % config['src'], extensions=['extra', 'fenced_code', 'codehilite'])
         self.render('config.html', active_page='config', frm=frm, ident=subconfig, data=data, config_src=config_src)
 
 
-class StatsHandler(web.RequestHandler):
+class StatsHandler(BaseHandler):
 
     def get(self):
         self.render('stats.html', active_page='stats')
+
+
+class NotFoundHandler(BaseHandler):
+
+    def prepare(self):
+        self.send_error(404)

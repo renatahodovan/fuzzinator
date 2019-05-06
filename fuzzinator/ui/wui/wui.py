@@ -20,7 +20,7 @@ from tornado import ioloop, web
 from ... import Controller
 from .. import build_parser, process_args
 
-from .handlers import ConfigHandler, IndexHandler, IssueHandler, SocketHandler, StatsHandler
+from .handlers import ConfigHandler, IndexHandler, IssueHandler, NotFoundHandler, SocketHandler, StatsHandler
 from .wui_listener import WuiListener
 
 logger = logging.getLogger()
@@ -28,7 +28,7 @@ logger = logging.getLogger()
 
 class Wui(object):
 
-    def __init__(self, controller, port, address):
+    def __init__(self, controller, port, address, debug):
         self.events = Queue()
         self.lock = Lock()
         # Main controller of Fuzzinator.
@@ -40,9 +40,10 @@ class Wui(object):
                                     (r'/stats', StatsHandler),
                                     (r'/config/([0-9a-f]{9})/([0-9a-z]+)', ConfigHandler, dict(db=controller.db)),
                                     (r'/wui', SocketHandler, dict(wui=self))],
+                                   default_handler_class=NotFoundHandler,
                                    template_path=resource_filename(__name__, os.path.join('resources', 'templates')),
                                    static_path=resource_filename(__name__, os.path.join('resources', 'static')),
-                                   autoreload=False, debug=True)
+                                   autoreload=False, debug=debug)
         # Starts an HTTP server for this application on the given port.
         self.server = self.app.listen(port, address)
         # List of opened WebSockets.
@@ -123,6 +124,8 @@ def execute(args=None, parser=None):
                         help='bind service to all available addresses (alias for --bind-ip=%(const)r)')
     parser.add_argument('--port', metavar='NUM', default=8080, type=int,
                         help='port to start the service on (default: %(default)d)')
+    parser.add_argument('--develop', action='store_true',
+                        help='run the service in development mode')
     arguments = parser.parse_args(args)
     error_msg = process_args(arguments)
     if error_msg:
@@ -136,7 +139,7 @@ def execute(args=None, parser=None):
     logger.info('Server started at: http://%s:%d', arguments.bind_ip or 'localhost', arguments.port)
 
     controller = Controller(config=arguments.config)
-    wui = Wui(controller, arguments.port, arguments.bind_ip)
+    wui = Wui(controller, arguments.port, arguments.bind_ip, arguments.develop)
     fuzz_process = Process(target=controller.run, args=())
 
     iol = ioloop.IOLoop.instance()

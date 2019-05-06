@@ -88,10 +88,6 @@ thead .sorting {
   background-image: none;
 }
 
-#stat-table tr {
-  line-height: 2.5;
-}
-
 .card.stat {
   cursor: pointer;
 }

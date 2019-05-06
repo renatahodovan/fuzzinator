@@ -46,9 +46,9 @@
           </div>
           <div class="col-12 col-md-12 text-secondary" data-toggle="tool-tip" title="actions">
             <div class="col-12 col-md-12"></div>
-            <div class="float-right"><button type="button" class="btn btn-outline-secondary reduce-issue btn-sm btn-block" title="reduce" onclick="reduceIssue('{{ issue['_id'] }}')"><i class="material-icons-outlined md-14 align-middle">crop</i> Reduce</button></div>
-            <div class="float-right"><button type="button" class="btn btn-outline-secondary validate-issue btn-sm btn-block" title="validate" onclick="validateIssue('{{ issue['_id'] }}')"><i class="material-icons md-14 align-middle">replay</i> Validate</button></div>
             <div class="float-right"><button type="button" class="btn btn-outline-secondary delete-issue btn-sm btn-block" title="delete" onclick="deleteIssue('{{ issue['_id'] }}'); location.href='/'"><i class="material-icons-outlined md-14 align-middle">delete</i> Delete</button></div>
+            <div class="float-right"><button type="button" class="btn btn-outline-secondary validate-issue btn-sm btn-block" title="validate" onclick="validateIssue('{{ issue['_id'] }}')"><i class="material-icons md-14 align-middle">replay</i> Validate</button></div>
+            <div class="float-right"><button type="button" class="btn btn-outline-secondary reduce-issue btn-sm btn-block" title="reduce" onclick="reduceIssue('{{ issue['_id'] }}')"><i class="material-icons-outlined md-14 align-middle">crop</i> Reduce</button></div>
           </div>
 
           {% if issue.get('subconfig') %}

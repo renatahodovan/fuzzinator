@@ -196,10 +196,10 @@ class Controller(object):
         """
         self.config = config
 
-        self.fuzzers = config_get_fuzzers(self.config)
         self.capacity = int(config_get_with_writeback(self.config, 'fuzzinator', 'cost_budget', str(os.cpu_count())))
         self.work_dir = config_get_with_writeback(self.config, 'fuzzinator', 'work_dir', os.path.join(os.getcwd(), '.fuzzinator-{uid}')).format(uid=os.getpid())
         self.config.set('fuzzinator', 'work_dir', self.work_dir)
+        self.fuzzers = config_get_fuzzers(self.config)
 
         self.db = MongoDriver(config_get_with_writeback(self.config, 'fuzzinator', 'db_uri', 'mongodb://localhost/fuzzinator'))
         self.db.init_db(self.fuzzers)

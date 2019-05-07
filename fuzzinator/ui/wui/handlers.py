@@ -131,10 +131,10 @@ class BaseHandler(web.RequestHandler):
         self.render('error.html', active_page='error', code=status_code, icon=icon, exc_info=exc_info)
 
 
-class IndexHandler(BaseHandler):
+class IssuesHandler(BaseHandler):
 
     def get(self):
-        self.render('index.html', active_page='issues')
+        self.render('issues.html', active_page='issues')
 
 
 class IssueHandler(BaseHandler):
@@ -159,23 +159,23 @@ class ConfigHandler(BaseHandler):
         super().__init__(*args, **kwargs)
         self.db = db
 
-    def get(self, subconfig, frm):
+    def get(self, subconfig, issue_id=None):
         config = self.db.find_config_by_id(subconfig)
         if not config:
             self.send_error(404)
             return
 
-        if frm == 'stat':
+        if not issue_id:
             data = list(self.db.get_stats(filter={'configs.subconfig': subconfig}).values())[0]
         else:
-            data = self.db.find_issue_by_id(frm)
+            data = self.db.find_issue_by_id(issue_id)
 
         if not data:
             self.send_error(404)
             return
 
         config_src = markdown('```ini\n%s\n```' % config['src'], extensions=['extra', 'fenced_code', 'codehilite'])
-        self.render('config.html', active_page='config', frm=frm, ident=subconfig, data=data, config_src=config_src)
+        self.render('config.html', active_page='config', subconfig=subconfig, issue_id=issue_id, data=data, config_src=config_src)
 
 
 class StatsHandler(BaseHandler):

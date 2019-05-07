@@ -20,7 +20,7 @@ from tornado import ioloop, web
 from ... import Controller
 from .. import build_parser, process_args
 
-from .handlers import ConfigHandler, IndexHandler, IssueHandler, NotFoundHandler, SocketHandler, StatsHandler
+from .handlers import ConfigHandler, IssueHandler, IssuesHandler, NotFoundHandler, SocketHandler, StatsHandler
 from .wui_listener import WuiListener
 
 logger = logging.getLogger()
@@ -35,10 +35,10 @@ class Wui(object):
         self.controller = controller
         self.controller.listener += WuiListener(self.events, self.lock)
         # Collection of request handlers that make up a web application.
-        self.app = web.Application([(r'/', IndexHandler),
-                                    (r'/issue/([0-9a-f]{24})', IssueHandler, dict(db=controller.db, config=controller.config)),
+        self.app = web.Application([(r'/', IssuesHandler),
+                                    (r'/issues/([0-9a-f]{24})', IssueHandler, dict(db=controller.db, config=controller.config)),
                                     (r'/stats', StatsHandler),
-                                    (r'/config/([0-9a-f]{9})/([0-9a-z]+)', ConfigHandler, dict(db=controller.db)),
+                                    (r'/configs/([0-9a-f]{9})(?:/([0-9a-f]{24}))?', ConfigHandler, dict(db=controller.db)),
                                     (r'/wui', SocketHandler, dict(wui=self))],
                                    default_handler_class=NotFoundHandler,
                                    template_path=resource_filename(__name__, os.path.join('resources', 'templates')),

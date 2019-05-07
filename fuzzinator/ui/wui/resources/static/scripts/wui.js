@@ -181,7 +181,7 @@ function issueRowFormatter (value, data) {
   $(issueRow).find('.reduce-issue').attr('onclick', `reduceIssue('${data._id}')`);
   $(issueRow).find('.validate-issue').attr('onclick', `validateIssue('${data._id}')`);
   $(issueRow).find('.issue-ref').text(data.id);
-  $(issueRow).find('.issue-ref').attr('href', `/issue/${data._id}`);
+  $(issueRow).find('.issue-ref').attr('href', `/issues/${data._id}`);
   $(issueRow).find('.issue-id').attr('title', data.id);
   $(issueRow).find('.sut-id').text(data.sut);
   $(issueRow).find('.fuzzer-id').text(data.fuzzer);
@@ -212,7 +212,7 @@ function statRowDetailFormatter (index, row) {
   for (var detail of row.configs) {
     var statRowDetail = document.importNode($('#stat-row-template').prop('content').cloneNode(true), true).children[0];
     if (detail.subconfig !== null) {
-        $(statRowDetail).find('.config-ref').attr('href', `/config/${detail.subconfig}/stat`);
+        $(statRowDetail).find('.config-ref').attr('href', `/configs/${detail.subconfig}`);
     }
     $(statRowDetail).find('.config-ref').text(detail.subconfig === null ? 'N/A' : `${detail.subconfig}`);
     $(statRowDetail).find('.sut').text(row.sut);

@@ -75,21 +75,22 @@ class Wui(object):
         for socket in self.sockets:
             socket.send_message(action, data)
 
+    def new_job(self, type, **kwargs):
+        job = dict(kwargs, status='inactive', type=type)
+        self.jobs[job['ident']] = job
+        self.send_message('new_job', job)
+
     def new_fuzz_job(self, **kwargs):
-        self.jobs[kwargs['ident']] = dict(kwargs, status='inactive', type='fuzz')
-        self.send_message('new_fuzz_job', kwargs)
+        self.new_job('fuzz', **kwargs)
 
     def new_reduce_job(self, **kwargs):
-        self.jobs[kwargs['ident']] = dict(kwargs, status='inactive', type='reduce')
-        self.send_message('new_reduce_job', kwargs)
+        self.new_job('reduce', **kwargs)
 
     def new_update_job(self, **kwargs):
-        self.jobs[kwargs['ident']] = dict(kwargs, status='inactive', type='update')
-        self.send_message('new_update_job', kwargs)
+        self.new_job('update', **kwargs)
 
     def new_validate_job(self, **kwargs):
-        self.jobs[kwargs['ident']] = dict(kwargs, status='inactive', type='validate')
-        self.send_message('new_validate_job', kwargs)
+        self.new_job('validate', **kwargs)
 
     def remove_job(self, **kwargs):
         del self.jobs[kwargs['ident']]

@@ -88,7 +88,7 @@ class SocketHandler(websocket.WebSocketHandler):
 
     def on_get_jobs(self, request):
         for job in dict(self._wui.jobs).values():
-            self.send_message('new_{type}_job'.format(type=job['type']), job)
+            self.send_message('new_job', job)
 
     def on_cancel_job(self, request):
         self._wui.controller.cancel_job(ident=int(request['ident']))

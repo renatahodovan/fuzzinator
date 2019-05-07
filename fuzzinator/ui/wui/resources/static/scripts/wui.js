@@ -22,48 +22,24 @@ ws.onclose = function () {
   $('.fz-motto').attr('title', 'offline').addClass('websocket-error');
 };
 
-ws.onmessage['new_fuzz_job'] = function (data) {
-  var job = $('#fuzz-job-template').prop('content').cloneNode(true);
+ws.onmessage['new_job'] = function (data) {
+  var job = $(`#${data.type}-job-template`).prop('content').cloneNode(true);
   $(job).find('.card').attr('id', `job-${data.ident}`);
   $(job).find('.card').addClass(data.status === 'active' ? 'bg-success' : 'bg-secondary');
   $(job).find('.close').attr('onclick', `cancelJob('${data.ident}')`);
-  $(job).find('.fuzz-job-id').text(data.ident);
-  $(job).find('.fuzz-job-fuzzer').text(data.fuzzer);
-  $(job).find('.fuzz-job-sut').text(data.sut);
-  $(job).find('.progress-bar').attr('data-maxvalue', data.batch);
-  $('#jobs').append(document.importNode(job, true));
-};
-
-ws.onmessage['new_reduce_job'] = function (data) {
-  var job = $('#reduce-job-template').prop('content').cloneNode(true);
-  $(job).find('.card').attr('id', `job-${data.ident}`);
-  $(job).find('.card').addClass(data.status === 'active' ? 'bg-success' : 'bg-secondary');
-  $(job).find('.close').attr('onclick', `cancelJob('${data.ident}')`);
-  $(job).find('.reduce-job-id').text(data.ident);
-  $(job).find('.reduce-job-sut').text(data.sut);
-  $(job).find('.reduce-job-issue').text(data.issue_id);
-  $(job).find('.progress-bar').attr('data-maxvalue', data.size);
-  $('#jobs').append(document.importNode(job, true));
-};
-
-ws.onmessage['new_update_job'] = function (data) {
-  var job = $('#update-job-template').prop('content').cloneNode(true);
-  $(job).find('.card').attr('id', `job-${data.ident}`);
-  $(job).find('.card').addClass(data.status === 'active' ? 'bg-success' : 'bg-secondary');
-  $(job).find('.close').attr('onclick', `cancelJob('${data.ident}')`);
-  $(job).find('.update-job-id').text(data.ident);
-  $(job).find('.update-job-sut').text(data.sut);
-  $('#jobs').append(document.importNode(job, true));
-};
-
-ws.onmessage['new_validate_job'] = function (data) {
-  var job = $('#validate-job-template').prop('content').cloneNode(true);
-  $(job).find('.card').attr('id', `job-${data.ident}`);
-  $(job).find('.card').addClass(data.status === 'active' ? 'bg-success' : 'bg-secondary');
-  $(job).find('.close').attr('onclick', `cancelJob('${data.ident}')`);
-  $(job).find('.validate-job-id').text(data.ident);
-  $(job).find('.validate-job-sut').text(data.sut);
-  $(job).find('.validate-job-issue').text(data.issue_id);
+  $(job).find('.job-id').text(data.ident);
+  if ('fuzzer' in data) {
+    $(job).find('.job-fuzzer').text(data.fuzzer);
+  }
+  if ('sut' in data) {
+    $(job).find('.job-sut').text(data.sut);
+  }
+  if ('issue_id' in data) {
+    $(job).find('.job-issue').text(data.issue_id);
+  }
+  if ('batch' in data || 'size' in data) {
+    $(job).find('.progress-bar').attr('data-maxvalue', Math.max(data.batch || 0, data.size || 0));
+  }
   $('#jobs').append(document.importNode(job, true));
 };
 

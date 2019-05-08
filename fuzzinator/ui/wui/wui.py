@@ -104,20 +104,21 @@ class Wui(object):
         self.jobs[kwargs['ident']]['progress'] = kwargs['progress']
         self.send_message('job_progress', kwargs)
 
-    def new_issue(self, ident, issue):
-        self.send_message('new_issue', issue)
+    def new_issue(self, **kwargs):
+        self.send_message('new_issue', None)
+        self.send_message('refresh_issues', None)
 
-    def update_issue(self, ident, issue):
-        self.send_message('update_issue', issue)
+    def update_issue(self, **kwargs):
+        self.send_message('refresh_issues', None)
 
-    def invalid_issue(self, ident, issue):
-        self.send_message('invalid_issue', issue)
+    def invalid_issue(self, **kwargs):
+        self.send_message('refresh_issues', None)
 
-    def reduced_issue(self, ident, issue):
-        self.send_message('reduced_issue', issue)
+    def reduced_issue(self, **kwargs):
+        self.send_message('refresh_issues', None)
 
     def update_fuzz_stat(self, **kwargs):
-        self.send_message('update_fuzz_stat', list(self.controller.db.get_stats(filter=kwargs).values()))
+        self.send_message('refresh_stats', None)
 
     def warning(self, ident, msg):
         logger.warning(msg)

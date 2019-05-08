@@ -67,21 +67,15 @@ ws.onmessage['remove_job'] = function (data) {
 
 ws.onmessage['new_issue'] = function () {
   $('.badge').text(Number($('.badge').text()) + 1);
-  $('#issue-table').bootstrapTable('refresh', { silent: true });
   fireworks();
 };
 
-ws.onmessage['update_fuzz_stat'] = function () {
-  if (activePage === 'stats') {
-    $('#stat-table').bootstrapTable('refresh', { silent: true });
-  }
+ws.onmessage['refresh_issues'] = function () {
+  $('#issue-table').bootstrapTable('refresh', { silent: true });
 };
 
-ws.onmessage['update_issue'] =
-ws.onmessage['reduced_issue'] =
-ws.onmessage['delete_issue'] =
-ws.onmessage['invalid_issue'] = function () {
-  $('#issue-table').bootstrapTable('refresh', { silent: true });
+ws.onmessage['refresh_stats'] = function () {
+  $('#stat-table').bootstrapTable('refresh', { silent: true });
 };
 
 ws.onmessage['get_issues'] =

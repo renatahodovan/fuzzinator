@@ -95,7 +95,7 @@ class SocketHandler(websocket.WebSocketHandler):
 
     def on_delete_issue(self, request):
         self._wui.controller.db.remove_issue_by_id(request['_id'])
-        self.send_message('delete_issue', request['_id'])
+        self.send_message('refresh_issues', None)
 
     def on_reduce_issue(self, request):
         issue = self._wui.controller.db.find_issue_by_id(request['_id'])

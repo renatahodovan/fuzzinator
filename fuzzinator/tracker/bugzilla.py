@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,6 +6,8 @@
 # according to those terms.
 
 import os
+
+from io import BytesIO
 
 from bugzilla import *
 
@@ -41,7 +43,7 @@ class BugzillaTracker(BaseTracker):
                                                        short_desc=query,
                                                        include_fields=['id', 'summary', 'weburl']))
 
-    def report_issue(self, report_details, test, extension):
+    def report_issue(self, report_details, test, extension='txt'):
         create_info = self.bzapi.build_createbug(product=report_details['product'],
                                                  component=report_details['component'],
                                                  summary=report_details['summary'],
@@ -50,11 +52,8 @@ class BugzillaTracker(BaseTracker):
                                                  blocks=report_details['blocks'])
 
         bug = self.bzapi.createbug(create_info)
-        test_file = 'test.{ext}'.format(ext=extension)
-        with open(test_file, 'wb') as f:
-            f.write(test)
-        self.bzapi.attachfile(idlist=bug.bug_id, attachfile=test_file, description='Test', is_patch=False)
-        os.remove(test_file)
+        with BytesIO(test) as f:
+            self.bzapi.attachfile(idlist=bug.bug_id, attachfile=f, description='Test', is_patch=False, file_name='test.{ext}'.format(ext=extension))
         return bug
 
     def __call__(self, issue):

@@ -6,7 +6,22 @@
 # according to those terms.
 
 
-class BaseTracker(object):
+class Multiton(type):
+
+    def __init__(cls, name, bases, dct):
+        super().__init__(name, bases, dct)
+        cls._instances = dict()
+
+    def __call__(cls, *args, **kwargs):
+        key = tuple(args) + tuple(sorted(kwargs.items()))
+        instance = cls._instances.get(key, None)
+        if instance is None:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[key] = instance
+        return instance
+
+
+class BaseTracker(metaclass=Multiton):
 
     def find_issue(self, issue):
         pass

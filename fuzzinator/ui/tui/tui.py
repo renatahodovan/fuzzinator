@@ -103,6 +103,9 @@ class Tui(object):
     def update_issue(self, ident, issue):
         self.view.issues_table.update_row(ident=issue['_id'])
 
+    def reduced_issue(self, ident, issue):
+        self.view.issues_table.update_row(ident=issue['_id'])
+
     def warning(self, ident, msg):
         self.view._emit('warning', msg)
 

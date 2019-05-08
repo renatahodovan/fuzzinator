@@ -144,6 +144,15 @@ class EventListener(object):
         """
         pass
 
+    def reduced_issue(self, ident, issue):
+        """
+        Invoked when an issue got reduced.
+
+        :param int ident: identifier of the job that has reduced the issue.
+        :param dict issue: the issue object that got reduced.
+        """
+        pass
+
     def warning(self, ident, msg):
         """
         Invoked on unexpected events.

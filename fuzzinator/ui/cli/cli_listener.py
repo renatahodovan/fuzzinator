@@ -49,3 +49,6 @@ class CliListener(EventListener):
 
     def invalid_issue(self, ident, issue):
         logger.debug('#%s: Invalid issue %r in %s.', ident, issue['id'], issue['sut'])
+
+    def reduced_issue(self, ident, issue):
+        logger.debug('#%s: Reduced issue %r in %s.', ident, issue['id'], issue['sut'])

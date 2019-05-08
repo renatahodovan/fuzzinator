@@ -112,6 +112,9 @@ class Wui(object):
     def invalid_issue(self, ident, issue):
         self.send_message('invalid_issue', issue)
 
+    def reduced_issue(self, ident, issue):
+        self.send_message('reduced_issue', issue)
+
     def update_fuzz_stat(self, **kwargs):
         self.send_message('update_fuzz_stat', list(self.controller.db.get_stats(filter=kwargs).values()))
 

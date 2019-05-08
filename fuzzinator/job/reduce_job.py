@@ -54,7 +54,7 @@ class ReduceJob(CallJob):
             self.listener.warning(ident=self.id, msg='Reduce of {ident} failed.'.format(ident=self.issue['id']))
         else:
             self.db.update_issue_by_id(self.issue['_id'], {'reduced': reduced_src})
-            self.listener.update_issue(ident=self.id, issue=self.issue)
+            self.listener.reduced_issue(ident=self.id, issue=self.issue)
 
         for issue in new_issues:
             self.add_issue(issue, new_issues=issues)

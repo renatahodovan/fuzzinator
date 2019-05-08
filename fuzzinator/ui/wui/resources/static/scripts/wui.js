@@ -102,6 +102,7 @@ ws.onmessage['update_fuzz_stat'] = function () {
 };
 
 ws.onmessage['update_issue'] =
+ws.onmessage['reduced_issue'] =
 ws.onmessage['delete_issue'] =
 ws.onmessage['invalid_issue'] = function () {
   $('#issue-table').bootstrapTable('refresh', { silent: true });

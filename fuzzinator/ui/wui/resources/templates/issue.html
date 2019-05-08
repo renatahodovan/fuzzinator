@@ -21,14 +21,16 @@
 {% end nav %}
 
 {% block body %}
+  {% set color = 'warning' if not issue.get('invalid') else 'secondary' %}
+
   <!-- issue summary start -->
   <td width="100%" style="padding: 0px">
-    <div class="detailed-card container-fluid border-light mb-1 pl-2 bg-warning rounded-0 pr-0 mb-3">
+    <div class="detailed-card container-fluid border-light mb-1 pl-2 bg-{{ color }} rounded-0 pr-0 mb-3">
       <div class="bg-white ml-1">
         <div class="row">
           <h5 class="col-10 col-md-10">
-            <i class="material-icons-outlined align-text-bottom text-warning">priority_high</i>
-            <span class="text-warning font-weight-bold" data-toggle="tool-tip" title="issue">{{ issue.get('id', 'N/A') }}</span>
+            <i class="material-icons-outlined align-text-bottom text-{{ color }}">priority_high</i>
+            <span class="text-{{ color }} font-weight-bold" data-toggle="tool-tip" title="issue">{{ issue.get('id', 'N/A') }}</span>
           </h5>
         </div>
         <div>

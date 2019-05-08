@@ -266,13 +266,13 @@ class IssuesTable(Table):
         super().update_row_style(ident, attr_map, focus_map)
 
     def get_attr(self, data):
-        if data.get('invalid', False):
+        if data.get('invalid'):
             attr_map = {None: 'issue_invalid'}
             focus_map = {None: 'issue_invalid_selected'}
-        elif data['reported']:
+        elif data.get('reported'):
             attr_map = {None: 'issue_reported'}
             focus_map = {None: 'issue_reported_selected'}
-        elif data['reduced'] is not None:
+        elif data.get('reduced') is not None:
             attr_map = {None: 'issue_reduced'}
             focus_map = {None: 'issue_reduced_selected'}
         else:

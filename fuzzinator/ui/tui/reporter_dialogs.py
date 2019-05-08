@@ -9,7 +9,7 @@ from urwid import *
 
 from ...config import config_get_callable
 from ...formatter import JsonFormatter
-from ...tracker import BaseTracker
+from ...tracker import BaseTracker, BugzillaTracker
 from .button import FormattedButton
 from .decor_widgets import PatternBox
 from .dialogs import BugEditor
@@ -95,14 +95,14 @@ class BugzillaReportDialog(ReportDialog):
         self.edit_cc = BugEditor(multiline=True)
         self.edit_extension = BugEditor(edit_text='html')
 
-        tracker = config_get_callable(config, 'sut.' + issue['sut'], 'tracker')[0] or BaseTracker()
-        self.product_info = tracker.bzapi.getproducts()
+        tracker = config_get_callable(config, 'sut.' + issue['sut'], 'tracker')[0]
+        assert isinstance(tracker, BugzillaTracker), 'Tracker is not a Bugzilla instance.'
+        self.product_info = tracker.product_info()
         self.product = None
         products_walker = SimpleListWalker([])
         products = []
         for product in self.product_info:
-            if product['is_active']:
-                products_walker.append(RadioButton(products, product['name'], on_state_change=self.set_product))
+            products_walker.append(RadioButton(products, product, on_state_change=self.set_product))
 
         self.component = None
         self.component_box = SimpleFocusListWalker([])
@@ -123,9 +123,8 @@ class BugzillaReportDialog(ReportDialog):
     def set_product(self, btn, state):
         if state:
             self.product = btn.label
-            self.update_components(self.tracker.bzapi.getcomponents(self.product))
-            versions = [version['name'] for product in self.product_info if product['name'] == self.product for version in product['versions'] if version['is_active']]
-            self.update_versions(versions)
+            self.update_components(self.product_info[self.product]['components'])
+            self.update_versions(self.product_info[self.product]['versions'])
 
     def set_component(self, btn, state):
         if state:

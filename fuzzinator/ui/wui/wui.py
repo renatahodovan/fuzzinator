@@ -106,6 +106,9 @@ class Wui(object):
     def new_issue(self, ident, issue):
         self.send_message('new_issue', issue)
 
+    def update_issue(self, ident, issue):
+        self.send_message('update_issue', issue)
+
     def invalid_issue(self, ident, issue):
         self.send_message('invalid_issue', issue)
 

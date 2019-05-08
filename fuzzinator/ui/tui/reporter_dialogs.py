@@ -148,18 +148,14 @@ class BugzillaReportDialog(ReportDialog):
             self.versions_box.append(RadioButton(group=versions_group, label=version, on_state_change=self.set_version))
 
     def get_report_data(self):
-        return dict(
-            report_details=dict(
-                product=self.product,
-                component=self.component,
-                summary=self.issue_title.edit_text,
-                version=self.version,
-                description=self.issue_desc.edit_text,
-                blocks=self.edit_blocks.edit_text
-            ),
-            test=self.issue['test'],
-            extension=self.edit_extension.edit_text
-        )
+        return dict(title=self.issue_title.edit_text,
+                    body=self.issue_desc.edit_text,
+                    product=self.product,
+                    product_version=self.version,
+                    component=self.component,
+                    blocks=self.edit_blocks.edit_text,
+                    test=self.issue['test'],
+                    extension=self.edit_extension.edit_text)
 
 
 class GithubReportDialog(ReportDialog):

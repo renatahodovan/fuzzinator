@@ -32,13 +32,13 @@ class BugzillaTracker(BaseTracker):
                                                        short_desc=query,
                                                        include_fields=['id', 'summary', 'weburl']))
 
-    def report_issue(self, report_details, test, extension='txt'):
-        create_info = self.bzapi.build_createbug(product=report_details['product'],
-                                                 component=report_details['component'],
-                                                 summary=report_details['summary'],
-                                                 version=report_details['version'],
-                                                 description=report_details['description'],
-                                                 blocks=report_details['blocks'])
+    def report_issue(self, title, body, product, product_version, component, blocks, test, extension='txt'):
+        create_info = self.bzapi.build_createbug(summary=title,
+                                                 description=body,
+                                                 product=product,
+                                                 version=product_version,
+                                                 component=component,
+                                                 blocks=blocks)
 
         bug = self.bzapi.createbug(create_info)
         with BytesIO(test) as f:

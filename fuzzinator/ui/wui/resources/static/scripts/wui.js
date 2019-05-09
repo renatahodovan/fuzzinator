@@ -8,11 +8,10 @@
  * according to those terms.
  */
 
-/* global WUIWebSocket, activePage */
-/* exported cancelJob deleteIssue, reduceIssue, validateIssue */
+/* global activePage, bsonConverters, WUIWebSocket */
+/* exported cancelJob, deleteIssue, reduceIssue, validateIssue */
 
 var ws = new WUIWebSocket();
-var successQueue = [];
 
 ws.onopen = function () {
   $('.fz-motto').attr('title', 'online').removeClass('websocket-error');
@@ -78,12 +77,7 @@ ws.onmessage['refresh_stats'] = function () {
   $('#stat-table').bootstrapTable('refresh', { silent: true });
 };
 
-ws.onmessage['get_issues'] =
-ws.onmessage['get_stats'] = function (data) {
-  successQueue.shift()(data);
-};
-
-function createBootstrapTable (table, sortName, sortOrder, columnNames, formatter, detailFormatter, cookie, action) {
+function createBootstrapTable (table, sortName, sortOrder, columnNames, formatter, detailFormatter, cookie, url) {
   var columns = [];
   for (var colName of columnNames) {
     columns.push({field: colName, title: colName, visible: true, sortable: true});
@@ -134,11 +128,16 @@ function createBootstrapTable (table, sortName, sortOrder, columnNames, formatte
     },
 
     ajax: function (params) {
-      ws.send(JSON.stringify({
-        'action': action,
-        'data': params.data
-      }));
-      successQueue.push(params.success);
+      $.ajax({
+        url: url,
+        data: params.data,
+        converters: bsonConverters,
+        success: function (data, status, xhr) {
+          params.success({ rows: data, total: Number(xhr.getResponseHeader('X-Total')) }, status, xhr);
+        },
+        error: params.error,
+        cache: false
+      });
     }
   });
 }
@@ -197,13 +196,13 @@ function statRowDetailFormatter (index, row) {
 function createIssueTable () {
   return createBootstrapTable($('#issue-table'), 'first_seen', 'desc',
                               ['sut', 'fuzzer', 'id', 'first_seen', 'last_seen', 'count', 'reduced', 'reported'],
-                              issueRowFormatter, null, 'issueTableCookie', 'get_issues');
+                              issueRowFormatter, null, 'issueTableCookie', '/api/issues');
 }
 
 function createStatTable () {
   return createBootstrapTable($('#stat-table'), 'exec', 'desc',
                               ['fuzzer', 'exec', 'crashes', 'unique', 'sut'],
-                              statRowFormatter, statRowDetailFormatter, 'statTableCookie', 'get_stats');
+                              statRowFormatter, statRowDetailFormatter, 'statTableCookie', '/api/stats');
 }
 
 function fireworks () {
@@ -214,42 +213,55 @@ function fireworks () {
 }
 
 function deleteIssue (issueId) {
-  ws.send(JSON.stringify({
-    'action': 'delete_issue',
-    '_id': issueId,
-  }));
+  $.ajax({
+    method: 'DELETE',
+    url: `/api/issues/${issueId}`
+  });
 }
 
 function reduceIssue (issueId) {
-  ws.send(JSON.stringify({
-    'action': 'reduce_issue',
-    '_id': issueId,
-  }));
+  $.ajax({
+    method: 'POST',
+    url: '/api/jobs',
+    contentType: 'application/json',
+    data: JSON.stringify({ type: 'reduce', _id: issueId })
+  });
 }
 
 function validateIssue (issueId) {
-  ws.send(JSON.stringify({
-    'action': 'validate_issue',
-    '_id': issueId,
-  }));
+  $.ajax({
+    method: 'POST',
+    url: '/api/jobs',
+    contentType: 'application/json',
+    data: JSON.stringify({ type: 'validate', _id: issueId })
+  });
 }
 
 function cancelJob (jobId) {
-  ws.send(JSON.stringify({
-    'action': 'cancel_job',
-    'ident': jobId,
-  }));
+  $.ajax({
+    method: 'DELETE',
+    url: `/api/jobs/${jobId}`
+  });
 }
 
 $(document).ready(function () {
-  ws.start();
-  ws.wait(function () {
-    ws.send(JSON.stringify({ 'action': 'get_jobs' }));
-      switch (activePage) {
-        case 'stats': createStatTable(); break;
-        case 'issues': createIssueTable(); break;
+  switch (activePage) {
+    case 'stats': createStatTable(); break;
+    case 'issues': createIssueTable(); break;
+  }
+
+  $.ajax({
+    url: '/api/jobs',
+    converters: bsonConverters,
+    success: function (data) {
+      for (var job of data) {
+        ws.onmessage['new_job'](job);
       }
+    },
+    cache: false
   });
+
+  ws.start();
 
   $('.fz-motto').click(function () {
     ws.toggle();

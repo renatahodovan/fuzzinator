@@ -20,7 +20,8 @@ from tornado import ioloop, web
 from ... import Controller
 from .. import build_parser, process_args
 
-from .handlers import ConfigHandler, IssueHandler, IssuesHandler, NotFoundHandler, SocketHandler, StatsHandler
+from .api_handlers import IssueAPIHandler, IssuesAPIHandler, JobAPIHandler, JobsAPIHandler, NotFoundAPIHandler, StatsAPIHandler
+from .ui_handlers import ConfigUIHandler, IssuesUIHandler, IssueUIHandler, NotFoundHandler, NotificationsHandler, StatsUIHandler
 from .wui_listener import WuiListener
 
 logger = logging.getLogger()
@@ -35,12 +36,19 @@ class Wui(object):
         self.controller = controller
         self.controller.listener += WuiListener(self.events, self.lock)
         # Collection of request handlers that make up a web application.
-        self.app = web.Application([(r'/', IssuesHandler),
-                                    (r'/issues/([0-9a-f]{24})', IssueHandler, dict(db=controller.db, config=controller.config)),
-                                    (r'/stats', StatsHandler),
-                                    (r'/configs/([0-9a-f]{9})(?:/([0-9a-f]{24}))?', ConfigHandler, dict(db=controller.db)),
-                                    (r'/wui', SocketHandler, dict(wui=self))],
-                                   default_handler_class=NotFoundHandler,
+        handler_args = dict(wui=self)
+        self.app = web.Application([(r'/', IssuesUIHandler, handler_args),
+                                    (r'/issues/([0-9a-f]{24})', IssueUIHandler, handler_args),
+                                    (r'/stats', StatsUIHandler, handler_args),
+                                    (r'/configs/([0-9a-f]{9})(?:/([0-9a-f]{24}))?', ConfigUIHandler, handler_args),
+                                    (r'/notifications', NotificationsHandler, handler_args),
+                                    (r'/api/issues', IssuesAPIHandler, handler_args),
+                                    (r'/api/issues/([0-9a-f]{24})', IssueAPIHandler, handler_args),
+                                    (r'/api/jobs', JobsAPIHandler, handler_args),
+                                    (r'/api/jobs/([0-9]+)', JobAPIHandler, handler_args),
+                                    (r'/api/stats', StatsAPIHandler, handler_args),
+                                    (r'/api/.*', NotFoundAPIHandler)],
+                                   default_handler_class=NotFoundHandler, default_handler_args=handler_args,
                                    template_path=resource_filename(__name__, os.path.join('resources', 'templates')),
                                    static_path=resource_filename(__name__, os.path.join('resources', 'static')),
                                    autoreload=False, debug=debug)
@@ -71,14 +79,15 @@ class Wui(object):
         for socket in self.sockets:
             socket.close()
 
-    def send_message(self, action, data):
+    def send_notification(self, action, data=None):
         for socket in self.sockets:
-            socket.send_message(action, data)
+            socket.send_notification(action, data)
 
     def new_job(self, type, **kwargs):
-        job = dict(kwargs, status='inactive', type=type)
+        job = kwargs
+        job.update(type=type, status='inactive')
         self.jobs[job['ident']] = job
-        self.send_message('new_job', job)
+        self.send_notification('new_job', job)
 
     def new_fuzz_job(self, **kwargs):
         self.new_job('fuzz', **kwargs)
@@ -94,31 +103,35 @@ class Wui(object):
 
     def remove_job(self, **kwargs):
         del self.jobs[kwargs['ident']]
-        self.send_message('remove_job', kwargs)
+        self.send_notification('remove_job', kwargs)
 
     def activate_job(self, **kwargs):
-        self.jobs[kwargs['ident']] = dict(self.jobs[kwargs['ident']], status='active')
-        self.send_message('activate_job', kwargs)
+        job = self.jobs[kwargs['ident']]
+        job.update(status='active')
+        self.jobs[kwargs['ident']] = job
+        self.send_notification('activate_job', kwargs)
 
     def job_progress(self, **kwargs):
-        self.jobs[kwargs['ident']]['progress'] = kwargs['progress']
-        self.send_message('job_progress', kwargs)
+        job = self.jobs[kwargs['ident']]
+        job.update(progress=kwargs['progress'])
+        self.jobs[kwargs['ident']] = job
+        self.send_notification('job_progress', kwargs)
 
     def new_issue(self, **kwargs):
-        self.send_message('new_issue', None)
-        self.send_message('refresh_issues', None)
+        self.send_notification('new_issue')
+        self.send_notification('refresh_issues')
 
     def update_issue(self, **kwargs):
-        self.send_message('refresh_issues', None)
+        self.send_notification('refresh_issues')
 
     def invalid_issue(self, **kwargs):
-        self.send_message('refresh_issues', None)
+        self.send_notification('refresh_issues')
 
     def reduced_issue(self, **kwargs):
-        self.send_message('refresh_issues', None)
+        self.send_notification('refresh_issues')
 
     def update_fuzz_stat(self, **kwargs):
-        self.send_message('refresh_stats', None)
+        self.send_notification('refresh_stats')
 
     def warning(self, ident, msg):
         logger.warning(msg)

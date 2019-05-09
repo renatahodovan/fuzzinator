@@ -37,12 +37,13 @@ class MongoDriver(object):
         issues = db.fuzzinator_issues
         issues.create_index([('sut', ASCENDING), ('id', ASCENDING)])
         issues.create_index([('sut', ASCENDING), ('fuzzer', ASCENDING), ('subconfig.subconfig', ASCENDING)])
-        issues.create_index('first_seen')
-        issues.create_index('last_seen')
-        issues.create_index('invalid')
         issues.create_index('count')
+        issues.create_index('first_seen')
         issues.create_index('fuzzer')
+        issues.create_index('id')
         issues.create_index('invalid')
+        issues.create_index('last_seen')
+        issues.create_index('reported')
 
         stats = db.fuzzinator_stats
         stats.create_index([('sut', ASCENDING), ('fuzzer', ASCENDING), ('subconfig', ASCENDING)])

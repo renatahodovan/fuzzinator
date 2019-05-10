@@ -38,7 +38,7 @@ class MainWindow(PopUpLauncher):
         self.logo = FuzzerLogo(max_load=controller.capacity)
         self.issues_table = IssuesTable(db=self.db, initial_sort='sut')
         fuzzer_suts = {(fuzzer, data['sut']) for fuzzer, data in self.controller.fuzzers.items()}
-        self.stat_table = StatTable(['fuzzer'], stat_baseline={fuzzer_sut: stat for fuzzer_sut, stat in self.db.get_stats().items() if fuzzer_sut in fuzzer_suts}, db=self.db)
+        self.stat_table = StatTable(['fuzzer'], stat_baseline={fuzzer_sut: stat for fuzzer_sut, stat in self.db.get_stats(detailed=False).items() if fuzzer_sut in fuzzer_suts}, db=self.db)
         self.job_table = JobsTable()
 
         self.data_tables = Pile([
@@ -256,7 +256,7 @@ class IssuesTable(Table):
 
     def update(self, show_all):
         self.all_issues = show_all
-        self.query_data = self.db.get_issues(include_invalid=self.show_invalid, show_all=self.all_issues)
+        self.query_data = self.db.get_issues(include_invalid=self.show_invalid, show_all=self.all_issues, detailed=False)
         self.requery(self.query_data)
         self.walker._modified()
 
@@ -312,13 +312,13 @@ class StatTable(Table):
 
     def show_all(self):
         self.show_current = False
-        self.query_data = list(self.db.get_stats().values())
+        self.query_data = list(self.db.get_stats(detailed=False).values())
         self.requery(self.query_data)
         self.walker._modified()
 
     def show_less(self):
         self.show_current = True
-        snapshot = self.db.get_stats(show_all=False)
+        snapshot = self.db.get_stats(show_all=False, detailed=False)
         self.query_data = [dict(fuzzer=fuzzer,
                                 exec=snapshot[(fuzzer, sut)]['exec'] - self.stat_baseline[(fuzzer, sut)]['exec'],
                                 issues=snapshot[(fuzzer, sut)]['issues'] - self.stat_baseline[(fuzzer, sut)]['issues'],

@@ -37,7 +37,7 @@ class BaseAPIHandler(RequestHandler):
             except TypeError:
                 return obj
 
-        return dumps(_convert(obj), indent=2)
+        return dumps(_convert(obj))
 
     @staticmethod
     def _loads(loads, s):
@@ -57,12 +57,14 @@ class BaseAPIHandler(RequestHandler):
         order = self.get_query_argument('order', None)
         offset = self.get_query_argument('offset', None)
         limit = self.get_query_argument('limit', None)
+        detailed = self.get_query_argument('detailed', None)
 
         return dict(
             filter={'$or': [{c: {'$regex': search, '$options': 'i'}} for c in columns]} if search else None,
             skip=int(offset) if offset else 0,
             limit=int(limit) if limit else 10,  # unconditional to ensure that the query is always limited
             sort=[(sort, {'asc': ASCENDING, 'desc': DESCENDING}[order])] if sort and order else None,
+            detailed=detailed in ('true', 'True', '1') if detailed else True,
         )
 
     def get_content(self):
@@ -104,7 +106,7 @@ class IssuesAPIHandler(BaseAPIHandler):
     def get(self):
         query = self.get_pagination_query(['fuzzer', 'sut', 'id'])
         self.send_content(self._db.get_issues(**query),
-                          total=len(self._db.get_issues(query['filter'])))
+                          total=len(self._db.get_issues(query['filter'], detailed=False)))
 
 
 class IssueAPIHandler(BaseAPIHandler):
@@ -179,7 +181,7 @@ class StatsAPIHandler(BaseAPIHandler):
             query['sort'] = dict(query['sort'])
 
         self.send_content(list(self._db.get_stats(**query).values()),
-                          total=len(self._db.get_stats(query['filter'])))
+                          total=len(self._db.get_stats(query['filter'], detailed=False)))
 
 
 class NotFoundAPIHandler(RequestHandler):

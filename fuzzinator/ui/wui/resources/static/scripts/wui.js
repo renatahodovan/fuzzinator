@@ -130,7 +130,7 @@ function createBootstrapTable (table, sortName, sortOrder, columnNames, formatte
     ajax: function (params) {
       $.ajax({
         url: url,
-        data: params.data,
+        data: Object.assign(params.data, { detailed: false }),
         converters: bsonConverters,
         success: function (data, status, xhr) {
           params.success({ rows: data, total: Number(xhr.getResponseHeader('X-Total')) }, status, xhr);

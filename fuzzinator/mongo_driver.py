@@ -77,13 +77,14 @@ class MongoDriver(object):
         # different from the value stored in `now` (on nanosecond level).
         return issue['first_seen'] == issue['last_seen']
 
-    def get_issues(self, filter=None, skip=0, limit=0, sort=None, include_invalid=True, show_all=True):
+    def get_issues(self, filter=None, skip=0, limit=0, sort=None, include_invalid=True, show_all=True, detailed=True):
         filter = filter or {}
         if not show_all:
             filter['first_seen'] = {'$gte': self.session_start}
         if not include_invalid:
             filter['invalid'] = {'$exists': False}
-        return list(self._db.fuzzinator_issues.find(filter=filter, skip=skip, limit=limit, sort=sort))
+        projection = None if detailed else ['id', 'sut', 'fuzzer', 'first_seen', 'last_seen', 'count', 'invalid', 'reduced', 'reported']
+        return list(self._db.fuzzinator_issues.find(filter=filter, projection=projection, skip=skip, limit=limit, sort=sort))
 
     def find_issue_by_id(self, _id):
         return self._db.fuzzinator_issues.find_one({'_id': ObjectId(_id)})
@@ -100,17 +101,7 @@ class MongoDriver(object):
     def find_config_by_id(self, id):
         return self._db.fuzzinator_configs.find_one({'subconfig': id})
 
-    def get_stats(self, filter=None, skip=0, limit=0, sort=None, show_all=True):
-        issues_pipeline = [
-            {'$group': {
-                '_id': {'sut': '$sut', 'fuzzer': '$fuzzer', 'subconfig': '$subconfig'},
-                'sut': {'$first': '$sut'}, 'fuzzer': {'$first': '$fuzzer'}, 'subconfig': {'$first': '$subconfig'},
-                'exec': {'$sum': 0}, 'crashes': {'$sum': 0}, 'unique': {'$sum': 1},
-            }},
-        ]
-        if not show_all:
-            issues_pipeline.insert(0, {'$match': {'first_seen': {'$gte': self.session_start}}})
-
+    def get_stats(self, filter=None, skip=0, limit=0, sort=None, show_all=True, detailed=True):
         aggregator = [
             # Get an empty document
             {'$limit': 1},  # Note: this works only if fuzzinator_stats has at least one element.
@@ -120,7 +111,15 @@ class MongoDriver(object):
             # Get unique crash counts from the issues (exec and crash counts are set to 0).
             {'$lookup': {
                 'from': 'fuzzinator_issues',
-                'pipeline': issues_pipeline,
+                'pipeline': ([] if show_all else [
+                    {'$match': {'first_seen': {'$gte': self.session_start}}}
+                ]) + [
+                    {'$group': {
+                        '_id': {'sut': '$sut', 'fuzzer': '$fuzzer', 'subconfig': '$subconfig'},
+                        'sut': {'$first': '$sut'}, 'fuzzer': {'$first': '$fuzzer'}, 'subconfig': {'$first': '$subconfig'},
+                        'exec': {'$sum': 0}, 'crashes': {'$sum': 0}, 'unique': {'$sum': 1},
+                    }},
+                ],
                 'as': 'fuzzinator_issues',
             }},
 
@@ -145,7 +144,7 @@ class MongoDriver(object):
                 'exec': {'$sum': '$exec'}, 'crashes': {'$sum': '$crashes'}, 'unique': {'$sum': '$unique'},
             }},
             {'$match': {'$or': [{'exec': {'$gt': 0}}, {'crashes': {'$gt': 0}}, {'unique': {'$gt': 0}}]}},
-
+        ] + ([] if not detailed else [
             # Extend stats with the ini snippet
             {'$lookup': {
                 'from': 'fuzzinator_configs',
@@ -154,14 +153,14 @@ class MongoDriver(object):
                 'as': 'fuzzinator_configs',
             }},
             {'$unwind': {'path': '$fuzzinator_configs', 'preserveNullAndEmptyArrays': True}},
-
+        ]) + [
             # Create a 2-level hierarchy of stats grouped by fuzzer and sut, detailed by config
             {'$group': {
                 '_id': {'sut': '$sut', 'fuzzer': '$fuzzer'},
                 'sut': {'$first': '$sut'}, 'fuzzer': {'$first': '$fuzzer'},
                 'exec': {'$sum': '$exec'}, 'crashes': {'$sum': '$crashes'}, 'unique': {'$sum': '$unique'},
-                'configs': {'$push': {'subconfig': '$subconfig', 'src': '$fuzzinator_configs.src', 'exec': '$exec',
-                                      'crashes': '$crashes', 'unique': '$unique'}},
+                'configs': {'$push': {'subconfig': '$subconfig', 'src': '$fuzzinator_configs.src',
+                                      'exec': '$exec', 'crashes': '$crashes', 'unique': '$unique'}},
             }},
             {'$project': {'_id': 0}},
         ]

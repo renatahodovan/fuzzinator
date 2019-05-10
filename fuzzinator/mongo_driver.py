@@ -83,8 +83,20 @@ class MongoDriver(object):
             filter['first_seen'] = {'$gte': self.session_start}
         if not include_invalid:
             filter['invalid'] = {'$exists': False}
-        projection = None if detailed else ['id', 'sut', 'fuzzer', 'first_seen', 'last_seen', 'count', 'invalid', 'reduced', 'reported']
-        return list(self._db.fuzzinator_issues.find(filter=filter, projection=projection, skip=skip, limit=limit, sort=sort))
+
+        aggregator = []
+        if filter:
+            aggregator.append({'$match': filter})
+        if sort:
+            aggregator.append({'$sort': sort})
+        if skip:
+            aggregator.append({'$skip': skip})
+        if limit:
+            aggregator.append({'$limit': limit})
+        if not detailed:
+            aggregator.append({'$project': {'id': 1, 'sut': 1, 'fuzzer': 1, 'first_seen': 1, 'last_seen': 1, 'count': 1, 'invalid': 1, 'reduced': {'$ifNull': [True, None]}, 'reported': 1}})
+
+        return list(self._db.fuzzinator_issues.aggregate(aggregator))
 
     def find_issue_by_id(self, _id):
         return self._db.fuzzinator_issues.find_one({'_id': ObjectId(_id)})
@@ -167,13 +179,10 @@ class MongoDriver(object):
 
         if filter:
             aggregator.append({'$match': filter})
-
         if sort:
             aggregator.append({'$sort': sort})
-
         if skip:
             aggregator.append({'$skip': skip})
-
         if limit:
             aggregator.append({'$limit': limit})
 

@@ -63,7 +63,7 @@ class BaseAPIHandler(RequestHandler):
             filter={'$or': [{c: {'$regex': search, '$options': 'i'}} for c in columns]} if search else None,
             skip=int(offset) if offset else 0,
             limit=int(limit) if limit else 10,  # unconditional to ensure that the query is always limited
-            sort=[(sort, {'asc': ASCENDING, 'desc': DESCENDING}[order])] if sort and order else None,
+            sort={sort: {'asc': ASCENDING, 'desc': DESCENDING}[order]} if sort and order else None,
             detailed=detailed in ('true', 'True', '1') if detailed else True,
         )
 
@@ -177,9 +177,6 @@ class StatsAPIHandler(BaseAPIHandler):
 
     def get(self):
         query = self.get_pagination_query(['fuzzer', 'sut'])
-        if query['sort']:
-            query['sort'] = dict(query['sort'])
-
         self.send_content(list(self._db.get_stats(**query).values()),
                           total=len(self._db.get_stats(query['filter'], detailed=False)))
 

@@ -52,7 +52,7 @@ class BugzillaTracker(BaseTracker):
         return issue.weburl
 
     def product_info(self):
-        products = self.bzapi.product_get(ptype='selectable')
-        return {product['name']: dict(components=self.bzapi.getcomponents(product),
+        products = self.bzapi.getproducts(ptype='selectable')
+        return {product['name']: dict(components=self.bzapi.getcomponents(product['name']),
                                       versions=[version['name'] for version in product['versions'] if version['is_active']])
                 for product in products if product['components']}

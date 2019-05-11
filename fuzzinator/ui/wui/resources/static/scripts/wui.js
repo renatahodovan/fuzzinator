@@ -8,266 +8,36 @@
  * according to those terms.
  */
 
-/* global activePage, bsonConverters, WUIWebSocket */
-/* exported cancelJob, deleteIssue, reduceIssue, validateIssue */
-
-var ws = new WUIWebSocket();
-
-ws.onopen = function () {
-  $('.fz-motto').attr('title', 'online').removeClass('websocket-error');
-};
-
-ws.onclose = function () {
-  $('.fz-motto').attr('title', 'offline').addClass('websocket-error');
-};
-
-ws.onmessage['new_job'] = function (data) {
-  var job = $(`#${data.type}-job-template`).prop('content').cloneNode(true);
-  $(job).find('.card').attr('id', `job-${data.ident}`);
-  $(job).find('.card').addClass(data.status === 'active' ? 'bg-success' : 'bg-secondary');
-  $(job).find('.close').attr('onclick', `cancelJob('${data.ident}')`);
-  $(job).find('.job-id').text(data.ident);
-  if ('fuzzer' in data) {
-    $(job).find('.job-fuzzer').text(data.fuzzer);
-  }
-  if ('sut' in data) {
-    $(job).find('.job-sut').text(data.sut);
-  }
-  if ('issue_id' in data) {
-    $(job).find('.job-issue').text(data.issue_id);
-  }
-  if ('batch' in data || 'size' in data) {
-    $(job).find('.progress-bar').attr('data-maxvalue', Math.max(data.batch || 0, data.size || 0));
-  }
-  $('#jobs').append(document.importNode(job, true));
-};
-
-ws.onmessage['job_progress'] = function (data) {
-  var jobCard = $(`#job-${data.ident}`);
-  if (jobCard.length !== 0) {
-    var progress = jobCard.find('.progress-bar');
-    var percent = Math.round(data.progress / progress.attr('data-maxvalue') * 100);
-    progress.css('width', `${percent}%`);
-    progress.attr('aria-valuenow', percent);
-    jobCard.find('.progress-text').text(`${percent}%`);
-  }
-};
-
-ws.onmessage['activate_job'] = function (data) {
-  var jobCard = $(`#job-${data.ident}`);
-  if (jobCard.length !== 0 && jobCard.hasClass('bg-secondary')) {
-    jobCard.removeClass('bg-secondary').addClass('bg-success');
-  }
-};
-
-ws.onmessage['remove_job'] = function (data) {
-  $(`#job-${data.ident}`).remove();
-};
-
-ws.onmessage['new_issue'] = function () {
-  $('.badge').text(Number($('.badge').text()) + 1);
-  fireworks();
-};
-
-ws.onmessage['refresh_issues'] = function () {
-  $('#issue-table').bootstrapTable('refresh', { silent: true });
-};
-
-ws.onmessage['refresh_stats'] = function () {
-  $('#stat-table').bootstrapTable('refresh', { silent: true });
-};
-
-function createBootstrapTable (table, sortName, sortOrder, columnNames, formatter, detailFormatter, cookie, url) {
-  var columns = [];
-  for (var colName of columnNames) {
-    columns.push({field: colName, title: colName, visible: true, sortable: true});
-  }
-  columns[0].formatter = formatter;
-
-  table.bootstrapTable({
-    columns: columns,
-    search: true,
-    pagination: true,
-    sidePagination: 'server',
-    undefinedText: 'N/A',
-    showRefresh: true,
-    showHeader: false,
-    filterControl: true,
-    rememberOrder: true,
-    sortName: sortName,
-    sortOrder: sortOrder,
-    buttonsClass: 'outline-secondary',
-
-    detailView: detailFormatter !== null,
-    detailViewIcon: false,
-    detailFormatter: detailFormatter,
-
-    cookie: true,
-    cookieStorage: 'localStorage',
-    cookieExpire: '1d',
-    cookieIdTable: cookie,
-
-    onExpandRow: function (index) {
-      if (!this.openRows.includes(index)) {
-        this.openRows.push(index);
-      }
-      return false;
-    },
-
-    onCollapseRow: function (index) {
-      var inOpenedRowsIndex = this.openRows.indexOf(index);
-      if (inOpenedRowsIndex !== -1) {
-        this.openRows.splice(inOpenedRowsIndex, 1);
-      }
-      return false;
-    },
-
-    onPageChange: function () {
-      this.openRows = [];
-      return false;
-    },
-
-    ajax: function (params) {
-      $.ajax({
-        url: url,
-        data: Object.assign(params.data, { detailed: false }),
-        converters: bsonConverters,
-        success: function (data, status, xhr) {
-          params.success({ rows: data, total: Number(xhr.getResponseHeader('X-Total')) }, status, xhr);
-        },
-        error: params.error,
-        cache: false
-      });
-    }
-  });
-}
-
-function issueRowFormatter (value, data) {
-  var issueRow = document.importNode($('#issue-card-template').prop('content').cloneNode(true), true).children[0];
-  $(issueRow).find('.card').id = data.id;
-  $(issueRow).find('.card').addClass(typeof data['invalid'] === 'undefined' ? 'bg-warning' : 'bg-secondary');
-  $(issueRow).find('.delete-issue').attr('onclick', `deleteIssue('${data._id}')`);
-  $(issueRow).find('.reduce-issue').attr('onclick', `reduceIssue('${data._id}')`);
-  $(issueRow).find('.validate-issue').attr('onclick', `validateIssue('${data._id}')`);
-  $(issueRow).find('.issue-ref').text(data.id);
-  $(issueRow).find('.issue-ref').attr('href', `/issues/${data._id}`);
-  $(issueRow).find('.issue-id').attr('title', data.id);
-  $(issueRow).find('.sut-id').text(data.sut);
-  $(issueRow).find('.fuzzer-id').text(data.fuzzer);
-  $(issueRow).find('.date_range').text((new Date(data.first_seen)).toISOString().slice(0, -5) + ' .. ' + (new Date(data.last_seen)).toISOString().slice(0, -5));
-  $(issueRow).find('.count').text(data.count);
-
-  if (data.reduced !== null) {
-    $(issueRow).find('.reduced').text('crop');
-  }
-  if (data.reported) {
-    $(issueRow).find('.reported').text('link');
-  }
-
-  return $(issueRow)[0].outerHTML;
-}
-
-function statRowFormatter (value, data) {
-  var statRow = document.importNode($('#stat-card-template').prop('content').cloneNode(true), true).children[0];
-  $(statRow).find('.fuzzer').text(data.fuzzer);
-  $(statRow).find('.exec').text(data.exec);
-  $(statRow).find('.issues').text(data.issues);
-  $(statRow).find('.unique').text(data.unique);
-  return $(statRow)[0].outerHTML;
-}
-
-function statRowDetailFormatter (index, row) {
-  var mainDiv = document.createElement('div');
-  for (var detail of row.configs) {
-    var statRowDetail = document.importNode($('#stat-row-template').prop('content').cloneNode(true), true).children[0];
-    if (detail.subconfig !== null) {
-        $(statRowDetail).find('.config-ref').attr('href', `/configs/${detail.subconfig}`);
-    }
-    $(statRowDetail).find('.config-ref').text(detail.subconfig === null ? 'N/A' : `${detail.subconfig}`);
-    $(statRowDetail).find('.sut').text(row.sut);
-    $(statRowDetail).find('.exec').text(detail.exec);
-    $(statRowDetail).find('.issues').text(detail.crashes);
-    $(statRowDetail).find('.unique').text(detail.unique);
-    $(statRowDetail).appendTo($(mainDiv));
-  }
-  return mainDiv.outerHTML;
-}
-
-function createIssueTable () {
-  return createBootstrapTable($('#issue-table'), 'first_seen', 'desc',
-                              ['sut', 'fuzzer', 'id', 'first_seen', 'last_seen', 'count', 'reduced', 'reported'],
-                              issueRowFormatter, null, 'issueTableCookie', '/api/issues');
-}
-
-function createStatTable () {
-  return createBootstrapTable($('#stat-table'), 'exec', 'desc',
-                              ['fuzzer', 'exec', 'crashes', 'unique', 'sut'],
-                              statRowFormatter, statRowDetailFormatter, 'statTableCookie', '/api/stats');
-}
-
-function fireworks () {
-  $('.fz-logo').addClass('fz-logo-fireworks');
-  $('.fz-logo').one('animationend', function () {
-    $(this).removeClass('fz-logo-fireworks');
-  });
-}
-
-function deleteIssue (issueId) {
-  $.ajax({
-    method: 'DELETE',
-    url: `/api/issues/${issueId}`
-  });
-}
-
-function reduceIssue (issueId) {
-  $.ajax({
-    method: 'POST',
-    url: '/api/jobs',
-    contentType: 'application/json',
-    data: JSON.stringify({ type: 'reduce', _id: issueId })
-  });
-}
-
-function validateIssue (issueId) {
-  $.ajax({
-    method: 'POST',
-    url: '/api/jobs',
-    contentType: 'application/json',
-    data: JSON.stringify({ type: 'validate', _id: issueId })
-  });
-}
-
-function cancelJob (jobId) {
-  $.ajax({
-    method: 'DELETE',
-    url: `/api/jobs/${jobId}`
-  });
-}
+/* global fz */
 
 $(document).ready(function () {
-  switch (activePage) {
-    case 'stats': createStatTable(); break;
-    case 'issues': createIssueTable(); break;
+  function fireworks () {
+    $('.fz-logo').addClass('fz-logo-fireworks');
+    $('.fz-logo').one('animationend', function () {
+      $(this).removeClass('fz-logo-fireworks');
+    });
   }
-
-  $.ajax({
-    url: '/api/jobs',
-    converters: bsonConverters,
-    success: function (data) {
-      for (var job of data) {
-        ws.onmessage['new_job'](job);
-      }
-    },
-    cache: false
-  });
-
-  ws.start();
-
-  $('.fz-motto').click(function () {
-    ws.toggle();
-  });
 
   $('.fz-logo').click(function () {
     fireworks();
+  });
+
+  fz.notifications.onopen = function () {
+    $('.fz-motto').attr('title', 'online').removeClass('websocket-error');
+  };
+
+  fz.notifications.onclose = function () {
+    $('.fz-motto').attr('title', 'offline').addClass('websocket-error');
+  };
+
+  fz.notifications.onmessage['new_issue'] = function () {
+    $('.badge').text(Number($('.badge').text()) + 1);
+    fireworks();
+  };
+
+  fz.notifications.start();
+
+  $('.fz-motto').click(function () {
+    fz.notifications.toggle();
   });
 });

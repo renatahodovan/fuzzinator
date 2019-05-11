@@ -27,23 +27,22 @@
     <meta name="theme-color" content="#3a3a3a">
     <!-- Google fonts -->
     <link href="/static/assets/google-fonts/google-fonts.css" type="text/css" rel="stylesheet"/>
-    <!-- Bootstrap & bootstrap-table CSS -->
+    <!-- Bootstrap CSS -->
     <link href="/static/assets/bootstrap-4/css/bootstrap.min.css" type="text/css" rel="stylesheet"/>
-    <link href="/static/assets/bootstrap-table/bootstrap-table.min.css" type="text/css" rel="stylesheet"/>
     <!-- Fuzzinator CSS -->
     <link href="/static/assets/codehilite-colorful.css" type="text/css" rel="stylesheet"/>
     <link href="/static/styles/fuzzinator.css" type="text/css" rel="stylesheet"/>
-    <!-- Script sources -->
+    <!-- Bootstrap scripts -->
     <script src="/static/assets/jquery.min.js" type="text/javascript"></script>
     <script src="/static/assets/bootstrap-4/js/bootstrap.bundle.min.js" type="text/javascript"></script>
-    <script src="/static/assets/bootstrap-table/bootstrap-table.min.js" type="text/javascript"></script>
-    <script src="/static/assets/bootstrap-table/extensions/cookie/bootstrap-table-cookie.min.js" type="text/javascript"></script>
     <!-- Custom Fuzzinator scripts -->
-    <script>var activePage = "{{ active_page }}";</script>
-    <script src="/static/scripts/bs-table-details.js" type="text/javascript"></script>
-    <script src="/static/scripts/bs-table-toolbar.js" type="text/javascript"></script>
-    <script src="/static/scripts/bson.js" type="text/javascript"></script>
-    <script src="/static/scripts/websocket.js" type="text/javascript"></script>
+    <script src="/static/scripts/fz.js" type="text/javascript"></script>
+    <script src="/static/scripts/fz-bson.js" type="text/javascript"></script>
+    <script src="/static/scripts/fz-api.js" type="text/javascript"></script>
+    <script src="/static/scripts/fz-notifications.js" type="text/javascript"></script>
+    <script src="/static/scripts/jobs.js" type="text/javascript"></script>
+    {% block head %}
+    {% end head %}
     <script src="/static/scripts/wui.js" type="text/javascript"></script>
     <title>Fuzzinator</title>
   </head>
@@ -63,10 +62,10 @@
             <div class="w-100 order-1 order-md-0 dual-collapse2">
               <ul class="nav nav-tabs" id="mainTab" role="tablist">
                 <li class="nav-item">
-                  <a class="nav-link {% if active_page=='issues' %} active {% end %}" id="issues-tab" onclick="location.href='/'" data-toggle="tab" href="/" role="tab" aria-controls="issues" aria-selected="true">Issues <span class="badge badge-pill badge-primary"></span></a>
+                  <a class="nav-link" id="issues-tab" onclick="location.href='/'" data-toggle="tab" href="/" role="tab" aria-controls="issues" aria-selected="true">Issues <span class="badge badge-pill badge-primary"></span></a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link {% if active_page=='stats' %} active {% end %}" id="stats-tab" onclick="location.href='/stats'" href="/stats" data-toggle="tab" role="tab" aria-controls="stats" aria-selected="false">Stats</a>
+                  <a class="nav-link" id="stats-tab" onclick="location.href='/stats'" href="/stats" data-toggle="tab" role="tab" aria-controls="stats" aria-selected="false">Stats</a>
                 </li>
                 {% block nav %}
                 {% end nav %}

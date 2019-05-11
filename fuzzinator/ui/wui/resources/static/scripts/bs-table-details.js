@@ -18,7 +18,29 @@
 
   // Extend init method with initiating a member to keep track of the opened rows.
   BootstrapTable.prototype.init = function () {
-    this.options.openRows = [];
+    $.extend(this.options, {
+      openRows: [],
+
+      onExpandRow: function (index) {
+        if (!this.openRows.includes(index)) {
+          this.openRows.push(index);
+        }
+        return false;
+      },
+
+      onCollapseRow: function (index) {
+        var inOpenedRowsIndex = this.openRows.indexOf(index);
+        if (inOpenedRowsIndex !== -1) {
+          this.openRows.splice(inOpenedRowsIndex, 1);
+        }
+        return false;
+      },
+
+      onPageChange: function () {
+        this.openRows = [];
+        return false;
+      }
+    });
     _init.apply(this, Array.prototype.slice.apply(arguments));
   };
 

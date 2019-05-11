@@ -12,6 +12,19 @@
 
 {% extends "base.html" %}
 
+{% block head %}
+<!-- Bootstrap-table CSS -->
+<link href="/static/assets/bootstrap-table/bootstrap-table.min.css" type="text/css" rel="stylesheet"/>
+<!-- Bootstrap-table scripts -->
+<script src="/static/assets/bootstrap-table/bootstrap-table.min.js" type="text/javascript"></script>
+<script src="/static/assets/bootstrap-table/extensions/cookie/bootstrap-table-cookie.min.js" type="text/javascript"></script>
+<!-- Custom Fuzzinator scripts -->
+<script src="/static/scripts/bs-table-toolbar.js" type="text/javascript"></script>
+<script src="/static/scripts/bs-table-details.js" type="text/javascript"></script>
+<script src="/static/scripts/fz-utils.js" type="text/javascript"></script>
+<script src="/static/scripts/stats.js" type="text/javascript"></script>
+{% end head %}
+
 {% block body %}
 
 <!-- stats content -->

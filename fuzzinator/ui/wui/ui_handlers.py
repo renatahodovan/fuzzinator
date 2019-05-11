@@ -67,13 +67,13 @@ class BaseUIHandler(RequestHandler):
         else:
             icon = 'mood_bad'
             exc_info = ''
-        self.render('error.html', active_page='error', code=status_code, icon=icon, exc_info=exc_info)
+        self.render('error.html', code=status_code, icon=icon, exc_info=exc_info)
 
 
 class IssuesUIHandler(BaseUIHandler):
 
     def get(self):
-        self.render('issues.html', active_page='issues')
+        self.render('issues.html')
 
 
 class IssueUIHandler(BaseUIHandler):
@@ -84,7 +84,7 @@ class IssueUIHandler(BaseUIHandler):
             self.send_error(404)
             return
         formatter = config_get_callable(self._config, 'sut.' + issue['sut'], ['wui_formatter', 'formatter'])[0] or JsonFormatter
-        self.render('issue.html', active_page='issue', issue=issue, issue_body=formatter(issue=issue))
+        self.render('issue.html', issue=issue, issue_body=formatter(issue=issue))
 
 
 class ConfigUIHandler(BaseUIHandler):
@@ -105,13 +105,13 @@ class ConfigUIHandler(BaseUIHandler):
             return
 
         config_src = markdown('```ini\n%s\n```' % config['src'], extensions=['extra', 'fenced_code', 'codehilite'])
-        self.render('config.html', active_page='config', subconfig=subconfig, issue_id=issue_id, data=data, config_src=config_src)
+        self.render('config.html', subconfig=subconfig, issue_id=issue_id, data=data, config_src=config_src)
 
 
 class StatsUIHandler(BaseUIHandler):
 
     def get(self):
-        self.render('stats.html', active_page='stats')
+        self.render('stats.html')
 
 
 class NotFoundHandler(BaseUIHandler):

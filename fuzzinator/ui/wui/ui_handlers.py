@@ -16,6 +16,7 @@ from tornado.websocket import WebSocketHandler
 
 from ...config import config_get_callable
 from ...formatter import JsonFormatter
+from ...pkgdata import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +57,9 @@ class BaseUIHandler(RequestHandler):
     @property
     def _config(self):
         return self._wui.controller.config
+
+    def render(self, *args, **kwargs):
+        super().render(*args, version=__version__, **kwargs)
 
     def write_error(self, status_code, **kwargs):
         if 'exc_info' in kwargs:

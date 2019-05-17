@@ -5,26 +5,39 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import json
-
-from os.path import dirname, join
 from setuptools import setup, find_packages
 
-with open(join(dirname(__file__), 'fuzzinator', 'PKGDATA.json'), 'r') as f:
-    data = json.load(f)
+
+def fuzzinator_version():
+    def _version_scheme(version):
+        return version.format_with('{tag}')
+
+    def _local_scheme(version):
+        if version.exact and not version.dirty:
+            return ''
+        parts = ['{distance}'.format(distance=version.distance)]
+        if version.node:
+            parts.append('{node}'.format(node=version.node))
+        if version.dirty:
+            parts.append('d{time:%Y%m%d}'.format(time=version.time))
+        return '+{parts}'.format(parts='.'.join(parts))
+
+    return { 'version_scheme': _version_scheme, 'local_scheme': _local_scheme }
+
 
 setup(
-    name=data['name'],
-    version=data['version'],
+    name='fuzzinator',
     packages=find_packages(),
-    url=data['url'],
+    url='https://github.com/renatahodovan/fuzzinator',
     license='BSD',
-    author=data['author'],
-    author_email=data['author_email'],
+    author='Renata Hodovan, Akos Kiss',
+    author_email='hodovan@inf.u-szeged.hu, akiss@inf.u-szeged.hu',
     description='Fuzzinator Random Testing Framework',
     long_description=open('README.rst').read(),
     zip_safe=False,
     include_package_data=True,
+    setup_requires=['setuptools_scm'],
+    use_scm_version=fuzzinator_version,
     install_requires=[
         'chardet',
         'chevron',

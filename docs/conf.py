@@ -33,13 +33,6 @@ sys.path.insert(0, os.path.abspath('..'))
 from fuzzinator import __version__ as version
 # The full version, including alpha/beta/rc tags.
 release = version
-if release.endswith('r'):
-    try:
-        import subprocess
-        release = '%s+%s' % (version, subprocess.check_output('git show -s --format="%h"',
-                                                              shell=True, universal_newlines=True))
-    except:
-        pass
 
 # -- Project-specific extensions ------------------------------------------
 

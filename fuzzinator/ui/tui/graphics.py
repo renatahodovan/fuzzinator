@@ -15,16 +15,20 @@ from ...pkgdata import __version__
 
 
 def fz_logo_4lines():
-    padding = ''.join([' '] * (len(__version__) + 2)) + '\n'
+    version_parts = __version__.split('+')
+    if len(version_parts) > 1:
+        version_parts[1:] = [version_parts[1].split('.')[0]]
+    short_version = '+'.join(version_parts)
+    padding = ''.join([' '] * (len(short_version) + 2)) + '\n'
     if util.get_encoding_mode() == 'utf8':
         return [
-            ('logo', u' ▄▄▄▄ ▄▄ ▄▄ ▄▄▄▄▄ ▄▄▄▄▄ ▄▄ ▄▄▄▄   ▄▄▄  █▄     ▄▄▄  ▄▄▄▄  '), ('logo_secondary', u'[{version}]\n'.format(version=__version__)),
+            ('logo', u' ▄▄▄▄ ▄▄ ▄▄ ▄▄▄▄▄ ▄▄▄▄▄ ▄▄ ▄▄▄▄   ▄▄▄  █▄     ▄▄▄  ▄▄▄▄  '), ('logo_secondary', u'[{version}]\n'.format(version=short_version)),
             ('logo', u'██ ▀▀ ██ ██   ▄█▀   ▄█▀ ▄▄ ██ ██ ▀▀ ██ ██▀   ██ ██ ██ ██ '), ('logo_secondary', padding),
             ('logo', u'██▀   ██ ██ ▄█▀   ▄█▀   ██ ██ ██ ▄█▀██ ██ ██ ██ ██ ██▀█▄ '), ('logo_secondary', padding),
             ('logo', u'█▀     ▀▀▀  ▀▀▀▀▀ ▀▀▀▀▀ ▀▀ ▀▀ ▀▀ ▀▀▀▀▀  ▀▀▀▀  ▀▀▀  ▀▀ ▀█ '), ('logo_secondary', padding),
             ('logo_secondary', u'In Bug We Trust.')]
     return [
-        ('logo', u' #### ## ## ##### ##### ## ####  ####  ##     ###  ####  '), ('logo_secondary', '[{version}]\n'.format(version=__version__)),
+        ('logo', u' #### ## ## ##### ##### ## ####  ####  ##     ###  ####  '), ('logo_secondary', '[{version}]\n'.format(version=short_version)),
         ('logo', u'##    ## ##   ###   ###    ## ##   ### ###   ## ## ## ## '), ('logo_secondary', padding),
         ('logo', u'###   ## ## ###   ###   ## ## ## ## ## ##    ## ## ####  '), ('logo_secondary', padding),
         ('logo', u'##     ###  ##### ##### ## ## ## #####  ####  ###  ## ## '), ('logo_secondary', padding),

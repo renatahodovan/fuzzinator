@@ -23,6 +23,8 @@ jobs:
       before_script:
         - sudo apt-get install npm
         - sudo npm install -g npx
+    - python: 3.6
+      env: TOXENV=docs
 
     - stage: deploy
       python: 3.4

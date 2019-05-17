@@ -45,11 +45,15 @@ setup(
         'python-gitlab',
         'rainbow_logging_handler',
         'setuptools',
-        'sphinx',
-        'sphinx_rtd_theme',
         'tornado<6.0',  # no Tornado 6 for Python < 3.5
         'urwid',
     ],
+    extras_require={
+        'docs': [
+            'sphinx',
+            'sphinx_rtd_theme',
+        ]
+    },
     entry_points={
         'console_scripts': ['fuzzinator = fuzzinator.executor:execute']
     }

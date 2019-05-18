@@ -33,7 +33,7 @@ $(document).ready(function () {
       $(statRowDetail).find('.config-ref').text(detail.subconfig === null ? 'N/A' : `${detail.subconfig}`);
       $(statRowDetail).find('.sut').text(row.sut);
       $(statRowDetail).find('.exec').text(detail.exec);
-      $(statRowDetail).find('.issues').text(detail.crashes);
+      $(statRowDetail).find('.issues').text(detail.issues);
       $(statRowDetail).find('.unique').text(detail.unique);
       $(statRowDetail).appendTo($(mainDiv));
     }
@@ -41,7 +41,7 @@ $(document).ready(function () {
   }
 
   $('#stat-table').bootstrapTable(fz.utils.bstOptions({
-    columnNames: ['fuzzer', 'exec', 'crashes', 'unique', 'sut'],
+    columnNames: ['fuzzer', 'exec', 'issues', 'unique', 'sut'],
     formatter: statRowFormatter,
     detailFormatter: statRowDetailFormatter,
     sortName: 'exec',

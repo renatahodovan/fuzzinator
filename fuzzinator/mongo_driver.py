@@ -56,7 +56,7 @@ class MongoDriver(object):
                                         upsert=True)
 
             stats.find_one_and_update(filter={'sut': fuzz_data['sut'], 'fuzzer': fuzz_name, 'subconfig': fuzz_data['subconfig']},
-                                      update={'$setOnInsert': {'sut': fuzz_data['sut'], 'fuzzer': fuzz_name, 'subconfig': fuzz_data['subconfig'], 'exec': 0, 'crashes': 0}},
+                                      update={'$setOnInsert': {'sut': fuzz_data['sut'], 'fuzzer': fuzz_name, 'subconfig': fuzz_data['subconfig'], 'exec': 0, 'issues': 0}},
                                       upsert=True)
 
     def add_issue(self, issue):
@@ -129,7 +129,7 @@ class MongoDriver(object):
                     {'$group': {
                         '_id': {'sut': '$sut', 'fuzzer': '$fuzzer', 'subconfig': '$subconfig'},
                         'sut': {'$first': '$sut'}, 'fuzzer': {'$first': '$fuzzer'}, 'subconfig': {'$first': '$subconfig'},
-                        'exec': {'$sum': 0}, 'crashes': {'$sum': 0}, 'unique': {'$sum': 1},
+                        'exec': {'$sum': 0}, 'issues': {'$sum': 0}, 'unique': {'$sum': 1},
                     }},
                 ],
                 'as': 'fuzzinator_issues',
@@ -153,9 +153,9 @@ class MongoDriver(object):
             {'$group': {
                 '_id': {'sut': '$sut', 'fuzzer': '$fuzzer', 'subconfig': '$subconfig'},
                 'sut': {'$first': '$sut'}, 'fuzzer': {'$first': '$fuzzer'}, 'subconfig': {'$first': '$subconfig'},
-                'exec': {'$sum': '$exec'}, 'crashes': {'$sum': '$crashes'}, 'unique': {'$sum': '$unique'},
+                'exec': {'$sum': '$exec'}, 'issues': {'$sum': '$issues'}, 'unique': {'$sum': '$unique'},
             }},
-            {'$match': {'$or': [{'exec': {'$gt': 0}}, {'crashes': {'$gt': 0}}, {'unique': {'$gt': 0}}]}},
+            {'$match': {'$or': [{'exec': {'$gt': 0}}, {'issues': {'$gt': 0}}, {'unique': {'$gt': 0}}]}},
         ] + ([] if not detailed else [
             # Extend stats with the ini snippet
             {'$lookup': {
@@ -170,9 +170,9 @@ class MongoDriver(object):
             {'$group': {
                 '_id': {'sut': '$sut', 'fuzzer': '$fuzzer'},
                 'sut': {'$first': '$sut'}, 'fuzzer': {'$first': '$fuzzer'},
-                'exec': {'$sum': '$exec'}, 'crashes': {'$sum': '$crashes'}, 'unique': {'$sum': '$unique'},
+                'exec': {'$sum': '$exec'}, 'issues': {'$sum': '$issues'}, 'unique': {'$sum': '$unique'},
                 'configs': {'$push': {'subconfig': '$subconfig', 'src': '$fuzzinator_configs.src',
-                                      'exec': '$exec', 'crashes': '$crashes', 'unique': '$unique'}},
+                                      'exec': '$exec', 'issues': '$issues', 'unique': '$unique'}},
             }},
             {'$project': {'_id': 0}},
         ]
@@ -191,12 +191,12 @@ class MongoDriver(object):
             result[(document['fuzzer'], document['sut'])] = dict(fuzzer=document['fuzzer'],
                                                                  sut=document['sut'],
                                                                  exec=document['exec'],
-                                                                 issues=document['crashes'],
+                                                                 issues=document['issues'],
                                                                  unique=document['unique'],
                                                                  configs=document['configs'])
         return result
 
     def update_stat(self, sut, fuzzer, subconfig, batch, issues):
         self._db.fuzzinator_stats.find_one_and_update({'sut': sut, 'fuzzer': fuzzer, 'subconfig': subconfig},
-                                                      {'$inc': {'exec': int(batch), 'crashes': issues}},
+                                                      {'$inc': {'exec': int(batch), 'issues': issues}},
                                                       upsert=True)

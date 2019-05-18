@@ -111,19 +111,19 @@ class IssuesAPIHandler(BaseAPIHandler):
 
 class IssueAPIHandler(BaseAPIHandler):
 
-    def get(self, issue_id):
-        issue = self._db.find_issue_by_id(issue_id)
+    def get(self, issue_oid):
+        issue = self._db.find_issue_by_oid(issue_oid)
         if issue is None:
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
         self.send_content(issue)
 
-    def delete(self, issue_id):
-        issue = self._db.find_issue_by_id(issue_id)
+    def delete(self, issue_oid):
+        issue = self._db.find_issue_by_oid(issue_oid)
         if issue is None:
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
-        self._db.remove_issue_by_id(issue_id)
+        self._db.remove_issue_by_oid(issue_oid)
         self._wui.send_notification('refresh_issues')
         self.set_status(204, reason='issue deleted')    # 204 Success: No Content
 
@@ -137,9 +137,9 @@ class JobsAPIHandler(BaseAPIHandler):
     def post(self):
         job_args = self.get_content()
         job_type = job_args.get('type')
-        issue_id = job_args.get('_id')
+        issue_oid = job_args.get('issue_oid')
 
-        issue = self._db.find_issue_by_id(issue_id)
+        issue = self._db.find_issue_by_oid(issue_oid)
         if issue is None:
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 

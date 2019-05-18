@@ -33,21 +33,21 @@
     getCollection('/api/issues', pagination, success, error);
   };
 
-  api.deleteIssue = function (issueId, success, error) {
+  api.deleteIssue = function (issueOid, success, error) {
     $.ajax({
       method: 'DELETE',
-      url: `/api/issues/${issueId}`,
+      url: `/api/issues/${issueOid}`,
       success: success,
       error: error,
     });
   };
 
-  api.addJob = function (type, issueId, success, error) {
+  api.addJob = function (type, issueOid, success, error) {
     $.ajax({
       method: 'POST',
       url: '/api/jobs',
       contentType: 'application/json',
-      data: JSON.stringify({ type: type, _id: issueId }),
+      data: JSON.stringify({ type: type, issue_oid: issueOid }),
       success: success,
       error: error,
     });

@@ -53,7 +53,7 @@ class ViewButton(FullScreenPopupLauncher):
             return None
 
         pop_up = FormattedIssueDialog(config=self.config,
-                                      issue=self.issues_table.db.find_issue_by_id(focus.data['_id']),
+                                      issue=self.issues_table.db.find_issue_by_oid(focus.data['_id']),
                                       db=self.issues_table.db)
         connect_signal(pop_up, 'close', lambda button: self.close_pop_up())
         return pop_up
@@ -71,7 +71,7 @@ class EditButton(FullScreenPopupLauncher):
         if not focus:
             return None
 
-        pop_up = EditIssueDialog(issue=self.issues_table.db.find_issue_by_id(focus.data['_id']),
+        pop_up = EditIssueDialog(issue=self.issues_table.db.find_issue_by_oid(focus.data['_id']),
                                  db=self.issues_table.db)
         connect_signal(pop_up, 'close', lambda button: self.close_pop_up())
         return pop_up
@@ -95,7 +95,7 @@ class ReportButton(FullScreenPopupLauncher):
         if not focus:
             return None
 
-        issue = self.issues_table.db.find_issue_by_id(focus.data['_id'])
+        issue = self.issues_table.db.find_issue_by_oid(focus.data['_id'])
         try:
             tracker_cls = self.config.get('sut.' + issue['sut'], 'tracker').split('.')[-1]
             popup_cls = globals()[tracker_cls.replace('Tracker', 'ReportDialog')]

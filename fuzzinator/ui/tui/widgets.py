@@ -102,7 +102,7 @@ class MainWindow(PopUpLauncher):
         self.init_popup(msg)
 
     def remove_issue(self, ident):
-        self.db.remove_issue_by_id(ident)
+        self.db.remove_issue_by_oid(ident)
         if ident in self.issues_table.row_dict:
             del self.issues_table[self.issues_table.body.rows.index(self.issues_table.row_dict[ident])]
         self.close_pop_up()
@@ -115,7 +115,7 @@ class MainWindow(PopUpLauncher):
 
     def add_reduce_job(self):
         if self.issues_table.selection:
-            issue = self.db.find_issue_by_id(self.issues_table.selection.data['_id'])
+            issue = self.db.find_issue_by_oid(self.issues_table.selection.data['_id'])
             if not self.config.has_section('sut.' + issue['sut']):
                 self.warning_popup(msg='{sut} is not defined.'.format(sut=issue['sut']))
             else:
@@ -126,13 +126,13 @@ class MainWindow(PopUpLauncher):
 
     def add_validate_job(self):
         if self.issues_table.selection:
-            issue = self.db.find_issue_by_id(self.issues_table.selection.data['_id'])
+            issue = self.db.find_issue_by_oid(self.issues_table.selection.data['_id'])
             if not self.controller.add_validate_job(issue):
                 self.warning_popup(msg='{sut} is not defined.'.format(sut=issue['sut']))
 
     def copy_selected(self, test_bytes=False):
         if self.issues_table.selection:
-            issue = self.db.find_issue_by_id(self.issues_table.selection.data['_id'])
+            issue = self.db.find_issue_by_oid(self.issues_table.selection.data['_id'])
             if test_bytes:
                 pyperclip.copy(str(issue['test']))
             else:
@@ -232,7 +232,7 @@ class IssuesTable(Table):
         if key in ['delete', 'd']:
             if self:    # len(self) != 0
                 ident = self[self.focus_position].data['_id']
-                self.db.update_issue_by_id(ident, {'invalid': datetime.utcnow()})
+                self.db.update_issue_by_oid(ident, {'invalid': datetime.utcnow()})
                 self.invalidate_row(ident)
             return None
         if key in ['shift delete', 'D']:
@@ -261,7 +261,7 @@ class IssuesTable(Table):
         self.walker._modified()
 
     def update_row(self, ident):
-        issue = self.db.find_issue_by_id(ident)
+        issue = self.db.find_issue_by_oid(ident)
         attr_map, focus_map = self.get_attr(issue)
         super().update_row_style(ident, attr_map, focus_map)
 

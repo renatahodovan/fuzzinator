@@ -40,11 +40,11 @@ class ValidateJob(CallJob):
         if issue:
             issue['test'] = self.issue['test']
             if issue['id'] == self.issue['id']:
-                self.db.update_issue_by_id(self.issue['_id'], issue)
+                self.db.update_issue_by_oid(self.issue['_id'], issue)
                 return True, new_issues
 
             self.add_issue(issue, new_issues=new_issues)
 
-        self.db.update_issue_by_id(self.issue['_id'], {'invalid': datetime.utcnow()})
+        self.db.update_issue_by_oid(self.issue['_id'], {'invalid': datetime.utcnow()})
         self.listener.invalid_issue(ident=self.id, issue=self.issue)
         return False, new_issues

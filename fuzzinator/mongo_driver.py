@@ -98,17 +98,17 @@ class MongoDriver(object):
 
         return list(self._db.fuzzinator_issues.aggregate(aggregator))
 
-    def find_issue_by_id(self, _id):
-        return self._db.fuzzinator_issues.find_one({'_id': ObjectId(_id)})
+    def find_issue_by_oid(self, oid):
+        return self._db.fuzzinator_issues.find_one({'_id': ObjectId(oid)})
 
     def find_issues_by_suts(self, suts):
         return list(self._db.fuzzinator_issues.find({'sut': {'$in': suts}}))
 
-    def update_issue_by_id(self, _id, _set):
-        self._db.fuzzinator_issues.update_one({'_id': ObjectId(_id)}, {'$set': _set})
+    def update_issue_by_oid(self, oid, _set):
+        self._db.fuzzinator_issues.update_one({'_id': ObjectId(oid)}, {'$set': _set})
 
-    def remove_issue_by_id(self, _id):
-        self._db.fuzzinator_issues.delete_one({'_id': ObjectId(_id)})
+    def remove_issue_by_oid(self, oid):
+        self._db.fuzzinator_issues.delete_one({'_id': ObjectId(oid)})
 
     def find_config_by_id(self, id):
         return self._db.fuzzinator_configs.find_one({'subconfig': id})

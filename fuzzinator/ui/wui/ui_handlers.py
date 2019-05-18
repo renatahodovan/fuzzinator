@@ -82,8 +82,8 @@ class IssuesUIHandler(BaseUIHandler):
 
 class IssueUIHandler(BaseUIHandler):
 
-    def get(self, issue_id):
-        issue = self._db.find_issue_by_id(issue_id)
+    def get(self, issue_oid):
+        issue = self._db.find_issue_by_oid(issue_oid)
         if issue is None:
             self.send_error(404)
             return
@@ -93,23 +93,23 @@ class IssueUIHandler(BaseUIHandler):
 
 class ConfigUIHandler(BaseUIHandler):
 
-    def get(self, subconfig, issue_id=None):
+    def get(self, subconfig, issue_oid=None):
         config = self._db.find_config_by_id(subconfig)
         if not config:
             self.send_error(404)
             return
 
-        if not issue_id:
+        if not issue_oid:
             data = list(self._db.get_stats(filter={'configs.subconfig': subconfig}).values())[0]
         else:
-            data = self._db.find_issue_by_id(issue_id)
+            data = self._db.find_issue_by_oid(issue_oid)
 
         if not data:
             self.send_error(404)
             return
 
         config_src = markdown('```ini\n%s\n```' % config['src'], extensions=['extra', 'fenced_code', 'codehilite'])
-        self.render('config.html', subconfig=subconfig, issue_id=issue_id, data=data, config_src=config_src)
+        self.render('config.html', subconfig=subconfig, issue_oid=issue_oid, data=data, config_src=config_src)
 
 
 class StatsUIHandler(BaseUIHandler):

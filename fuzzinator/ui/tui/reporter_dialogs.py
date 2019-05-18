@@ -68,7 +68,7 @@ class ReportDialog(PopUpTarget):
     def send_report(self):
         url = self.tracker.issue_url(self.tracker.report_issue(**self.get_report_data()))
         self.result.set_text(('dialog_secondary', 'Reported at: {weburl}'.format(weburl=url)))
-        self.db.update_issue_by_id(self.issue['_id'], {'reported': url})
+        self.db.update_issue_by_oid(self.issue['_id'], {'reported': url})
         return url
 
     def save_reported(self):
@@ -78,7 +78,7 @@ class ReportDialog(PopUpTarget):
             url = self.duplicate
         else:
             url = ''
-        self.db.update_issue_by_id(self.issue['_id'], {'reported': url})
+        self.db.update_issue_by_oid(self.issue['_id'], {'reported': url})
         self._emit('close')
 
     def keypress(self, size, key):

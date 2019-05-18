@@ -22,7 +22,8 @@ class ReduceJob(CallJob):
         sut_section = 'sut.' + sut_name
         fuzzer_name = '{fuzzer}/{reducer}'.format(fuzzer=issue['fuzzer'].split('/')[0],
                                                   reducer=config.get(sut_section, 'reduce'))
-        super().__init__(id, config, issue.get('subconfig'), sut_name, fuzzer_name, db, listener)
+        subconfig_id = issue['subconfig'].get('subconfig') if isinstance(issue.get('subconfig'), dict) else None
+        super().__init__(id, config, subconfig_id, sut_name, fuzzer_name, db, listener)
 
         self.issue = issue
         self.cost = int(config.get(sut_section, 'reduce_cost', fallback=config.get(sut_section, 'cost', fallback=1)))

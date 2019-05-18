@@ -19,7 +19,8 @@ class ValidateJob(CallJob):
     def __init__(self, id, config, issue, db, listener):
         sut_name = issue['sut']
         fuzzer_name = issue['fuzzer']
-        super().__init__(id, config, issue.get('subconfig'), sut_name, fuzzer_name, db, listener)
+        subconfig_id = issue['subconfig'].get('subconfig') if isinstance(issue.get('subconfig'), dict) else None
+        super().__init__(id, config, subconfig_id, sut_name, fuzzer_name, db, listener)
 
         self.issue = issue
         self.cost = int(config.get('sut.' + sut_name, 'validate_cost', fallback=config.get('sut.' + sut_name, 'cost', fallback=1)))

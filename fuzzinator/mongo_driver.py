@@ -36,7 +36,7 @@ class MongoDriver(object):
 
         issues = db.fuzzinator_issues
         issues.create_index([('sut', ASCENDING), ('id', ASCENDING)])
-        issues.create_index([('sut', ASCENDING), ('fuzzer', ASCENDING), ('subconfig', ASCENDING)])
+        issues.create_index([('sut', ASCENDING), ('fuzzer', ASCENDING), ('subconfig.subconfig', ASCENDING)])
         issues.create_index('first_seen')
         issues.create_index('last_seen')
         issues.create_index('invalid')
@@ -77,7 +77,7 @@ class MongoDriver(object):
         # different from the value stored in `now` (on nanosecond level).
         return issue['first_seen'] == issue['last_seen']
 
-    def get_issues(self, filter=None, skip=0, limit=0, sort=None, include_invalid=True, show_all=True, detailed=True):
+    def get_issues(self, filter=None, skip=0, limit=0, sort=None, include_invalid=True, show_all=True, detailed=False):
         filter = filter or {}
         if not show_all:
             filter['first_seen'] = {'$gte': self.session_start}
@@ -93,13 +93,32 @@ class MongoDriver(object):
             aggregator.append({'$skip': skip})
         if limit:
             aggregator.append({'$limit': limit})
-        if not detailed:
-            aggregator.append({'$project': {'id': 1, 'sut': 1, 'fuzzer': 1, 'first_seen': 1, 'last_seen': 1, 'count': 1, 'invalid': 1, 'reduced': {'$ifNull': [True, None]}, 'reported': 1}})
+        if detailed:
+            aggregator.extend([
+                {'$lookup': {
+                    'from': 'fuzzinator_configs',
+                    'localField': 'subconfig.subconfig',
+                    'foreignField': 'subconfig',
+                    'as': 'fuzzinator_configs',
+                }},
+                {'$unwind': {'path': '$fuzzinator_configs', 'preserveNullAndEmptyArrays': True}},
+                {'$addFields': {'subconfig.src': '$fuzzinator_configs.src'}},
+                {'$project': {'fuzzinator_configs': 0}},
+            ])
+        else:
+            aggregator.append({'$project': {'id': 1, 'sut': 1, 'fuzzer': 1, 'subconfig': 1, 'first_seen': 1, 'last_seen': 1, 'count': 1, 'invalid': 1, 'reduced': {'$ifNull': [True, None]}, 'reported': 1}})
 
         return list(self._db.fuzzinator_issues.aggregate(aggregator))
 
-    def find_issue_by_oid(self, oid):
-        return self._db.fuzzinator_issues.find_one({'_id': ObjectId(oid)})
+    def find_issue_by_oid(self, oid, detailed=False):
+        issue = self._db.fuzzinator_issues.find_one({'_id': ObjectId(oid)})
+        if detailed and issue and isinstance(issue.get('subconfig'), dict):
+            subconfig_id = issue['subconfig'].get('subconfig')
+            if subconfig_id:
+                subconfig = self.find_config_by_id(subconfig_id)
+                if subconfig:
+                    issue['subconfig']['src'] = subconfig['src']
+        return issue
 
     def find_issues_by_suts(self, suts):
         return list(self._db.fuzzinator_issues.find({'sut': {'$in': suts}}))
@@ -113,7 +132,7 @@ class MongoDriver(object):
     def find_config_by_id(self, id):
         return self._db.fuzzinator_configs.find_one({'subconfig': id})
 
-    def get_stats(self, filter=None, skip=0, limit=0, sort=None, show_all=True, detailed=True):
+    def get_stats(self, filter=None, skip=0, limit=0, sort=None, show_all=True, detailed=False):
         aggregator = [
             # Get an empty document
             {'$limit': 1},  # Note: this works only if fuzzinator_stats has at least one element.
@@ -171,8 +190,8 @@ class MongoDriver(object):
                 '_id': {'sut': '$sut', 'fuzzer': '$fuzzer'},
                 'sut': {'$first': '$sut'}, 'fuzzer': {'$first': '$fuzzer'},
                 'exec': {'$sum': '$exec'}, 'issues': {'$sum': '$issues'}, 'unique': {'$sum': '$unique'},
-                'configs': {'$push': {'subconfig': '$subconfig', 'src': '$fuzzinator_configs.src',
-                                      'exec': '$exec', 'issues': '$issues', 'unique': '$unique'}},
+                'subconfigs': {'$push': {'subconfig': '$subconfig', 'src': '$fuzzinator_configs.src',
+                                         'exec': '$exec', 'issues': '$issues', 'unique': '$unique'}},
             }},
             {'$project': {'_id': 0}},
         ]
@@ -193,7 +212,7 @@ class MongoDriver(object):
                                                                  exec=document['exec'],
                                                                  issues=document['issues'],
                                                                  unique=document['unique'],
-                                                                 configs=document['configs'])
+                                                                 subconfigs=document['subconfigs'])
         return result
 
     def update_stat(self, sut, fuzzer, subconfig, batch, issues):

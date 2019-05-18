@@ -25,7 +25,7 @@ $(document).ready(function () {
 
   function statRowDetailFormatter (index, row) {
     var mainDiv = document.createElement('div');
-    for (var detail of row.configs) {
+    for (var detail of row.subconfigs) {
       var statRowDetail = document.importNode($('#stat-row-template').prop('content').cloneNode(true), true).children[0];
       if (detail.subconfig !== null) {
           $(statRowDetail).find('.config-ref').attr('href', `/configs/${detail.subconfig}`);

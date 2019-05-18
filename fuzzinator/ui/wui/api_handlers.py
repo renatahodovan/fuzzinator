@@ -106,13 +106,13 @@ class IssuesAPIHandler(BaseAPIHandler):
     def get(self):
         query = self.get_pagination_query(['fuzzer', 'sut', 'id'])
         self.send_content(self._db.get_issues(**query),
-                          total=len(self._db.get_issues(query['filter'], detailed=False)))
+                          total=len(self._db.get_issues(query['filter'])))
 
 
 class IssueAPIHandler(BaseAPIHandler):
 
     def get(self, issue_oid):
-        issue = self._db.find_issue_by_oid(issue_oid)
+        issue = self._db.find_issue_by_oid(issue_oid, detailed=True)
         if issue is None:
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
@@ -178,7 +178,7 @@ class StatsAPIHandler(BaseAPIHandler):
     def get(self):
         query = self.get_pagination_query(['fuzzer', 'sut'])
         self.send_content(list(self._db.get_stats(**query).values()),
-                          total=len(self._db.get_stats(query['filter'], detailed=False)))
+                          total=len(self._db.get_stats(query['filter'])))
 
 
 class NotFoundAPIHandler(RequestHandler):

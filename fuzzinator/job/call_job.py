@@ -28,7 +28,7 @@ class CallJob(object):
         # Save issue details.
         issue.update(dict(sut=self.sut_name,
                           fuzzer=self.fuzzer_name,
-                          subconfig=self.subconfig_id,
+                          subconfig=dict(subconfig=self.subconfig_id),
                           test=test,
                           reduced=None,
                           reported=False))

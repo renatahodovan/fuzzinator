@@ -53,9 +53,10 @@
             <div class="float-right"><button type="button" class="btn btn-outline-secondary reduce-issue btn-sm btn-block" title="reduce" onclick="fz.api.addJob('reduce', '{{ issue['_id'] }}')"><i class="material-icons-outlined md-14 align-middle">crop</i> Reduce</button></div>
           </div>
 
-          {% if issue.get('subconfig') %}
+          {% set subconfig = issue['subconfig'].get('subconfig') if isinstance(issue.get('subconfig'), dict) else None %}
+          {% if subconfig %}
           <div class="col-2 col-md-2 text-truncate text-secondary" data-toggle="tool-tip" title="config">
-            <i class="material-icons-outlined md-14 align-text-center">description</i> <a class="config-ref" href="/configs/{{ issue['subconfig'] }}/{{ issue['_id'] }}">{{ issue['subconfig'] }}</a>
+            <i class="material-icons-outlined md-14 align-text-center">description</i> <a class="config-ref" href="/configs/{{ subconfig }}/{{ issue['_id'] }}">{{ subconfig }}</a>
           </div>
           {% end %}
         </div>

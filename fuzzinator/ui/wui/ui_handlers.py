@@ -100,7 +100,7 @@ class ConfigUIHandler(BaseUIHandler):
             return
 
         if not issue_oid:
-            data = list(self._db.get_stats(filter={'configs.subconfig': subconfig}).values())[0]
+            data = list(self._db.get_stats(filter={'subconfigs.subconfig': subconfig}).values())[0]
         else:
             data = self._db.find_issue_by_oid(issue_oid)
 

@@ -20,8 +20,8 @@ from tornado import ioloop, web
 from ... import Controller
 from .. import build_parser, process_args
 
-from .api_handlers import IssueAPIHandler, IssuesAPIHandler, JobAPIHandler, JobsAPIHandler, NotFoundAPIHandler, StatsAPIHandler
-from .ui_handlers import ConfigUIHandler, IssuesUIHandler, IssueUIHandler, NotFoundHandler, NotificationsHandler, StatsUIHandler
+from .api_handlers import IssueAPIHandler, IssueReportAPIHandler, IssuesAPIHandler, JobAPIHandler, JobsAPIHandler, NotFoundAPIHandler, StatsAPIHandler
+from .ui_handlers import ConfigUIHandler, IssueReportUIHandler, IssuesUIHandler, IssueUIHandler, NotFoundHandler, NotificationsHandler, StatsUIHandler
 from .wui_listener import WuiListener
 
 logger = logging.getLogger()
@@ -39,11 +39,13 @@ class Wui(object):
         handler_args = dict(wui=self)
         self.app = web.Application([(r'/', IssuesUIHandler, handler_args),
                                     (r'/issues/([0-9a-f]{24})', IssueUIHandler, handler_args),
+                                    (r'/issues/([0-9a-f]{24})/report', IssueReportUIHandler, handler_args),
                                     (r'/stats', StatsUIHandler, handler_args),
                                     (r'/configs/([0-9a-f]{9})(?:/([0-9a-f]{24}))?', ConfigUIHandler, handler_args),
                                     (r'/notifications', NotificationsHandler, handler_args),
                                     (r'/api/issues', IssuesAPIHandler, handler_args),
                                     (r'/api/issues/([0-9a-f]{24})', IssueAPIHandler, handler_args),
+                                    (r'/api/issues/([0-9a-f]{24})/report', IssueReportAPIHandler, handler_args),
                                     (r'/api/jobs', JobsAPIHandler, handler_args),
                                     (r'/api/jobs/([0-9]+)', JobAPIHandler, handler_args),
                                     (r'/api/stats', StatsAPIHandler, handler_args),

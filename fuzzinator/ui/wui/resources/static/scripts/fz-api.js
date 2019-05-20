@@ -42,6 +42,28 @@
     });
   };
 
+  api.editIssue = function (issueOid, issue, success, error) {
+    $.ajax({
+      method: 'POST',
+      url: `/api/issues/${issueOid}`,
+      data: JSON.stringify(issue),
+      contentType: 'application/json',
+      success: success,
+      error: error,
+    });
+  };
+
+  api.reportIssue = function (issueOid, reportData, success, error) {
+    $.ajax({
+      method: 'POST',
+      url: `/api/issues/${issueOid}/report`,
+      data: JSON.stringify(reportData),
+      contentType: 'application/json',
+      success: success,
+      error: error,
+    });
+  };
+
   api.addJob = function (type, issueOid, success, error) {
     $.ajax({
       method: 'POST',

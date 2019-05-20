@@ -28,3 +28,6 @@ class BaseTracker(metaclass=Multiton):
 
     def report_issue(self, **kwargs):
         pass
+
+    def settings(self):
+        return dict()

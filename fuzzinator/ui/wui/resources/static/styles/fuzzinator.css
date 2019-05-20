@@ -158,3 +158,30 @@ thead .sorting {
   right: 0;
   margin-left: -120px;
 }
+
+.list-group input[type="radio"] {
+  display: none;
+}
+
+.list-group input[type="radio"] + label {
+  cursor: pointer;
+}
+
+.input-group-text {
+  background: transparent;
+  padding-left: 1rem;
+}
+
+input[type="radio"] + label:before {
+  content: "\2713";
+  color: transparent;
+  margin-right: 1em;
+}
+
+input[type="radio"]:checked + label:before {
+  color: inherit;
+}
+
+.form-control {
+  height: unset;
+}

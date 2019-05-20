@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<!--
+ Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+
+ Licensed under the BSD 3-Clause License
+ <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
+ This file may not be copied, modified, or distributed except
+ according to those terms.
+-->
+
+{% extends "base.html" %}
+
+{% block head %}
+<script>
+$(document).ready(function () {
+  'use strict';
+
+  $('[name="url"]').on('click', function (event) {
+    var radio = $(this);
+    $(`#markAsReportedForm input[type="radio"]:not('#${radio.prop('id')}')`).data('wasChecked', false);
+    radio.data('wasChecked', !radio.data('wasChecked'));
+    radio.prop('checked', radio.data('wasChecked'));
+
+    // Enable/Disable markAsReportedBtn button based on the selection.
+    var dupBtn = $('#markAsReportedBtn');
+    var dupBtnDisabled = $('#markAsReportedForm input[type="radio"]:checked').length === 0;
+    dupBtn.prop('class', `btn ${dupBtnDisabled ? "btn-secondary disabled" : "btn-info"}`);
+    dupBtn.prop('disabled', dupBtnDisabled);
+  });
+
+  $('#markAsReportedForm').on('submit', function (event) {
+    event.preventDefault();
+    var data = new FormData(this);
+    var url = data.get('url') || data.get('customUrl');
+    fz.api.editIssue('{{ issue_oid }}', {'reported': url}, function () { location.href = `/issues/{{ issue_oid }}`; });
+  });
+
+  $('#reportForm').on('submit', function (event) {
+    event.preventDefault();
+    fz.api.reportIssue('{{ issue_oid }}', Array.from(new FormData(this)).reduce((obj, [k, v]) => ({...obj, [k]: v}), {}), function () { location.href = `/issues/{{ issue_oid }}`; });
+  });
+});
+</script>
+{% block report_head %}
+{% end report_head %}
+{% end head %}
+
+
+{% block nav %}
+  <li class="nav-item">
+    <a class="nav-link disabled" id="chevron-tab" aria-selected="false"><i class="material-icons-outlined md-18 align-text-top">chevron_right</i></a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link active" id="report-tab" role="tab" aria-controls="report" aria-selected="true">Report</a>
+  </li>
+{% end nav %}
+
+{% block body %}
+  <!-- report summary starts -->
+  <td width="100%" style="padding: 0px">
+    <div class="detailed-card container-fluid border-light mb-3 mt-1 pl-2 bg-warning rounded-0 pr-0">
+      <div class="bg-white ml-1">
+        <div class="row">
+          <h5 class="col-12 col-md-12">
+            <i class="material-icons-outlined md-10 align-text-bottom text-warning">send</i>
+            <span class="text-warning font-weight-bold" data-toggle="tool-tip" title="{{ title }}">Report issue to {{ tracker_name }}</span>
+          </h5>
+          <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="sut">
+            <i class="material-icons-outlined md-14 align-text-center">priority_high</i> <a href="/issue/{{ issue_oid }}" class="sut-id">{{ title }}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </td>
+  <!-- report summary ends -->
+
+  <div class="bg-white col-12 col-md-12 text-truncate text-secondary">
+
+    <!-- mark as reported form starts -->
+    <form id="markAsReportedForm" class="list-group col-12 mt-3 mb-3">
+      {% for issue in duplicates %}
+      <input type="radio" name="url" value="{{ issue['url'] }}" id="{{ issue['id'] }}" />
+      <label class="col-12 list-group-item text-truncate" for="{{ issue['id'] }}"><a target="_blank" href="{{ issue['url'] }}">#{{ issue['id'] }}</a> {{ issue['title'] }}</label>
+      {% end %}
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <div class="input-group-text">
+            <input type="radio" name="url" value="" id="customUrl"><label for="customUrl"></label>
+          </div>
+        </div>
+        <input type="text" name="customUrl" class="form-control border-left-0" placeholder="Paste the issue URL here ..." onfocus="$('#customUrl').click()">
+      </div>
+      <div class="form-group col-sm-2 col-xs-12">
+        <button type="submit" id="markAsReportedBtn" formnovalidate disabled class="btn btn-secondary disabled">Mark as reported</button>
+      </div>
+    </form>
+    <!-- mark as reported form ends -->
+
+    <!-- report form starts -->
+    <form id="reportForm" class="list-group col-12 mt-3 mb-3">
+      {% block settings %}
+      {% end settings %}
+
+      <div class="form-group mt-3 mb-1">
+        <label for="issueTitle">Title</label>
+        <textarea name="title" required class="form-control" id="issueTitle" rows="1">{{ title }}</textarea>
+      </div>
+      <div class="form-group">
+        <label for="issueDescription">Description</label>
+        <textarea name="body" required class="form-control" id="issueDescription" rows="20">{{ body }}></textarea>
+      </div>
+
+      <div class="form-group col-sm-2 col-xs-12">
+        <button type="submit" class="btn btn-info">Submit</button>
+      </div>
+    </form>
+    <!-- report form ends -->
+  </div>
+{% end body %}

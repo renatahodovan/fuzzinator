@@ -56,6 +56,11 @@
           <div class="col-12 col-md-12 text-nowrap text-secondary" data-toggle="tool-tip" title="count">
             <i class="material-icons-outlined md-14 align-text-center">repeat</i> <span class="count">{{ data.get('count', 1) }}</span>
           </div>
+          {% if data.get('reported') %}
+          <div class="col-12 col-md-12 text-nowrap text-secondary" data-toggle="tool-tip" title="reported">
+            <i class="material-icons-outlined md-14 align-text-center">link</i> <a target="_blank" class="reported" href="{{ data['reported'] }}">{{ data['reported'] }}</a>
+          </div>
+          {% end %}
           <div class="col-12 col-md-12 text-truncate text-secondary" data-toggle="tool-tip" title="issue">
             <i class="material-icons-outlined md-14 align-text-center">priority_high</i> <a href="/issues/{{ data.get('_id') }}" class="sut-id">{{ data.get('id', 'N/A') }}</a>
           </div>

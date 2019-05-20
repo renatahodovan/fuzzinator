@@ -11,6 +11,8 @@ from bson.json_util import default, object_hook, RELAXED_JSON_OPTIONS
 from pymongo import ASCENDING, DESCENDING
 from tornado.web import HTTPError, RequestHandler
 
+from ...config import config_get_callable
+
 
 class BaseAPIHandler(RequestHandler):
 
@@ -24,6 +26,10 @@ class BaseAPIHandler(RequestHandler):
     @property
     def _db(self):
         return self._wui.controller.db
+
+    @property
+    def _config(self):
+        return self._wui.controller.config
 
     @staticmethod
     def _dumps(dumps, obj):
@@ -118,6 +124,15 @@ class IssueAPIHandler(BaseAPIHandler):
 
         self.send_content(issue)
 
+    def post(self, issue_oid):
+        issue = self._db.find_issue_by_oid(issue_oid)
+        if issue is None:
+            raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
+
+        self._db.update_issue_by_oid(issue_oid, self.get_content())
+        self._wui.send_notification('refresh_issues')
+        self.set_status(204, reason='issue updated')  # 204 Success: No Content
+
     def delete(self, issue_oid):
         issue = self._db.find_issue_by_oid(issue_oid)
         if issue is None:
@@ -126,6 +141,22 @@ class IssueAPIHandler(BaseAPIHandler):
         self._db.remove_issue_by_oid(issue_oid)
         self._wui.send_notification('refresh_issues')
         self.set_status(204, reason='issue deleted')    # 204 Success: No Content
+
+
+class IssueReportAPIHandler(BaseAPIHandler):
+
+    def post(self, issue_oid):
+        issue = self._db.find_issue_by_oid(issue_oid)
+        if issue is None:
+            raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
+
+        tracker = config_get_callable(self._config, 'sut.' + issue['sut'], 'tracker')[0]
+        if not tracker:
+            raise HTTPError(404, reason='tracker not found')  # 404 Client Error: Not Found
+
+        self._db.update_issue_by_oid(issue_oid, {'reported': tracker.report_issue(**self.get_content())['url']})
+        self._wui.send_notification('refresh_issues')
+        self.set_status(204, reason='issue reported')  # 204 Success: No Content
 
 
 class JobsAPIHandler(BaseAPIHandler):

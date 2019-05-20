@@ -1,0 +1,49 @@
+<!--
+ Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+
+ Licensed under the BSD 3-Clause License
+ <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
+ This file may not be copied, modified, or distributed except
+ according to those terms.
+-->
+
+{% extends "report.html" %}
+
+{% block report_head %}
+<script>
+$(document).ready(function () {
+  'use strict';
+
+  var product_info = {% raw json_encode(settings) %};
+  $('#bzProduct').on('change', function (event) {
+    var product = $(this).find(':selected').val();
+    $('#componentSelect').find('option').remove();
+    for (var component of product_info[product]['components']) {
+      $('#componentSelect').append($(`<option value=${component}>${component}</option>`));
+    }
+    $('#versionSelect').find('option').remove();
+    for (var version of product_info[product]['versions']) {
+      $('#versionSelect').append($(`<option value=${version}>${version}</option>`));
+    }
+  });
+});
+</script>
+{% end report_head %}
+
+<!-- tracker settings starts -->
+{% block settings %}
+<div class="input-group">
+<select id="bzProduct" name="product" size="7" class="form-control">
+  {% for name, product in settings.items() %}
+    <option value="{{ name }}">{{ name }}</option>
+  {% end %}
+</select>
+<select name="component" size="7" id="componentSelect" class="form-control"></select>
+<select name="product_version" size="7" id="versionSelect" class="form-control"></select>
+<div>
+  <input type="text" name="blocks" placeholder="Issue blocks ..." />
+  <div><input type="text" name="extension" placeholder="Test extension ..." /></div>
+</div>
+</div>
+{% end settings %}
+<!-- tracker settings ends -->

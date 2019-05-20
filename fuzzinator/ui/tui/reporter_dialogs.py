@@ -96,7 +96,7 @@ class BugzillaReportDialog(ReportDialog):
 
         tracker = config_get_callable(config, 'sut.' + issue['sut'], 'tracker')[0]
         assert isinstance(tracker, BugzillaTracker), 'Tracker is not a Bugzilla instance.'
-        self.product_info = tracker.product_info()
+        self.product_info = tracker.settings()
         self.product = None
         products_walker = SimpleListWalker([])
         products = []

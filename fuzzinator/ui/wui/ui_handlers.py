@@ -9,6 +9,8 @@
 import logging
 import traceback
 
+from os.path import exists, join
+
 from bson.json_util import dumps, RELAXED_JSON_OPTIONS
 from markdown import markdown
 from tornado.web import RequestHandler
@@ -88,7 +90,35 @@ class IssueUIHandler(BaseUIHandler):
             self.send_error(404)
             return
         formatter = config_get_callable(self._config, 'sut.' + issue['sut'], ['wui_formatter', 'formatter'])[0] or JsonFormatter
-        self.render('issue.html', issue=issue, issue_body=formatter(issue=issue))
+        self.render('issue.html', issue=issue, issue_body=formatter(issue=issue), tracker=self._config.has_option('sut.' + issue['sut'], 'tracker'))
+
+
+class IssueReportUIHandler(BaseUIHandler):
+
+    def get(self, issue_oid):
+        issue = self._db.find_issue_by_oid(issue_oid)
+        if issue is None:
+            self.send_error(404)
+            return
+
+        tracker = config_get_callable(self._config, 'sut.' + issue['sut'], 'tracker')[0]
+        if not tracker:
+            self.send_error(404)
+            return
+
+        formatter = config_get_callable(self._config, 'sut.' + issue['sut'], ['formatter'])[0] or JsonFormatter
+        duplicates = tracker.find_issue(issue['id'])
+        tracker_name = tracker.__class__.__name__.replace('Tracker', '')
+        template = 'report-' + tracker_name.lower() + '.html'
+        template = template if exists(join(self.get_template_path(), template)) else 'report.html'
+
+        self.render(template,
+                    issue_oid=issue_oid,
+                    tracker_name=tracker_name,
+                    title=formatter(issue=issue, format='short'),
+                    body=formatter(issue=issue),
+                    duplicates=duplicates,
+                    settings=tracker.settings())
 
 
 class ConfigUIHandler(BaseUIHandler):

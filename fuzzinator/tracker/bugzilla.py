@@ -33,7 +33,7 @@ class BugzillaTracker(BaseTracker):
                                                          include_fields=['id', 'summary', 'weburl']))
         return [{'id': issue.bug_id, 'title': issue.summary, 'url': issue.weburl} for issue in issues]
 
-    def report_issue(self, title, body, product, product_version, component, blocks, test, extension='txt'):
+    def report_issue(self, title, body, product, product_version, component, blocks, test=None, extension='txt'):
         create_info = self.bzapi.build_createbug(summary=title,
                                                  description=body,
                                                  product=product,
@@ -42,14 +42,15 @@ class BugzillaTracker(BaseTracker):
                                                  blocks=blocks)
 
         bug = self.bzapi.createbug(create_info)
-        with BytesIO(test) as f:
-            self.bzapi.attachfile(idlist=bug.bug_id, attachfile=f, description='Test', is_patch=False, file_name='test.{ext}'.format(ext=extension))
+        if test:
+            with BytesIO(test) as f:
+                self.bzapi.attachfile(idlist=bug.bug_id, attachfile=f, description='Test', is_patch=False, file_name='test.{ext}'.format(ext=extension))
         return {'id': bug.bug_id, 'title': bug.summary, 'url': bug.weburl}
 
     def __call__(self, issue):
         pass
 
-    def product_info(self):
+    def settings(self):
         products = self.bzapi.getproducts(ptype='selectable')
         return {product['name']: dict(components=self.bzapi.getcomponents(product['name']),
                                       versions=[version['name'] for version in product['versions'] if version['is_active']])

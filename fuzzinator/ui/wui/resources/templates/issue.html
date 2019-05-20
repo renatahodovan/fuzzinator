@@ -46,8 +46,16 @@
           <div class="col-12 col-md-12 text-nowrap text-secondary" data-toggle="tool-tip" title="count">
             <i class="material-icons-outlined md-14 align-text-center">repeat</i> <span class="count">{{ issue.get('count', 1) }}</span>
           </div>
+          {% if issue.get('reported') %}
+          <div class="col-12 col-md-12 text-nowrap text-secondary" data-toggle="tool-tip" title="reported">
+            <i class="material-icons-outlined md-14 align-text-center">link</i> <a target="_blank" class="reported" href="{{ issue['reported'] }}">{{ issue['reported'] }}</a>
+          </div>
+          {% end %}
           <div class="col-12 col-md-12 text-secondary" data-toggle="tool-tip" title="actions">
             <div class="col-12 col-md-12"></div>
+            {% if tracker %}
+            <div class="float-right"><button type="button" class="btn btn-outline-secondary report-issue btn-sm btn-block" title="report" onclick="location.href='/issues/{{ issue['_id'] }}/report'"><i class="material-icons-outlined md-14 align-middle">send</i> Report</button></div>
+            {% end %}
             <div class="float-right"><button type="button" class="btn btn-outline-secondary delete-issue btn-sm btn-block" title="delete" onclick="fz.api.deleteIssue('{{ issue['_id'] }}'); location.href='/'"><i class="material-icons-outlined md-14 align-middle">delete</i> Delete</button></div>
             <div class="float-right"><button type="button" class="btn btn-outline-secondary validate-issue btn-sm btn-block" title="validate" onclick="fz.api.addJob('validate', '{{ issue['_id'] }}')"><i class="material-icons md-14 align-middle">replay</i> Validate</button></div>
             <div class="float-right"><button type="button" class="btn btn-outline-secondary reduce-issue btn-sm btn-block" title="reduce" onclick="fz.api.addJob('reduce', '{{ issue['_id'] }}')"><i class="material-icons-outlined md-14 align-middle">crop</i> Reduce</button></div>

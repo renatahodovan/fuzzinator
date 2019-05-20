@@ -18,13 +18,16 @@ class GitlabTracker(BaseTracker):
         self.project = gl.projects.get(gl.search('projects', project)[0]['id'])
 
     def find_issue(self, query):
-        return [issue for issue in self.project.search('issues', query) if issue['state'] == 'opened']
+        issues = [issue for issue in self.project.search('issues', query) if issue['state'] == 'opened']
+        return [{'id': issue.attributes['id'],
+                 'title': issue.attributes['description'],
+                 'url': issue.attributes['web_url']} for issue in issues]
 
     def report_issue(self, title, body):
-        return self.project.issues.create(dict(title=title, description=body))
+        new_issue = self.project.issues.create(dict(title=title, description=body))
+        return {'id': new_issue.attributes['id'],
+                'title': new_issue.attributes['description'],
+                'url': new_issue.attributes['web_url']}
 
     def __call__(self, issue):
         pass
-
-    def issue_url(self, issue):
-        return issue.attributes['web_url']

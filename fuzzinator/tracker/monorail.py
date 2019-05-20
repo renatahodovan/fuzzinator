@@ -16,6 +16,9 @@ from .base import BaseTracker
 # https://chromium.googlesource.com/infra/infra/+/master/appengine/monorail/doc/api.md
 class MonorailTracker(BaseTracker):
 
+    discovery_url = 'https://monorail-prod.appspot.com/_ah/api/discovery/v1/apis/{api}/{apiVersion}/rest'
+    weburl_template = 'https://bugs.chromium.org/p/{project_id}/issues/detail?id={ident}'
+
     def __init__(self, project_id):
         self.project_id = project_id
         credentials = GoogleCredentials.get_application_default()
@@ -23,21 +26,23 @@ class MonorailTracker(BaseTracker):
 
         http = credentials.authorize(httplib2.Http())
         self.monorail = discovery.build('monorail',
-                                        discoveryServiceUrl=('https://monorail-prod.appspot.com/_ah/api/discovery/v1/apis/{api}/{apiVersion}/rest'),
+                                        discoveryServiceUrl=(self.discovery_url),
                                         http=http,
                                         version='v1')
 
     def find_issue(self, query):
-        return self.monorail.issues().list(projectId=self.project_id, can='open', q=query).execute().get('items', [])
+        issues = self.monorail.issues().list(projectId=self.project_id, can='open', q=query).execute().get('items', [])
+        return [{'id': issue['id'],
+                 'title': issue['summary'],
+                 'url': self.weburl_template.format(project_id=self.project_id, ident=issue['id'])} for issue in issues]
 
     def report_issue(self, title, body):
-        return self.monorail.issues().insert(projectId=self.project_id,
-                                             body=dict(summary=title,
-                                                       description=body)).execute()
+        new_issue = self.monorail.issues().insert(projectId=self.project_id,
+                                                  body=dict(summary=title,
+                                                            description=body)).execute()
+        return {'id': new_issue['id'],
+                'title': new_issue['summary'],
+                'url': self.weburl_template.format(project_id=self.project_id, ident=new_issue['id'])}
 
     def __call__(self, issue):
         pass
-
-    def issue_url(self, issue):
-        return 'https://bugs.chromium.org/p/{project_id}/issues/detail?id={ident}'.format(project_id=self.project_id,
-                                                                                          ident=issue['id'])

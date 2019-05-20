@@ -27,10 +27,11 @@ class BugzillaTracker(BaseTracker):
             os.remove(self.bzapi.cookiefile)
 
     def find_issue(self, query):
-        return self.bzapi.query(self.bzapi.build_query(product=self.product,
-                                                       status=['NEW', 'REOPENED', 'ASSIGNED'],
-                                                       short_desc=query,
-                                                       include_fields=['id', 'summary', 'weburl']))
+        issues = self.bzapi.query(self.bzapi.build_query(product=self.product,
+                                                         status=['NEW', 'REOPENED', 'ASSIGNED'],
+                                                         short_desc=query,
+                                                         include_fields=['id', 'summary', 'weburl']))
+        return [{'id': issue.bug_id, 'title': issue.summary, 'url': issue.weburl} for issue in issues]
 
     def report_issue(self, title, body, product, product_version, component, blocks, test, extension='txt'):
         create_info = self.bzapi.build_createbug(summary=title,
@@ -43,13 +44,10 @@ class BugzillaTracker(BaseTracker):
         bug = self.bzapi.createbug(create_info)
         with BytesIO(test) as f:
             self.bzapi.attachfile(idlist=bug.bug_id, attachfile=f, description='Test', is_patch=False, file_name='test.{ext}'.format(ext=extension))
-        return bug
+        return {'id': bug.bug_id, 'title': bug.summary, 'url': bug.weburl}
 
     def __call__(self, issue):
         pass
-
-    def issue_url(self, issue):
-        return issue.weburl
 
     def product_info(self):
         products = self.bzapi.getproducts(ptype='selectable')

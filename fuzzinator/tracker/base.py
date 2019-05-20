@@ -28,6 +28,3 @@ class BaseTracker(metaclass=Multiton):
 
     def report_issue(self, **kwargs):
         pass
-
-    def issue_url(self, issue):
-        return ''

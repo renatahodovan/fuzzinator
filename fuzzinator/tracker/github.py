@@ -27,13 +27,12 @@ class GithubTracker(BaseTracker):
         self.project = self.ghapi.get_repo(repository)
 
     def find_issue(self, query):
-        return list(self.ghapi.search_issues('+'.join(query.split()), state='open', org=self.org, repo=self.repository))
+        issues = list(self.ghapi.search_issues('+'.join(query.split()), state='open', org=self.org, repo=self.repository))
+        return [{'id': issue.number, 'title': issue.title, 'url': issue.html_url} for issue in issues]
 
     def report_issue(self, title, body):
-        return self.project.create_issue(title=title, body=body)
+        new_issue = self.project.create_issue(title=title, body=body)
+        return {'id': new_issue.number, 'title': new_issue.title, 'url': new_issue.html_url}
 
     def __call__(self, issue):
         pass
-
-    def issue_url(self, issue):
-        return issue.html_url

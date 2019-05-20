@@ -52,8 +52,8 @@ class ReportDialog(PopUpTarget):
     def find_duplicates(self):
         dups_walker = SimpleListWalker([self.edit_dups])
         options = []
-        for entry in self.tracker.find_issue(self.issue_title.get_text()[0]):
-            radio_btn = RadioButton(options, self.tracker.issue_url(entry), on_state_change=self.set_duplicate)
+        for issue in self.tracker.find_issue(self.issue_title.get_text()[0]):
+            radio_btn = RadioButton(options, issue['url'], on_state_change=self.set_duplicate)
             # Select the first suggested bug if there is not set any.
             if self.duplicate is None:
                 self.duplicate = radio_btn.label
@@ -66,10 +66,9 @@ class ReportDialog(PopUpTarget):
         return dict()
 
     def send_report(self):
-        url = self.tracker.issue_url(self.tracker.report_issue(**self.get_report_data()))
-        self.result.set_text(('dialog_secondary', 'Reported at: {weburl}'.format(weburl=url)))
-        self.db.update_issue_by_oid(self.issue['_id'], {'reported': url})
-        return url
+        issue_url = self.tracker.report_issue(**self.get_report_data())['url']
+        self.result.set_text(('dialog_secondary', 'Reported at: {url}'.format(url=issue_url)))
+        self.db.update_issue_by_oid(self.issue['_id'], {'reported': issue_url})
 
     def save_reported(self):
         if self.edit_dups.text:

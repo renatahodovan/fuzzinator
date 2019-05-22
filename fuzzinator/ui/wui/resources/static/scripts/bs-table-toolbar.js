@@ -24,7 +24,7 @@
     if (this.options.showRefresh) {
       $("[aria-label='refresh']").removeClass('btn-sm');
       var refresh = $("[aria-label='refresh']>i");
-      refresh.attr('class', 'material-icons align-text-top');
+      refresh.attr('class', 'material-icons-outlined');
       refresh.html('cached');
     }
 
@@ -32,8 +32,8 @@
     var btnGroup = that.$toolbar.find('>.btn-group');
     var button = btnGroup.find('button[name=sort]');
     if (!button.length) {
-      var btn = `<button class="btn btn-${that.options.buttonsClass} aria-label="sort type" title="Sort" data-toggle="dropdown" type="button">` +
-                `  <i class='material-icons'>unfold_more</i>` +
+      var btn = `<button class="btn btn-${that.options.buttonsClass}" aria-label="sort type" title="Sort" data-toggle="dropdown" type="button">` +
+                `  <i class='material-icons-outlined'>unfold_more</i>` +
                 `</button>`;
 
       var dropBtnGroup = $(`<div class='sort btn-group'>` +
@@ -43,7 +43,7 @@
 
       for (var col of that.options.columns[0]) {
         var htmlItem = `<button class='dropdown-item'>` +
-                       `  <i class='material-icons align-text-top'></i>` +
+                       `  <i class='material-icons-outlined'></i>` +
                        `  ${col.field}` +
                        `</button>`;
 

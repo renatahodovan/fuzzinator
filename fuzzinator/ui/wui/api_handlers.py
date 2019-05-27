@@ -7,6 +7,8 @@
 
 import json
 
+import xson
+
 from bson.json_util import default, object_hook, RELAXED_JSON_OPTIONS
 from pymongo import ASCENDING, DESCENDING
 from tornado.web import HTTPError, RequestHandler
@@ -51,10 +53,14 @@ class BaseAPIHandler(RequestHandler):
 
     dumps = {
         'application/json': lambda obj: BaseAPIHandler._dumps(json.dumps, obj),
+        'application/xml': lambda obj: BaseAPIHandler._dumps(xson.dumps, obj),
+        'text/xml': lambda obj: BaseAPIHandler._dumps(xson.dumps, obj),
     }
 
     loads = {
         'application/json': lambda s: BaseAPIHandler._loads(json.loads, s),
+        'application/xml': lambda s: BaseAPIHandler._loads(xson.loads, s),
+        'text/xml': lambda s: BaseAPIHandler._loads(xson.loads, s),
     }
 
     def get_pagination_query(self, columns):

@@ -36,9 +36,8 @@ class MainWindow(PopUpLauncher):
         self.db = controller.db
 
         self.logo = FuzzerLogo(max_load=controller.capacity)
-        self.issues_table = IssuesTable(db=self.db, initial_sort='sut')
-        fuzzer_suts = {(fuzzer, data['sut']) for fuzzer, data in self.controller.fuzzers.items()}
-        self.stat_table = StatTable(['fuzzer'], stat_baseline={fuzzer_sut: stat for fuzzer_sut, stat in self.db.get_stats().items() if fuzzer_sut in fuzzer_suts}, db=self.db)
+        self.issues_table = IssuesTable(session_start=self.controller.session_start, db=self.db, initial_sort='sut')
+        self.stat_table = StatTable(['fuzzer'], session_start=self.controller.session_start, session_baseline=self.controller.session_baseline, db=self.db)
         self.job_table = JobsTable()
 
         self.data_tables = Pile([
@@ -215,7 +214,8 @@ class IssuesTable(Table):
         TableColumn('id', width=('weight', 3), label='Issue ID')
     ]
 
-    def __init__(self, db, *args, **kwargs):
+    def __init__(self, session_start, db, *args, **kwargs):
+        self.session_start = session_start
         self.db = db
         super().__init__(*args, **kwargs)
 
@@ -256,7 +256,7 @@ class IssuesTable(Table):
 
     def update(self, show_all):
         self.all_issues = show_all
-        self.query_data = self.db.get_issues(include_invalid=self.show_invalid, show_all=self.all_issues)
+        self.query_data = self.db.get_issues(include_invalid=self.show_invalid, session_start=None if self.all_issues else self.session_start)
         self.requery(self.query_data)
         self.walker._modified()
 
@@ -297,9 +297,10 @@ class StatTable(Table):
     query_data = []
     title = 'STATISTICS'
 
-    def __init__(self, key_columns, stat_baseline, db, *args, **kwargs):
+    def __init__(self, key_columns, session_start, session_baseline, db, *args, **kwargs):
         self.key_columns = key_columns
-        self.stat_baseline = stat_baseline
+        self.session_start = session_start
+        self.session_baseline = session_baseline
         self.db = db
         self.show_current = True
         super().__init__(*args, **kwargs)
@@ -318,11 +319,7 @@ class StatTable(Table):
 
     def show_less(self):
         self.show_current = True
-        snapshot = self.db.get_stats(show_all=False)
-        self.query_data = [dict(fuzzer=fuzzer,
-                                exec=snapshot[(fuzzer, sut)]['exec'] - self.stat_baseline[(fuzzer, sut)]['exec'],
-                                issues=snapshot[(fuzzer, sut)]['issues'] - self.stat_baseline[(fuzzer, sut)]['issues'],
-                                unique=snapshot[(fuzzer, sut)]['unique']) for fuzzer, sut in self.stat_baseline]
+        self.query_data = list(self.db.get_stats(session_start=self.session_start, session_baseline=self.session_baseline).values())
         self.requery(self.query_data)
         self.walker._modified()
 

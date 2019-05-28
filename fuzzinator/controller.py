@@ -203,6 +203,8 @@ class Controller(object):
 
         self.db = MongoDriver(config_get_with_writeback(self.config, 'fuzzinator', 'db_uri', 'mongodb://localhost/fuzzinator'))
         self.db.init_db(self.fuzzers)
+        self.session_start = time.time()
+        self.session_baseline = self.db.get_stats()
 
         self.listener = ListenerManager()
         for name in config_get_kwargs(self.config, 'listeners'):

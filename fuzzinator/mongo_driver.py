@@ -6,8 +6,6 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import time
-
 from datetime import datetime
 
 from bson.objectid import ObjectId
@@ -18,7 +16,6 @@ class MongoDriver(object):
 
     def __init__(self, uri):
         self.uri = uri
-        self.session_start = time.time()
 
     @property
     def _db(self):
@@ -78,10 +75,10 @@ class MongoDriver(object):
         # different from the value stored in `now` (on nanosecond level).
         return issue['first_seen'] == issue['last_seen']
 
-    def get_issues(self, filter=None, skip=0, limit=0, sort=None, include_invalid=True, show_all=True, detailed=False):
+    def get_issues(self, filter=None, skip=0, limit=0, sort=None, include_invalid=True, session_start=None, detailed=False):
         filter = filter or {}
-        if not show_all:
-            filter['first_seen'] = {'$gte': self.session_start}
+        if session_start:
+            filter['first_seen'] = {'$gte': session_start}
         if not include_invalid:
             filter['invalid'] = {'$exists': False}
 
@@ -133,7 +130,7 @@ class MongoDriver(object):
     def find_config_by_id(self, id):
         return self._db.fuzzinator_configs.find_one({'subconfig': id})
 
-    def get_stats(self, filter=None, skip=0, limit=0, sort=None, show_all=True, detailed=False):
+    def get_stats(self, filter=None, skip=0, limit=0, sort=None, session_start=None, session_baseline=None, detailed=False):
         aggregator = [
             # Get an empty document
             {'$limit': 1},  # Note: this works only if fuzzinator_stats has at least one element.
@@ -143,8 +140,8 @@ class MongoDriver(object):
             # Get unique crash counts from the issues (exec and crash counts are set to 0).
             {'$lookup': {
                 'from': 'fuzzinator_issues',
-                'pipeline': ([] if show_all else [
-                    {'$match': {'first_seen': {'$gte': self.session_start}}}
+                'pipeline': ([] if not session_start else [
+                    {'$match': {'first_seen': {'$gte': session_start}}}
                 ]) + [
                     {'$group': {
                         '_id': {'sut': '$sut', 'fuzzer': '$fuzzer', 'subconfig': '$subconfig'},
@@ -163,9 +160,28 @@ class MongoDriver(object):
                 ],
                 'as': 'fuzzinator_stats',
             }},
+        ] + ([] if not session_baseline else [
+            # Get session baseline counts to be subtracted, if baseline is provided.
+            {'$lookup': {
+                'from': 'fuzzinator_stats',
+                'pipeline': [
+                    # Get an empty document
+                    {'$limit': 1},  # Note: this works only if fuzzinator_stats has at least one element.
+                    {'$project': {'_id': 1}},
+                    {'$project': {'_id': 0}},
 
-            # Union the two results.
-            {'$project': {'union': {'$concatArrays': ['$fuzzinator_issues', '$fuzzinator_stats']}}},
+                    # Add all baseline records as separate documents
+                    {'$addFields': {'session_baseline': [{'sut': results['sut'], 'fuzzer': results['fuzzer'], 'subconfig': subconfig['subconfig'],
+                                                          'exec': -subconfig['exec'], 'issues': -subconfig['issues']}
+                                                         for results in session_baseline.values() for subconfig in results['subconfigs']]}},
+                    {'$unwind': '$session_baseline'},
+                    {'$replaceRoot': {'newRoot': '$session_baseline'}},
+                ],
+                'as': 'session_baseline',
+            }},
+        ]) + [
+            # Union the results.
+            {'$project': {'union': {'$concatArrays': ['$fuzzinator_issues', '$fuzzinator_stats'] + ([] if not session_baseline else ['$session_baseline'])}}},
             {'$unwind': '$union'},
             {'$replaceRoot': {'newRoot': '$union'}},
 

@@ -42,6 +42,17 @@
       cookieExpire: '1d',
       cookieIdTable: options.cookieIdTable,
 
+      showAll: options.showAll,
+      includeInvalid: options.includeInvalid,
+
+      queryParams: function (params) {
+        if ('includeInvalid' in this) {
+            params.includeInvalid = this.includeInvalid;
+        }
+        params.showAll = this.showAll;
+        return params;
+      },
+
       ajax: function (params) {
         options.getRows(
           params.data,

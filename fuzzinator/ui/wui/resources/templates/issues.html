@@ -24,6 +24,10 @@
 <script src="/static/scripts/toolbar.js" type="text/javascript"></script>
 {% end head %}
 
+{% block filter %}
+<a class="dropdown-item text-secondary include-invalid"><i class="material-icons md-18 align-text-bottom invisible">check</i> <i class="material-icons md-18 align-text-bottom">priority_high</i> Valid issues only</a>
+{% end filter %}
+
 {% block sort %}
 <a class="dropdown-item text-secondary sort-name" data-value="id"><i class="material-icons md-18 align-text-bottom invisible">check</i> <i class="material-icons md-18 align-text-bottom">priority_high</i> Issue</a>
 <a class="dropdown-item text-secondary sort-name" data-value="sut"><i class="material-icons md-18 align-text-bottom invisible">check</i> <i class="material-icons md-18 align-text-bottom">my_location</i> SUT</a>

@@ -17,6 +17,15 @@
     <input id="table-search" type="text" class="form-control" placeholder="Search" aria-label="Search">
     <div class="input-group-append">
       <div class="dropdown">
+        <button id="filter-button" type="button" class="btn btn-outline-secondary dropdown-toggle" style="border-radius: 0;" title="Filter" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons align-middle">filter_list</i></button>
+        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="filter-button">
+          {% block filter %}
+          {% end filter %}
+          <a class="dropdown-item text-secondary show-all"><i class="material-icons md-18 align-text-bottom invisible">check</i> <i class="material-icons md-18 align-text-bottom">date_range</i> Current session only</a>
+        </div>
+      </div>
+
+      <div class="dropdown">
         <button id="sort-button" type="button" class="btn btn-outline-secondary dropdown-toggle" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" title="Sort" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons align-middle">sort</i></button>
         <div class="dropdown-menu dropdown-menu-right sort-menu" aria-labelledby="sort-button">
           {% block sort %}

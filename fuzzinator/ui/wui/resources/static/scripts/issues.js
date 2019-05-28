@@ -39,16 +39,19 @@ $(document).ready(function () {
     return $(issueRow)[0].outerHTML;
   }
 
-  $('#issue-table').bootstrapTable(fz.utils.bstOptions({
+  var options = fz.utils.bstOptions({
     columnNames: ['sut', 'fuzzer', 'id', 'first_seen', 'last_seen', 'count', 'reduced', 'reported'],
     formatter: issueRowFormatter,
     sortName: 'first_seen',
     sortOrder: 'desc',
     cookieIdTable: 'issueTableCookie',
-    getRows: fz.api.getIssues
-  }));
+    getRows: fz.api.getIssues,
+    showAll: true,
+    includeInvalid: false,
+  });
+  var bst = $('#issue-table').bootstrapTable(options).data()['bootstrap.table'];
 
   fz.notifications.onmessage['refresh_issues'] = function () {
-    $('#issue-table').bootstrapTable('refresh', { silent: true });
+    bst.refresh({ silent: true });
   };
 });

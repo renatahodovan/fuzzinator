@@ -70,6 +70,7 @@ class BaseAPIHandler(RequestHandler):
         offset = self.get_query_argument('offset', None)
         limit = self.get_query_argument('limit', None)
         detailed = self.get_query_argument('detailed', None)
+        show_all = self.get_query_argument('showAll', None) in ('true', 'True', '1')
 
         return dict(
             filter={'$or': [{c: {'$regex': search, '$options': 'i'}} for c in columns]} if search else None,
@@ -77,6 +78,7 @@ class BaseAPIHandler(RequestHandler):
             limit=int(limit) if limit else 10,  # unconditional to ensure that the query is always limited
             sort={sort: {'asc': ASCENDING, 'desc': DESCENDING}[order]} if sort and order else None,
             detailed=detailed in ('true', 'True', '1') if detailed else True,
+            session_start=None if show_all else self._controller.session_start,
         )
 
     def get_content(self):
@@ -117,8 +119,9 @@ class IssuesAPIHandler(BaseAPIHandler):
 
     def get(self):
         query = self.get_pagination_query(['fuzzer', 'sut', 'id'])
+        query['include_invalid'] = self.get_query_argument('includeInvalid', None) in ('true', 'True', '1')
         self.send_content(self._db.get_issues(**query),
-                          total=len(self._db.get_issues(query['filter'])))
+                          total=len(self._db.get_issues(query['filter'], session_start=query['session_start'], include_invalid=query['include_invalid'])))
 
 
 class IssueAPIHandler(BaseAPIHandler):
@@ -214,8 +217,9 @@ class StatsAPIHandler(BaseAPIHandler):
 
     def get(self):
         query = self.get_pagination_query(['fuzzer', 'sut'])
+        query['session_baseline'] = self._controller.session_baseline if query['session_start'] else None
         self.send_content(self._db.get_stats(**query),
-                          total=len(self._db.get_stats(query['filter'])))
+                          total=len(self._db.get_stats(query['filter'], session_start=query['session_start'], session_baseline=query['session_baseline'])))
 
 
 class NotFoundAPIHandler(RequestHandler):

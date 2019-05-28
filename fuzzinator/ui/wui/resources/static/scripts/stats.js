@@ -40,17 +40,19 @@ $(document).ready(function () {
     return mainDiv.outerHTML;
   }
 
-  $('#stat-table').bootstrapTable(fz.utils.bstOptions({
+
+  var bst = $('#stat-table').bootstrapTable(fz.utils.bstOptions({
     columnNames: ['fuzzer', 'exec', 'issues', 'unique', 'sut'],
     formatter: statRowFormatter,
     detailFormatter: statRowDetailFormatter,
     sortName: 'exec',
     sortOrder: 'desc',
     cookieIdTable: 'statTableCookie',
-    getRows: fz.api.getStats
-  }));
+    getRows: fz.api.getStats,
+    showAll: true,
+  })).data()['bootstrap.table'];
 
   fz.notifications.onmessage['refresh_stats'] = function () {
-    $('#stat-table').bootstrapTable('refresh', { silent: true });
+    bst.refresh({ silent: true });
   };
 });

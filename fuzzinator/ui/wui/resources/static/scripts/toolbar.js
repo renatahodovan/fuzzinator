@@ -12,6 +12,34 @@
 
   var BootstrapTable = $.fn.bootstrapTable.Constructor;
   var _initServer = BootstrapTable.prototype.initServer;
+  var _initCookie = BootstrapTable.prototype.initCookie;
+  var _init = BootstrapTable.prototype.init;
+
+  $.merge($.fn.bootstrapTable.defaults.cookiesEnabled, ['bs.table.includeInvalid', 'bs.table.showAll']);
+
+  BootstrapTable.prototype.initCookie = function () {
+    _initCookie.apply(this, Array.prototype.slice.apply(arguments));
+
+    if ('includeInvalid' in this.options) {
+        var includeInvalidCookie = $.fn.bootstrapTable.utils.getCookie(this, this.options.cookieIdTable, 'bs.table.includeInvalid');
+        this.options.includeInvalid = includeInvalidCookie !== null ? includeInvalidCookie == 'true' : this.options.includeInvalid;
+    }
+
+    var showAllCookie = $.fn.bootstrapTable.utils.getCookie(this, this.options.cookieIdTable, 'bs.table.showAll');
+    this.options.showAll = showAllCookie !== null ? showAllCookie == 'true' : this.options.showAll;
+  };
+
+  BootstrapTable.prototype.init = function () {
+    _init.apply(this, Array.prototype.slice.apply(arguments));
+
+    if ('includeInvalid' in this.options && !this.options.includeInvalid) {
+      $('.include-invalid i').first().removeClass('invisible');
+    }
+
+    if (!this.options.showAll) {
+      $('.show-all i').first().removeClass('invisible');
+    }
+  };
 
   BootstrapTable.prototype.initServer = function () {
     _initServer.apply(this, Array.prototype.slice.apply(arguments));
@@ -70,5 +98,27 @@ $(document).ready(function () {
   $('.sort-menu .sort-order').off('click').on('click', function (event) {
     bst.options.sortOrder = $(event.currentTarget).data('value');
     bst.onSort();
+  });
+
+  $('.show-all').off('click').on('click', function (event) {
+    bst.options.showAll = !bst.options.showAll;
+    $.fn.bootstrapTable.utils.setCookie(bst, 'bs.table.showAll', bst.options.showAll);
+    bst.refresh({ silent: true });
+    if (!bst.options.showAll) {
+      $(event.currentTarget).children('i').first().removeClass('invisible');
+    } else {
+      $(event.currentTarget).children('i').first().addClass('invisible');
+    }
+  });
+
+  $('.include-invalid').off('click').on('click', function (event) {
+    bst.options.includeInvalid = !bst.options.includeInvalid;
+    $.fn.bootstrapTable.utils.setCookie(bst, 'bs.table.includeInvalid', bst.options.includeInvalid);
+    bst.refresh({ silent: true });
+    if (!bst.options.includeInvalid) {
+      $(event.currentTarget).children('i').first().removeClass('invisible');
+    } else {
+      $(event.currentTarget).children('i').first().addClass('invisible');
+    }
   });
 });

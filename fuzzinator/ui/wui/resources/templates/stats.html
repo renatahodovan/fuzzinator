@@ -10,7 +10,7 @@
  according to those terms.
 -->
 
-{% extends "base.html" %}
+{% extends "toolbar.html" %}
 
 {% block head %}
 <!-- Bootstrap-table CSS -->
@@ -19,11 +19,19 @@
 <script src="/static/assets/bootstrap-table/bootstrap-table.min.js" type="text/javascript"></script>
 <script src="/static/assets/bootstrap-table/extensions/cookie/bootstrap-table-cookie.min.js" type="text/javascript"></script>
 <!-- Custom Fuzzinator scripts -->
-<script src="/static/scripts/bs-table-toolbar.js" type="text/javascript"></script>
 <script src="/static/scripts/bs-table-details.js" type="text/javascript"></script>
 <script src="/static/scripts/fz-utils.js" type="text/javascript"></script>
 <script src="/static/scripts/stats.js" type="text/javascript"></script>
+<script src="/static/scripts/toolbar.js" type="text/javascript"></script>
 {% end head %}
+
+{% block sort %}
+<a class="dropdown-item text-secondary sort-name" data-value="fuzzer"><i class="material-icons md-18 align-text-bottom invisible">check</i> <i class="material-icons md-18 align-text-bottom">shuffle</i> Fuzzer</a>
+<a class="dropdown-item text-secondary sort-name" data-value="sut"><i class="material-icons md-18 align-text-bottom invisible">check</i> <i class="material-icons md-18 align-text-bottom">my_location</i> SUT</a>
+<a class="dropdown-item text-secondary sort-name" data-value="exec"><i class="material-icons md-18 align-text-bottom invisible">check</i> <i class="material-icons md-18 align-text-bottom">repeat</i> Executed</a>
+<a class="dropdown-item text-secondary sort-name" data-value="issues"><i class="material-icons md-18 align-text-bottom invisible">check</i> <i class="material-icons md-18 align-text-bottom">error_outline</i> Issues</a>
+<a class="dropdown-item text-secondary sort-name" data-value="unique"><i class="material-icons md-18 align-text-bottom invisible">check</i> <i class="material-icons md-18 align-text-bottom">priority_high</i> Unique issues</a>
+{% end sort %}
 
 {% block body %}
 

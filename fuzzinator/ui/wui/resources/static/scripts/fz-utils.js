@@ -23,11 +23,9 @@
 
     return {
       columns: columns,
-      search: true,
       pagination: true,
       sidePagination: 'server',
       undefinedText: 'N/A',
-      showRefresh: true,
       showHeader: false,
       filterControl: true,
       rememberOrder: true,

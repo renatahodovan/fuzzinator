@@ -12,11 +12,11 @@ body {
   padding-top: 5rem;
 }
 
-.material-icons.md-18 { font-size: 18px; }
 .material-icons.md-14 { font-size: 14px; }
+.material-icons.md-18 { font-size: 18px; }
 
-.material-icons-outlined.md-18 { font-size: 18px; }
 .material-icons-outlined.md-14 { font-size: 14px; }
+.material-icons-outlined.md-18 { font-size: 18px; }
 
 /* fireworks animation for the new issue found event */
 @keyframes fz-fireworks {
@@ -37,6 +37,7 @@ body {
   mask-size: contain;
   animation: 1s fz-fireworks 1 linear;
 }
+
 .fz-motto {
   font-family: Courier, monospace;
   font-weight: bold;
@@ -78,14 +79,6 @@ body {
 
 .progress-bar {
   background-color: var(--info);
-}
-
-thead {
-  border-color: white;
-}
-
-thead .sorting {
-  background-image: none;
 }
 
 .card.stat {
@@ -135,14 +128,6 @@ thead .sorting {
 .dropdown-item {
   cursor: pointer;
   color: var(--secondary) !important;
-}
-
-.dropdown-item.desc i::after {
-  content: "expand_less";
-}
-
-.dropdown-item.asc i::after {
-  content: "expand_more";
 }
 
 /* extras to have "more_vert" (three vertical dots) instead of < (left triangle) as dropleft indicator */

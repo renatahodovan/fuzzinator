@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<!--
+ Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+
+ Licensed under the BSD 3-Clause License
+ <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
+ This file may not be copied, modified, or distributed except
+ according to those terms.
+-->
+
+{% extends "base.html" %}
+
+{% block toolbar %}
+<div class="btn-toolbar d-flex mb-3" role="toolbar" aria-label="Toolbar">
+  <div class="flex-grow-1 input-group">
+    <input id="table-search" type="text" class="form-control" placeholder="Search" aria-label="Search">
+    <div class="input-group-append">
+      <div class="dropdown">
+        <button id="sort-button" type="button" class="btn btn-outline-secondary dropdown-toggle" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" title="Sort" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons align-middle">sort</i></button>
+        <div class="dropdown-menu dropdown-menu-right sort-menu" aria-labelledby="sort-button">
+          {% block sort %}
+          {% end sort %}
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item text-secondary sort-order" data-value="asc"><i class="material-icons md-18 align-text-bottom invisible">check</i> <i class="material-icons md-18 align-text-bottom">arrow_upward</i> Ascending</a>
+          <a class="dropdown-item text-secondary sort-order" data-value="desc"><i class="material-icons md-18 align-text-bottom invisible">check</i> <i class="material-icons md-18 align-text-bottom">arrow_downward</i> Descending</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% end toolbar %}

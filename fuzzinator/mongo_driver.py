@@ -173,7 +173,7 @@ class MongoDriver(object):
                     # Add all baseline records as separate documents
                     {'$addFields': {'session_baseline': [{'sut': results['sut'], 'fuzzer': results['fuzzer'], 'subconfig': subconfig['subconfig'],
                                                           'exec': -subconfig['exec'], 'issues': -subconfig['issues']}
-                                                         for results in session_baseline.values() for subconfig in results['subconfigs']]}},
+                                                         for results in session_baseline for subconfig in results['subconfigs']]}},
                     {'$unwind': '$session_baseline'},
                     {'$replaceRoot': {'newRoot': '$session_baseline'}},
                 ],
@@ -222,15 +222,7 @@ class MongoDriver(object):
         if limit:
             aggregator.append({'$limit': limit})
 
-        result = dict()
-        for document in self._db.fuzzinator_stats.aggregate(aggregator):
-            result[(document['fuzzer'], document['sut'])] = dict(fuzzer=document['fuzzer'],
-                                                                 sut=document['sut'],
-                                                                 exec=document['exec'],
-                                                                 issues=document['issues'],
-                                                                 unique=document['unique'],
-                                                                 subconfigs=document['subconfigs'])
-        return result
+        return list(self._db.fuzzinator_stats.aggregate(aggregator))
 
     def update_stat(self, sut, fuzzer, subconfig, batch, issues):
         self._db.fuzzinator_stats.find_one_and_update({'sut': sut, 'fuzzer': fuzzer, 'subconfig': subconfig},

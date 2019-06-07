@@ -214,7 +214,7 @@ class StatsAPIHandler(BaseAPIHandler):
 
     def get(self):
         query = self.get_pagination_query(['fuzzer', 'sut'])
-        self.send_content(list(self._db.get_stats(**query).values()),
+        self.send_content(self._db.get_stats(**query),
                           total=len(self._db.get_stats(query['filter'])))
 
 

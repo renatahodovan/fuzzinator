@@ -313,13 +313,13 @@ class StatTable(Table):
 
     def show_all(self):
         self.show_current = False
-        self.query_data = list(self.db.get_stats().values())
+        self.query_data = self.db.get_stats()
         self.requery(self.query_data)
         self.walker._modified()
 
     def show_less(self):
         self.show_current = True
-        self.query_data = list(self.db.get_stats(session_start=self.session_start, session_baseline=self.session_baseline).values())
+        self.query_data = self.db.get_stats(session_start=self.session_start, session_baseline=self.session_baseline)
         self.requery(self.query_data)
         self.walker._modified()
 

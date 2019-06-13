@@ -143,6 +143,7 @@ class MongoDriver(object):
                 'pipeline': ([] if not session_start else [
                     {'$match': {'first_seen': {'$gte': session_start}}}
                 ]) + [
+                    {'$addFields': {'subconfig': {'$ifNull': ['$subconfig.subconfig', None]}}},
                     {'$group': {
                         '_id': {'sut': '$sut', 'fuzzer': '$fuzzer', 'subconfig': '$subconfig'},
                         'sut': {'$first': '$sut'}, 'fuzzer': {'$first': '$fuzzer'}, 'subconfig': {'$first': '$subconfig'},
@@ -156,7 +157,7 @@ class MongoDriver(object):
             {'$lookup': {
                 'from': 'fuzzinator_stats',
                 'pipeline': [
-                    {'$addFields': {'subconfig': '$subconfig'}},
+                    {'$addFields': {'subconfig': {'$ifNull': ['$subconfig', None]}}},
                 ],
                 'as': 'fuzzinator_stats',
             }},

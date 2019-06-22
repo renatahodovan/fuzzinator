@@ -107,7 +107,7 @@ class MongoDriver(object):
                 {'$project': {'fuzzinator_configs': 0}},
             ])
         else:
-            aggregator.append({'$project': {'id': 1, 'sut': 1, 'fuzzer': 1, 'subconfig': 1, 'first_seen': 1, 'last_seen': 1, 'count': 1, 'invalid': 1, 'reduced': {'$ifNull': [True, None]}, 'reported': 1}})
+            aggregator.append({'$project': {'id': 1, 'sut': 1, 'fuzzer': 1, 'subconfig': 1, 'first_seen': 1, 'last_seen': 1, 'count': 1, 'invalid': 1, 'reduced': {'$cond': {'if': {'$ne': ['$reduced', None]}, 'then': True, 'else': None}}, 'reported': 1}})
 
         return list(self._db.fuzzinator_issues.aggregate(aggregator))
 

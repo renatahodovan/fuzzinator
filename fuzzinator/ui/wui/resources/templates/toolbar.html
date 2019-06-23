@@ -37,5 +37,20 @@
       </div>
     </div>
   </div>
+
+  <div class="btn-group ml-2" role="group" aria-label="Export">
+    <div class="btn-group" role="group">
+      <button id="export-button" type="button" class="btn btn-outline-secondary dropdown-toggle" title="Export" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons-outlined md-24 align-middle">archive</i></button>
+      <div class="dropdown-menu dropdown-menu-right export" aria-labelledby="export-button">
+        <a class="dropdown-item text-secondary" data-format="json" data-target="all">Export all as JSON</a>
+        <a class="dropdown-item text-secondary" data-format="json" data-target="filtered">Export filtered as JSON</a>
+        <a class="dropdown-item text-secondary" data-format="json" data-target="page">Export page as JSON</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item text-secondary" data-format="xml" data-target="all">Export all as XML</a>
+        <a class="dropdown-item text-secondary" data-format="xml" data-target="filtered">Export filtered as XML</a>
+        <a class="dropdown-item text-secondary" data-format="xml" data-target="page">Export page as XML</a>
+      </div>
+    </div>
+  </div>
 </div>
 {% end toolbar %}

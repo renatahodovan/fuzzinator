@@ -75,7 +75,7 @@ class BaseAPIHandler(RequestHandler):
         return dict(
             filter={'$or': [{c: {'$regex': search, '$options': 'i'}} for c in columns]} if search else None,
             skip=int(offset) if offset else 0,
-            limit=int(limit) if limit else 10,  # unconditional to ensure that the query is always limited
+            limit=int(limit) if limit else None,
             sort={sort: {'asc': ASCENDING, 'desc': DESCENDING}[order]} if sort and order else None,
             detailed=detailed in ('true', 'True', '1') if detailed else True,
             session_start=None if show_all else self._controller.session_start,

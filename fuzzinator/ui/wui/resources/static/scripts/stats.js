@@ -40,8 +40,7 @@ $(document).ready(function () {
     return mainDiv.outerHTML;
   }
 
-
-  var bst = $('#stat-table').bootstrapTable(fz.utils.bstOptions({
+  var bst = $('#stats-table').bootstrapTable(fz.utils.bstOptions({
     columnNames: ['fuzzer', 'exec', 'issues', 'unique', 'sut'],
     formatter: statRowFormatter,
     detailFormatter: statRowDetailFormatter,

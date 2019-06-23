@@ -121,4 +121,27 @@ $(document).ready(function () {
       $(event.currentTarget).children('i').first().addClass('invisible');
     }
   });
+
+  $('.export .dropdown-item').on('click', function (event) {
+    var target = $(event.currentTarget).data('target');
+    var format = $(event.currentTarget).data('format');
+    var collectionName = $('.bootstrap-table .table').attr('id').replace('-table', '');
+    var href = `/api/${collectionName}?format=${format}`;
+
+    if (target == 'all') {
+      href += '&showAll=true&includeInvalid=true'
+    } else if (['filtered', 'page'].includes(target)) {
+      href += `&search=${bst.options.searchText}&showAll=${bst.options.showAll}`;
+      if ('includeInvalid' in bst.options) {
+        href += `&includeInvalid=${bst.options.includeInvalid}`;
+      }
+      if (target === 'page') {
+        var offset = (bst.options.pageNumber - 1) * bst.options.pageSize;
+        href += `&order=${bst.options.sortOrder}&sort=${bst.options.sortName}&offset=${offset}&limit=${bst.options.pageSize}`;
+      }
+    }
+    $(event.currentTarget).attr('href', href);
+    $(event.currentTarget).attr('download', `${collectionName}-${target}.${format}`);
+    return true;
+  });
 });

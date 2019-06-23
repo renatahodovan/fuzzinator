@@ -49,7 +49,7 @@ $(document).ready(function () {
     showAll: true,
     includeInvalid: false,
   });
-  var bst = $('#issue-table').bootstrapTable(options).data()['bootstrap.table'];
+  var bst = $('#issues-table').bootstrapTable(options).data()['bootstrap.table'];
 
   fz.notifications.onmessage['refresh_issues'] = function () {
     bst.refresh({ silent: true });

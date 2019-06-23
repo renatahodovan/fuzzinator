@@ -99,7 +99,7 @@ class MongoDriver(object):
                     'foreignField': 'subconfig',
                     'as': 'fuzzinator_configs',
                 }},
-                {'$unwind': {'path': '$fuzzinator_configs', 'preserveNullAndEmptyArrays': True}},
+                {'$addFields': {'fuzzinator_configs': {'$arrayElemAt': ['$fuzzinator_configs', 0]}}},
                 {'$addFields': {'subconfig.src': '$fuzzinator_configs.src'}},
                 {'$project': {'fuzzinator_configs': 0}},
             ])
@@ -201,7 +201,7 @@ class MongoDriver(object):
                 'foreignField': 'subconfig',
                 'as': 'fuzzinator_configs',
             }},
-            {'$unwind': {'path': '$fuzzinator_configs', 'preserveNullAndEmptyArrays': True}},
+            {'$addFields': {'fuzzinator_configs': {'$arrayElemAt': ['$fuzzinator_configs', 0]}}},
         ]) + [
             # Create a 2-level hierarchy of stats grouped by fuzzer and sut, detailed by config
             {'$group': {

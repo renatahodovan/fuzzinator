@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+ * Copyright (c) 2019-2020 Renata Hodovan, Akos Kiss.
  *
  * Licensed under the BSD 3-Clause License
  * <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -59,6 +59,22 @@
       url: `/api/issues/${issueOid}/report`,
       data: JSON.stringify(reportData),
       contentType: 'application/json',
+      success: success,
+      error: error,
+    });
+  };
+
+  api.addIssues = function (files, success, error) {
+    var data = new FormData();
+    for (var file of files) {
+      data.append('files', file);
+    }
+    $.ajax({
+      method: 'POST',
+      url: '/api/issues',
+      data: data,
+      contentType: false,
+      processData: false,
       success: success,
       error: error,
     });

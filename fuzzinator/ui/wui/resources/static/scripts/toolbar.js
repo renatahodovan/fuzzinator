@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+ * Copyright (c) 2019-2020 Renata Hodovan, Akos Kiss.
  *
  * Licensed under the BSD 3-Clause License
  * <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
  * This file may not be copied, modified, or distributed except
  * according to those terms.
  */
+
+/* global fz */
 
 (function ($) {
   'use strict';
@@ -120,6 +122,10 @@ $(document).ready(function () {
     } else {
       $(event.currentTarget).children('i').first().addClass('invisible');
     }
+  });
+
+  $('#import-form').submit(function () {
+    fz.api.addIssues($('#import-form').prop('files'));
   });
 
   $('.export .dropdown-item').on('click', function (event) {

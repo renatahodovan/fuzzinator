@@ -2,7 +2,7 @@
 
 <!--
  Copyright (c) 2019 Tamas Keri.
- Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+ Copyright (c) 2019-2020 Renata Hodovan, Akos Kiss.
 
  Licensed under the BSD 3-Clause License
  <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -38,6 +38,13 @@
 <a class="dropdown-item text-secondary sort-name" data-value="reduced"><i class="material-icons md-18 align-text-bottom invisible">check</i> <i class="material-icons md-18 align-text-bottom">crop</i> Reduced</a>
 <a class="dropdown-item text-secondary sort-name" data-value="reported"><i class="material-icons md-18 align-text-bottom invisible">check</i> <i class="material-icons md-18 align-text-bottom">send</i> Reported</a>
 {% end sort %}
+
+{% block import %}
+<button type="button" class="btn btn-outline-secondary" title="Import" style="position: relative;">
+  <i class="material-icons-outlined md-24 align-middle">unarchive</i>
+  <input id="import-form" type="file" name="files" accept=".json,.xml" multiple onchange="$(this).submit()" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; opacity: 0;">
+</button>
+{% end block %}
 
 {% block body %}
 

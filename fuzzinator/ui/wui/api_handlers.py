@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2019-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -81,18 +81,26 @@ class BaseAPIHandler(RequestHandler):
             session_start=None if show_all else self._controller.session_start,
         )
 
+    def load_mime(self, mime):
+        if mime in self.loads:
+            return mime
+
+        return 'application/json'
+
     def get_content(self):
-        def _mime():
-            mime = self.request.headers.get('Content-Type')
-            if mime in self.loads:
-                return mime
-
-            return 'application/json'
-
         try:
-            return self.loads[_mime()](self.request.body.decode('utf-8', errors='ignore'))
+            return self.loads[self.load_mime(self.request.headers.get('Content-Type').split(';')[0])](self.request.body.decode('utf-8', errors='ignore'))
         except ValueError:
             raise HTTPError(400, reason='malformed request body')   # 400 Client Error: Bad Request
+
+    def get_multipart_content(self):
+        if self.request.headers.get('Content-Type').split(';')[0] == 'multipart/form-data':
+            try:
+                return [self.loads[self.load_mime(file.content_type)](file.body.decode('utf-8', errors='ignore')) for file in self.request.files['files']]
+            except ValueError:
+                raise HTTPError(400, reason='malformed request body')   # 400 Client Error: Bad Request
+        else:
+            return [self.get_content()]
 
     def send_content(self, content, total=None):
         def _mime():
@@ -122,6 +130,23 @@ class IssuesAPIHandler(BaseAPIHandler):
         query['include_invalid'] = self.get_query_argument('includeInvalid', None) in ('true', 'True', '1')
         self.send_content(self._db.get_issues(**query),
                           total=len(self._db.get_issues(query['filter'], session_start=query['session_start'], include_invalid=query['include_invalid'])))
+
+    def post(self):
+        files = self.get_multipart_content()
+        if not files:
+            raise HTTPError(400, reason='no issue added')  # 400 Client Error: Bad Request
+
+        issues_added = 0
+        for issues in files:
+            if not isinstance(issues, list):
+                issues = [issues]
+
+            for issue in issues:
+                if self._db.add_issue(issue):
+                    issues_added += 1
+
+        self._wui.send_notification('refresh_issues')
+        self.set_status(201, reason='issue added' if issues_added == 1 else 'issues added')   # 201 Success: Created
 
 
 class IssueAPIHandler(BaseAPIHandler):

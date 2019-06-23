@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <!--
- Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+ Copyright (c) 2019-2020 Renata Hodovan, Akos Kiss.
 
  Licensed under the BSD 3-Clause License
  <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -38,7 +38,9 @@
     </div>
   </div>
 
-  <div class="btn-group ml-2" role="group" aria-label="Export">
+  <div class="btn-group ml-2" role="group" aria-label="Import/export">
+    {% block import %}
+    {% end import %}
     <div class="btn-group" role="group">
       <button id="export-button" type="button" class="btn btn-outline-secondary dropdown-toggle" title="Export" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons-outlined md-24 align-middle">archive</i></button>
       <div class="dropdown-menu dropdown-menu-right export" aria-labelledby="export-button">

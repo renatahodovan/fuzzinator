@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 # Copyright (c) 2019 Tamas Keri.
 #
 # Licensed under the BSD 3-Clause License
@@ -49,9 +49,7 @@ class MongoDriver(object):
         configs.create_index('subconfig')
 
         for fuzz_name, fuzz_data in fuzzers.items():
-            configs.find_one_and_update(filter={'subconfig': fuzz_data['subconfig']},
-                                        update={'$setOnInsert': {'subconfig': fuzz_data['subconfig'], 'src': fuzz_data['src']}},
-                                        upsert=True)
+            self.update_config(fuzz_data['subconfig'], fuzz_data['src'])
 
             stats.find_one_and_update(filter={'sut': fuzz_data['sut'], 'fuzzer': fuzz_name, 'subconfig': fuzz_data['subconfig']},
                                       update={'$setOnInsert': {'sut': fuzz_data['sut'], 'fuzzer': fuzz_name, 'subconfig': fuzz_data['subconfig'], 'exec': 0, 'issues': 0}},
@@ -61,14 +59,33 @@ class MongoDriver(object):
         # MongoDB assumes that dates and times are in UTC, hence it must
         # be used in the `first_seen` field, too.
         now = datetime.utcnow()
+        first_seen = issue.get('first_seen', now)
+        last_seen = issue.pop('last_seen', now)
+        count = issue.pop('count', None)
+        invalid = issue.get('invalid', None)
+        # Remove _id from imported issues.
+        issue.pop('_id', None)
+
+        if 'subconfig' in issue:
+            src = issue['subconfig'].pop('src')
+            self.update_config(issue['subconfig']['subconfig'], src)
+
         result = self._db.fuzzinator_issues.find_one_and_update(
-            {'sut': issue['sut'], 'id': issue['id'], 'invalid': {'$exists': False}},
-            {'$setOnInsert': dict(issue, first_seen=now),
-             '$set': dict(last_seen=now),
+            {'sut': issue['sut'], 'id': issue['id'], 'invalid': invalid or {'$exists': False}},
+            {'$setOnInsert': dict(issue, first_seen=first_seen),
+             '$max': dict(last_seen=last_seen),
              '$inc': dict(count=1)},
             upsert=True,
             return_document=ReturnDocument.AFTER,
         )
+
+        if count:
+            result = self._db.fuzzinator_issues.find_one_and_update(
+                {'sut': issue['sut'], 'id': issue['id'], 'invalid': invalid or {'$exists': False}},
+                {'$max': dict(count=count)},
+                return_document=ReturnDocument.AFTER,
+            )
+
         issue.update(result)
         # `first_seen` and `last_seen` values cannot be compared to `now` due
         # to some rounding in pymongo, the returning values can be slightly
@@ -129,6 +146,11 @@ class MongoDriver(object):
 
     def find_config_by_id(self, id):
         return self._db.fuzzinator_configs.find_one({'subconfig': id})
+
+    def update_config(self, subconfig, src):
+        self._db.fuzzinator_configs.find_one_and_update(filter={'subconfig': subconfig},
+                                                        update={'$setOnInsert': {'subconfig': subconfig, 'src': src}},
+                                                        upsert=True)
 
     def get_stats(self, filter=None, skip=0, limit=0, sort=None, session_start=None, session_baseline=None, detailed=False):
         aggregator = [

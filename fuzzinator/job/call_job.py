@@ -42,6 +42,6 @@ class CallJob(object):
         # Save new issues.
         if self.db.add_issue(issue):
             new_issues.append(issue)
-            self.listener.new_issue(ident=self.id, issue=issue)
+            self.listener.on_issue_added(ident=self.id, issue=issue)
         else:
-            self.listener.update_issue(ident=self.id, issue=issue)
+            self.listener.on_issue_updated(ident=self.id, issue=issue)

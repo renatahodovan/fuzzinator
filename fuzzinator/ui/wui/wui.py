@@ -85,54 +85,54 @@ class Wui(object):
         for socket in self.sockets:
             socket.send_notification(action, data)
 
-    def new_job(self, type, **kwargs):
+    def on_job_added(self, type, **kwargs):
         job = kwargs
         job.update(type=type, status='inactive')
         self.jobs[job['ident']] = job
-        self.send_notification('new_job', job)
+        self.send_notification('job_added', job)
 
-    def new_fuzz_job(self, **kwargs):
-        self.new_job('fuzz', **kwargs)
+    def on_fuzz_job_added(self, **kwargs):
+        self.on_job_added('fuzz', **kwargs)
 
-    def new_reduce_job(self, **kwargs):
-        self.new_job('reduce', **kwargs)
+    def on_reduce_job_added(self, **kwargs):
+        self.on_job_added('reduce', **kwargs)
 
-    def new_update_job(self, **kwargs):
-        self.new_job('update', **kwargs)
+    def on_update_job_added(self, **kwargs):
+        self.on_job_added('update', **kwargs)
 
-    def new_validate_job(self, **kwargs):
-        self.new_job('validate', **kwargs)
+    def on_validate_job_added(self, **kwargs):
+        self.on_job_added('validate', **kwargs)
 
-    def remove_job(self, **kwargs):
+    def on_job_removed(self, **kwargs):
         del self.jobs[kwargs['ident']]
-        self.send_notification('remove_job', kwargs)
+        self.send_notification('job_removed', kwargs)
 
-    def activate_job(self, **kwargs):
+    def on_job_activated(self, **kwargs):
         job = self.jobs[kwargs['ident']]
         job.update(status='active')
         self.jobs[kwargs['ident']] = job
-        self.send_notification('activate_job', kwargs)
+        self.send_notification('job_activated', kwargs)
 
-    def job_progress(self, **kwargs):
+    def on_job_progressed(self, **kwargs):
         job = self.jobs[kwargs['ident']]
         job.update(progress=kwargs['progress'])
         self.jobs[kwargs['ident']] = job
-        self.send_notification('job_progress', kwargs)
+        self.send_notification('job_progressed', kwargs)
 
-    def new_issue(self, **kwargs):
-        self.send_notification('new_issue')
+    def on_issue_added(self, **kwargs):
+        self.send_notification('issue_added')
         self.send_notification('refresh_issues')
 
-    def update_issue(self, **kwargs):
+    def on_issue_updated(self, **kwargs):
         self.send_notification('refresh_issues')
 
-    def invalid_issue(self, **kwargs):
+    def on_issue_invalidated(self, **kwargs):
         self.send_notification('refresh_issues')
 
-    def reduced_issue(self, **kwargs):
+    def on_issue_reduced(self, **kwargs):
         self.send_notification('refresh_issues')
 
-    def update_fuzz_stat(self, **kwargs):
+    def on_stats_updated(self, **kwargs):
         self.send_notification('refresh_stats')
 
     def warning(self, ident, msg):

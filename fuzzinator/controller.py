@@ -243,7 +243,7 @@ class Controller(object):
             current_load = 0
             for ident in list(running_jobs):
                 if not running_jobs[ident]['proc'].is_alive() or not psutil.pid_exists(running_jobs[ident]['proc'].pid):
-                    self.listener.remove_job(ident=ident)
+                    self.listener.on_job_removed(ident=ident)
                     del running_jobs[ident]
                 else:
                     current_load += running_jobs[ident]['job'].cost
@@ -251,7 +251,7 @@ class Controller(object):
             nonlocal load
             if load != current_load:
                 load = current_load
-                self.listener.update_load(load=load)
+                self.listener.on_load_updated(load=load)
 
         def _poll_jobs():
             with self._shared_lock:
@@ -276,26 +276,26 @@ class Controller(object):
 
             {
                 FuzzJob:
-                lambda: self.listener.new_fuzz_job(ident=next_job.id,
-                                                   cost=next_job.cost,
-                                                   sut=next_job.sut_name,
-                                                   fuzzer=next_job.fuzzer_name,
-                                                   batch=next_job.batch),
+                lambda: self.listener.on_fuzz_job_added(ident=next_job.id,
+                                                        cost=next_job.cost,
+                                                        sut=next_job.sut_name,
+                                                        fuzzer=next_job.fuzzer_name,
+                                                        batch=next_job.batch),
                 ValidateJob:
-                lambda: self.listener.new_validate_job(ident=next_job.id,
-                                                       cost=next_job.cost,
-                                                       sut=next_job.sut_name,
-                                                       issue_id=next_job.issue['id']),
+                lambda: self.listener.on_validate_job_added(ident=next_job.id,
+                                                            cost=next_job.cost,
+                                                            sut=next_job.sut_name,
+                                                            issue_id=next_job.issue['id']),
                 ReduceJob:
-                lambda: self.listener.new_reduce_job(ident=next_job.id,
-                                                     cost=next_job.cost,
-                                                     sut=next_job.sut_name,
-                                                     issue_id=next_job.issue['id'],
-                                                     size=len(str(next_job.issue['test']))),
+                lambda: self.listener.on_reduce_job_added(ident=next_job.id,
+                                                          cost=next_job.cost,
+                                                          sut=next_job.sut_name,
+                                                          issue_id=next_job.issue['id'],
+                                                          size=len(str(next_job.issue['test']))),
                 UpdateJob:
-                lambda: self.listener.new_update_job(ident=next_job.id,
-                                                     cost=next_job.cost,
-                                                     sut=next_job.sut_name),
+                lambda: self.listener.on_update_job_added(ident=next_job.id,
+                                                          cost=next_job.cost,
+                                                          sut=next_job.sut_name),
             }[job_class]()
 
             job_queue.insert(0 if priority else len(job_queue), next_job)
@@ -306,7 +306,7 @@ class Controller(object):
             else:
                 ident_idx = [job_idx for job_idx, job in enumerate(job_queue) if job.id == ident]
                 if ident_idx:
-                    self.listener.remove_job(ident=ident)
+                    self.listener.on_job_removed(ident=ident)
                     del job_queue[ident_idx[0]]
 
         try:
@@ -376,7 +376,7 @@ class Controller(object):
 
                 proc = Process(target=self._run_job, args=(next_job,))
                 running_jobs[next_job.id] = dict(job=next_job, proc=proc)
-                self.listener.activate_job(ident=next_job.id)
+                self.listener.on_job_activated(ident=next_job.id)
                 proc.start()
 
         except KeyboardInterrupt:

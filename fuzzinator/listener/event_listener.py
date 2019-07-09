@@ -23,7 +23,7 @@ class EventListener(object):
         """
         self.config = config
 
-    def update_load(self, load):
+    def on_load_updated(self, load):
         """
         Invoked when the framework's load changes.
 
@@ -31,7 +31,7 @@ class EventListener(object):
         """
         pass
 
-    def new_fuzz_job(self, ident, cost, sut, fuzzer, batch):
+    def on_fuzz_job_added(self, ident, cost, sut, fuzzer, batch):
         """
         Invoked when a new (still inactive) fuzz job is instantiated.
 
@@ -47,7 +47,7 @@ class EventListener(object):
         """
         pass
 
-    def new_reduce_job(self, ident, cost, sut, issue_id, size):
+    def on_reduce_job_added(self, ident, cost, sut, issue_id, size):
         """
         Invoked when a new (still inactive) reduce job is instantiated.
 
@@ -61,7 +61,7 @@ class EventListener(object):
         """
         pass
 
-    def new_update_job(self, ident, cost, sut):
+    def on_update_job_added(self, ident, cost, sut):
         """
         Invoked when a new (still inactive) update job is instantiated.
 
@@ -72,7 +72,7 @@ class EventListener(object):
         """
         pass
 
-    def new_validate_job(self, ident, cost, sut, issue_id):
+    def on_validate_job_added(self, ident, cost, sut, issue_id):
         """
         Invoked when a new (still inactive) validate job is instantiated.
 
@@ -84,7 +84,7 @@ class EventListener(object):
         """
         pass
 
-    def activate_job(self, ident):
+    def on_job_activated(self, ident):
         """
         Invoked when a previously instantiated job is activated (started).
 
@@ -92,7 +92,7 @@ class EventListener(object):
         """
         pass
 
-    def job_progress(self, ident, progress):
+    def on_job_progressed(self, ident, progress):
         """
         Invoked when an activated job makes progress.
 
@@ -104,7 +104,7 @@ class EventListener(object):
         """
         pass
 
-    def remove_job(self, ident):
+    def on_job_removed(self, ident):
         """
         Invoked when an active job has finished.
 
@@ -112,7 +112,7 @@ class EventListener(object):
         """
         pass
 
-    def new_issue(self, ident, issue):
+    def on_issue_added(self, ident, issue):
         """
         Invoked when a new issue is found.
 
@@ -124,7 +124,7 @@ class EventListener(object):
         """
         pass
 
-    def invalid_issue(self, ident, issue):
+    def on_issue_invalidated(self, ident, issue):
         """
         Invoked when an issue seems invalid.
 
@@ -135,7 +135,7 @@ class EventListener(object):
         """
         pass
 
-    def update_issue(self, ident, issue):
+    def on_issue_updated(self, ident, issue):
         """
         Invoked when the status of an issue changed.
 
@@ -144,7 +144,7 @@ class EventListener(object):
         """
         pass
 
-    def reduced_issue(self, ident, issue):
+    def on_issue_reduced(self, ident, issue):
         """
         Invoked when an issue got reduced.
 
@@ -164,7 +164,7 @@ class EventListener(object):
         """
         pass
 
-    def update_fuzz_stat(self):
+    def on_stats_updated(self):
         """
         Invoked when statistics about fuzzers, SUTs, and issues (e.g., execution
         counts, issue counts, unique issue counts) are updated in the

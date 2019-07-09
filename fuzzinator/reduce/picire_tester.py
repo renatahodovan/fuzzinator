@@ -34,7 +34,7 @@ class PicireTester(object):
 
             if issue:
                 if self._expected == issue['id']:
-                    self._listener.job_progress(ident=self._ident, progress=len(str(test)))
+                    self._listener.on_job_progressed(ident=self._ident, progress=len(str(test)))
                     return picire.AbstractDD.FAIL
 
                 if 'test' not in issue or not issue['test']:

@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -12,10 +12,12 @@ from . import CallableDecorator
 
 class PlatformInfoDecorator(CallableDecorator):
     """
-    Decorator for SUT calls to extend issues with ``'platform'`` property.
+    Decorator for SUT calls to extend issues with ``'platform'`` and ``'node'``
+    properties.
 
     The new ``'platform'`` issue property will contain the result of Python's
-    :func:`platform.platform`.
+    :func:`platform.platform` and the ``'node'`` property will contain the
+    result of :func:`platform.node`.
 
     **Example configuration snippet:**
 
@@ -34,6 +36,7 @@ class PlatformInfoDecorator(CallableDecorator):
                     return issue
 
                 issue['platform'] = platform.platform()
+                issue['node'] = platform.node()
                 return issue
 
             return filter

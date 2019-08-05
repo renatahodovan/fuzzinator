@@ -45,7 +45,7 @@ class BaseAPIHandler(RequestHandler):
             except TypeError:
                 return obj
 
-        return dumps(_convert(obj))
+        return dumps(_convert(obj), indent='\t', sort_keys=True)
 
     @staticmethod
     def _loads(loads, s):

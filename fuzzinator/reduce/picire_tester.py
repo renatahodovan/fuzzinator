@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -34,7 +34,7 @@ class PicireTester(object):
 
             if issue:
                 if self._expected == issue['id']:
-                    self._listener.job_progress(ident=self._ident, progress=len(test))
+                    self._listener.job_progress(ident=self._ident, progress=len(str(test)))
                     return picire.AbstractDD.FAIL
 
                 if 'test' not in issue or not issue['test']:

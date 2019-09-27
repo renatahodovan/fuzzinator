@@ -291,7 +291,7 @@ class Controller(object):
                                                      cost=next_job.cost,
                                                      sut=next_job.sut_name,
                                                      issue_id=next_job.issue['id'],
-                                                     size=len(next_job.issue['test'])),
+                                                     size=len(str(next_job.issue['test']))),
                 UpdateJob:
                 lambda: self.listener.new_update_job(ident=next_job.id,
                                                      cost=next_job.cost,

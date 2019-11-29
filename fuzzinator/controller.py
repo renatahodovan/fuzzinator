@@ -365,7 +365,7 @@ class Controller(object):
                     if not job_queue:
                         next_job = None
                         break
-                    elif load + job_queue[0].cost <= self.capacity:
+                    if load + job_queue[0].cost <= self.capacity:
                         next_job = job_queue.pop(0)
                         break
                     time.sleep(1)

@@ -22,6 +22,8 @@ def build_parser(parent=None):
                         help='define additional config options')
     parser.add_argument('-U', metavar='SECT[:OPT]', dest='undefs', default=list(), action='append',
                         help='undefine config sections or options')
+    parser.add_argument('--max-cycles', metavar='N', default=None, type=int,
+                        help='limit number of fuzz job cycles to %(metavar)s (default: no limit)')
     parser.add_argument('--show-config', action='store_true',
                         help='show complete config')
     parser.add_argument('-l', '--log-level', metavar='LEVEL', default='INFO',

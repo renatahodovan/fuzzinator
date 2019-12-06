@@ -194,7 +194,7 @@ def execute(args=None, parser=None):
     controller = Controller(config=arguments.config)
     tui = Tui(controller, style=style)
     controller.listener += TuiListener(tui.pipe, tui.events, tui.lock)
-    fuzz_process = Process(target=controller.run, args=())
+    fuzz_process = Process(target=controller.run, args=(), kwargs={'max_cycles': arguments.max_cycles})
 
     try:
         fuzz_process.start()

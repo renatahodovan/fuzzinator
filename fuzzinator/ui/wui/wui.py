@@ -163,7 +163,7 @@ def execute(args=None, parser=None):
 
     controller = Controller(config=arguments.config)
     wui = Wui(controller, arguments.port, arguments.bind_ip, arguments.develop)
-    fuzz_process = Process(target=controller.run, args=())
+    fuzz_process = Process(target=controller.run, args=(), kwargs={'max_cycles': arguments.max_cycles})
 
     iol = ioloop.IOLoop.instance()
     iol_clb = ioloop.PeriodicCallback(wui.update_ui, 1000)

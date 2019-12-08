@@ -51,7 +51,7 @@ generators in the wiki_.
 Requirements
 ============
 
-* Python_ >= 3.4
+* Python_ >= 3.5
 * pip_ and setuptools Python packages (the latter is automatically installed by
   pip)
 * MongoDB_ >= 3.6 (either local installation or access to remote database)

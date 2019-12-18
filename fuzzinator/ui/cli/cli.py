@@ -15,6 +15,8 @@ from ... import Controller
 from .. import build_parser, process_args
 from .cli_listener import CliListener
 
+root_logger = logging.getLogger()
+
 
 def execute(args=None, parser=None):
     parser = build_parser(parent=parser)
@@ -23,8 +25,8 @@ def execute(args=None, parser=None):
     if error_msg:
         parser.error(error_msg)
 
-    logger = logging.getLogger()
-    logger.addHandler(RainbowLoggingHandler(sys.stdout))
+    if not root_logger.hasHandlers():
+        root_logger.addHandler(RainbowLoggingHandler(sys.stdout))
 
     controller = Controller(config=arguments.config)
     controller.listener += CliListener()

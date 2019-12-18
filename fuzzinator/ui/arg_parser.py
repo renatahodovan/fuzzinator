@@ -13,6 +13,8 @@ import sys
 
 from ..pkgdata import __version__
 
+root_logger = logging.getLogger()
+
 
 def build_parser(parent=None):
     parser = argparse.ArgumentParser(description='Fuzzinator Random Testing Framework', fromfile_prefix_chars='@', parents=[parent])
@@ -71,8 +73,7 @@ def process_args(args):
 
     args.config = config
 
-    logger = logging.getLogger()
-    logger.setLevel(args.log_level)
+    root_logger.setLevel(args.log_level)
 
     sys.setrecursionlimit(args.sys_recursion_limit)
 

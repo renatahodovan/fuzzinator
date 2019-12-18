@@ -48,6 +48,6 @@ class ValidateJob(CallJob):
 
         if not self.issue.get('invalid'):
             self.db.update_issue_by_oid(self.issue['_id'], {'invalid': datetime.utcnow()})
-            self.listener.invalid_issue(ident=self.id, issue=self.issue)
+            self.listener.on_issue_invalidated(ident=self.id, issue=self.issue)
 
         return False, new_issues

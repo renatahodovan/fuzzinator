@@ -63,47 +63,47 @@ class Tui(object):
         if timer.update():
             loop.set_alarm_in(0.1, self.update_timer, timer)
 
-    def new_fuzz_job(self, ident, cost, sut, fuzzer, batch):
-        self.view.job_table.add_fuzz_job(ident, fuzzer, sut, cost, batch)
+    def on_fuzz_job_added(self, ident, cost, sut, fuzzer, batch):
+        self.view.job_table.on_fuzz_job_added(ident, fuzzer, sut, cost, batch)
 
-    def new_reduce_job(self, ident, cost, sut, issue_id, size):
-        self.view.job_table.add_reduce_job(ident, sut, cost, issue_id, size)
+    def on_reduce_job_added(self, ident, cost, sut, issue_id, size):
+        self.view.job_table.on_reduce_job_added(ident, sut, cost, issue_id, size)
 
-    def new_update_job(self, ident, cost, sut):
-        self.view.job_table.add_update_job(ident, sut)
+    def on_update_job_added(self, ident, cost, sut):
+        self.view.job_table.on_update_job_added(ident, sut)
 
-    def new_validate_job(self, ident, cost, sut, issue_id):
-        self.view.job_table.add_validate_job(ident, sut, issue_id)
+    def on_validate_job_added(self, ident, cost, sut, issue_id):
+        self.view.job_table.on_validate_job_added(ident, sut, issue_id)
 
-    def remove_job(self, ident):
-        self.view.job_table.remove_job(ident)
+    def on_job_removed(self, ident):
+        self.view.job_table.on_job_removed(ident)
 
-    def activate_job(self, ident):
-        self.view.job_table.activate_job(ident)
+    def on_job_activated(self, ident):
+        self.view.job_table.on_job_activated(ident)
 
-    def job_progress(self, ident, progress):
-        self.view.job_table.job_progress(ident, progress)
+    def on_job_progressed(self, ident, progress):
+        self.view.job_table.on_job_progressed(ident, progress)
 
-    def update_load(self, load):
+    def on_load_updated(self, load):
         self.view.logo.load.set_completion(load)
 
-    def update_fuzz_stat(self):
+    def on_stats_updated(self):
         self.view.stat_table.update()
 
-    def new_issue(self, ident, issue):
+    def on_issue_added(self, ident, issue):
         # Do shiny animation if a new issue has received.
         self.view.logo.do_animate = True
         self.loop.set_alarm_at(time.time() + 5, callback=self.view.logo.stop_animation)
         self.loop.set_alarm_in(0.1, self.view.logo.animate, self.view.logo)
         self.view.issues_table.add_row(issue)
 
-    def invalid_issue(self, ident, issue):
+    def on_issue_invalidated(self, ident, issue):
         self.view.issues_table.invalidate_row(ident=issue['_id'])
 
-    def update_issue(self, ident, issue):
+    def on_issue_updated(self, ident, issue):
         self.view.issues_table.update_row(ident=issue['_id'])
 
-    def reduced_issue(self, ident, issue):
+    def on_issue_reduced(self, ident, issue):
         self.view.issues_table.update_row(ident=issue['_id'])
 
     def warning(self, ident, msg):

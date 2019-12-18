@@ -30,7 +30,7 @@ $(document).ready(function () {
     $('.fz-motto').attr('title', 'offline').addClass('websocket-error');
   };
 
-  fz.notifications.onmessage['new_issue'] = function () {
+  fz.notifications.onmessage['issue_added'] = function () {
     $('.badge').text(Number($('.badge').text()) + 1);
     fireworks();
   };

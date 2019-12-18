@@ -357,29 +357,29 @@ class JobsTable(WidgetWrap):
         if len(self.walker) == 1:
             self.listbox.focus_position = 0
 
-    def add_fuzz_job(self, ident, fuzzer, sut, cost, batch):
+    def on_fuzz_job_added(self, ident, fuzzer, sut, cost, batch):
         self.insert_widget(ident, FuzzerJobWidget(dict(fuzzer=fuzzer, sut=sut, cost=cost), pb_done=batch))
 
-    def add_reduce_job(self, ident, sut, cost, issue_id, size):
+    def on_reduce_job_added(self, ident, sut, cost, issue_id, size):
         self.insert_widget(ident, ReduceJobWidget(dict(sut=sut, cost=cost, issue=issue_id), pb_done=size))
 
-    def add_update_job(self, ident, sut):
+    def on_update_job_added(self, ident, sut):
         self.insert_widget(ident, UpdateJobWidget(dict(sut=sut)))
 
-    def add_validate_job(self, ident, sut, issue_id):
+    def on_validate_job_added(self, ident, sut, issue_id):
         self.insert_widget(ident, ValidateJobWidget(dict(sut=sut, issue=issue_id)))
 
-    def activate_job(self, ident):
+    def on_job_activated(self, ident):
         idx = self.walker.index(self.jobs[ident])
         self.walker[idx].activate()
         self.title = self.active_jobs
 
-    def remove_job(self, ident):
+    def on_job_removed(self, ident):
         self.walker.remove(self.jobs[ident])
         del self.jobs[ident]
         self.title = self.active_jobs
 
-    def job_progress(self, ident, progress):
+    def on_job_progressed(self, ident, progress):
         idx = self.walker.index(self.jobs[ident])
         self.walker[idx].update_progress(progress)
 

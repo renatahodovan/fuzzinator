@@ -40,7 +40,7 @@ class FuzzJob(CallJob):
         stat_updated = 0
         new_issues = []
 
-        self.listener.update_fuzz_stat()
+        self.listener.on_stats_updated()
         with fuzzer:
             while index < self.batch:
                 sut_call, sut_call_kwargs = config_get_callable(self.config, 'sut.' + self.sut_name, 'call')
@@ -77,10 +77,10 @@ class FuzzJob(CallJob):
                         if issue:
                             issue_count += 1
 
-                        self.listener.job_progress(ident=self.id, progress=index)
+                        self.listener.on_job_progressed(ident=self.id, progress=index)
                         if index - stat_updated >= self.refresh:
                             self.db.update_stat(self.sut_name, self.fuzzer_name, self.subconfig_id, index - stat_updated, issue_count)
-                            self.listener.update_fuzz_stat()
+                            self.listener.on_stats_updated()
                             issue_count = 0
                             stat_updated = index
 
@@ -90,5 +90,5 @@ class FuzzJob(CallJob):
 
         # Update statistics.
         self.db.update_stat(self.sut_name, self.fuzzer_name, self.subconfig_id, index - stat_updated, issue_count)
-        self.listener.update_fuzz_stat()
+        self.listener.on_stats_updated()
         return new_issues

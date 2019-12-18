@@ -12,7 +12,7 @@
 $(document).ready(function () {
   'use strict';
 
-   var newJob = function (data) {
+   var jobAdded = function (data) {
     var job = $(`#${data.type}-job-template`).prop('content').cloneNode(true);
     $(job).find('.card').attr('id', `job-${data.ident}`);
     $(job).find('.card').addClass(data.status === 'active' ? 'bg-success' : 'bg-secondary');
@@ -33,9 +33,9 @@ $(document).ready(function () {
     $('#jobs').append(document.importNode(job, true));
   };
 
-  fz.notifications.onmessage['new_job'] = newJob;
+  fz.notifications.onmessage['job_added'] = jobAdded;
 
-  fz.notifications.onmessage['job_progress'] = function (data) {
+  fz.notifications.onmessage['job_progressed'] = function (data) {
     var jobCard = $(`#job-${data.ident}`);
     if (jobCard.length !== 0) {
       var progress = jobCard.find('.progress-bar');
@@ -46,20 +46,20 @@ $(document).ready(function () {
     }
   };
 
-  fz.notifications.onmessage['activate_job'] = function (data) {
+  fz.notifications.onmessage['job_activated'] = function (data) {
     var jobCard = $(`#job-${data.ident}`);
     if (jobCard.length !== 0 && jobCard.hasClass('bg-secondary')) {
       jobCard.removeClass('bg-secondary').addClass('bg-success');
     }
   };
 
-  fz.notifications.onmessage['remove_job'] = function (data) {
+  fz.notifications.onmessage['job_removed'] = function (data) {
     $(`#job-${data.ident}`).remove();
   };
 
   fz.api.getJobs(function (data) {
     for (var job of data) {
-      newJob(job);
+      jobAdded(job);
     }
   });
 });

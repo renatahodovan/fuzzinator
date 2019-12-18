@@ -24,7 +24,8 @@ from .api_handlers import IssueAPIHandler, IssueReportAPIHandler, IssuesAPIHandl
 from .ui_handlers import ConfigUIHandler, IssueReportUIHandler, IssuesUIHandler, IssueUIHandler, NotFoundHandler, NotificationsHandler, StatsUIHandler
 from .wui_listener import WuiListener
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
+root_logger = logging.getLogger()
 
 
 class Wui(object):
@@ -154,10 +155,11 @@ def execute(args=None, parser=None):
     if error_msg:
         parser.error(error_msg)
 
-    logger.addHandler(RainbowLoggingHandler(sys.stdout))
+    if not root_logger.hasHandlers():
+        root_logger.addHandler(RainbowLoggingHandler(sys.stdout))
     # The INFO level of Tornado's access logging is too chatty, hence they are
     # not displayed on INFO level.
-    if logger.getEffectiveLevel() == logging.INFO:
+    if root_logger.getEffectiveLevel() == logging.INFO:
         logging.getLogger('tornado.access').setLevel(logging.WARNING)
     logger.info('Server started at: http://%s:%d', arguments.bind_ip or 'localhost', arguments.port)
 

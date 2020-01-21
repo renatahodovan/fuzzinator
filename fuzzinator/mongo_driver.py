@@ -66,7 +66,7 @@ class MongoDriver(object):
         # Remove _id from imported issues.
         issue.pop('_id', None)
 
-        if 'subconfig' in issue:
+        if 'subconfig' in issue and 'src' in issue['subconfig']:
             src = issue['subconfig'].pop('src')
             self.update_config(issue['subconfig']['subconfig'], src)
 

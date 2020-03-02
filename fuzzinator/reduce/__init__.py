@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,9 +7,3 @@
 
 from .picire import Picire
 from .picireny import Picireny
-
-
-__all__ = [
-    'Picire',
-    'Picireny',
-]

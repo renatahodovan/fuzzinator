@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -12,14 +12,3 @@ from .jinja_formatter import JinjaFormatter
 from .json_formatter import JsonFormatter
 from .markdown_decorator import MarkdownDecorator
 from .string_formatter import StringFormatter
-
-
-__all__ = [
-    'TemplateFormatter',
-    'ChevronFormatter',
-    'DecoderDecorator',
-    'JinjaFormatter',
-    'JsonFormatter',
-    'MarkdownDecorator',
-    'StringFormatter',
-]

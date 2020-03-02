@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -20,36 +20,12 @@ from .subprocess_call import SubprocessCall
 from .subprocess_property_decorator import SubprocessPropertyDecorator
 from .unique_id_decorator import UniqueIdDecorator
 
-__all__ = [
-    'AnonymizeDecorator',
-    'CallableDecorator',
-    'ExitCodeFilter',
-    'FileReaderDecorator',
-    'FileWriterDecorator',
-    'GdbBacktraceDecorator',
-    'LldbBacktraceDecorator',
-    'NonIssue',
-    'PlatformInfoDecorator',
-    'RegexFilter',
-    'StdinSubprocessCall',
-    'SubprocessCall',
-    'SubprocessPropertyDecorator',
-    'UniqueIdDecorator',
-]
-
 try:
     from .stream_monitored_subprocess_call import StreamMonitoredSubprocessCall
-    __all__.append('StreamMonitoredSubprocessCall')
 except ImportError:
     pass
 
 try:
     from .test_runner_subprocess_call import TestRunnerSubprocessCall
-    __all__.append('TestRunnerSubprocessCall')
 except ImportError:
     pass
-
-# sorting __all__ has no functional use but seems to be needed to get
-# autodoc-generated sections in the correct alphabetical order
-# (autodoc_member_order='alphabetical' in docs/conf.py didn't do the job)
-__all__.sort()

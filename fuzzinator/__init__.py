@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -15,15 +15,3 @@ from . import listener
 from . import reduce
 from . import tracker
 from . import update
-
-__all__ = [
-    'Controller',
-    '__version__',
-    'call',
-    'formatter',
-    'fuzzer',
-    'listener',
-    'reduce',
-    'tracker',
-    'update',
-]

@@ -18,7 +18,8 @@ from ...config import config_get_callable
 
 class BaseAPIHandler(RequestHandler):
 
-    def initialize(self, wui):
+    def __init__(self, *args, wui, **kwargs):
+        super().__init__(*args, **kwargs)
         self._wui = wui
 
     @property

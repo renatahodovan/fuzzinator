@@ -58,7 +58,7 @@ setup(
         'python-gitlab',
         'rainbow_logging_handler',
         'setuptools',
-        'tornado<6.0',  # no Tornado 6 for Python < 3.5
+        'tornado',
         'urwid',
         'xson',
     ],

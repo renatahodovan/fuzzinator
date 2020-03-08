@@ -40,6 +40,7 @@ release = version
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
+    'sphinxcontrib.runcmd',
     'fuzzinator_sphinx',
 ]
 

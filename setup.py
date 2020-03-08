@@ -66,6 +66,7 @@ setup(
         'docs': [
             'sphinx',
             'sphinx_rtd_theme',
+            'sphinxcontrib-runcmd',
         ]
     },
     entry_points={

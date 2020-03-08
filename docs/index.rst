@@ -25,6 +25,13 @@ Fuzzinator
 
 
 .. toctree::
+   :caption: CLI Reference
+   :maxdepth: 1
+
+   cli
+
+
+.. toctree::
    :caption: Miscellaneous
    :maxdepth: 1
 

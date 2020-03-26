@@ -1,12 +1,30 @@
 language: python
 
+git:
+  autocrlf: input
+
 install: pip install -U tox
 script: tox -v
+
+_anchors:
+  - &refreshpath eval $(powershell -NonInteractive -Command 'write("export PATH=`"" + ([Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [Environment]::GetEnvironmentVariable("PATH","User")).replace("\","/").replace("C:","/c").replace(";",":") + ":`$PATH`"")')
 
 jobs:
   include:
     - stage: test
-      python: 3.5
+      os: windows
+      language: shell
+      before_install:
+        - choco install openjdk python3
+        - *refreshpath
+        - python --version
+        - pip --version
+        - java -version
+      env: TOXENV=py3
+    - os: osx
+      language: shell
+      env: TOXENV=py3
+    - python: 3.5
       env: TOXENV=py
     - python: 3.6
       env: TOXENV=py
@@ -18,8 +36,7 @@ jobs:
       env: TOXENV=lint
     - python: 3.7
       env: TOXENV=eslint
-      dist: xenial
-      before_script:
+      before_install:
         - sudo apt-get install npm
         - sudo npm install -g npx
     - python: 3.6

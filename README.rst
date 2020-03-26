@@ -6,8 +6,6 @@
    :target: https://badge.fury.io/py/fuzzinator
 .. image:: https://travis-ci.org/renatahodovan/fuzzinator.svg?branch=master
    :target: https://travis-ci.org/renatahodovan/fuzzinator
-.. image:: https://ci.appveyor.com/api/projects/status/mhdvgk65p0r7fkxr/branch/master?svg=true
-   :target: https://ci.appveyor.com/project/renatahodovan/fuzzinator/branch/master
 .. image:: https://readthedocs.org/projects/fuzzinator/badge/?version=latest
    :target: http://fuzzinator.readthedocs.io/en/latest/
 
@@ -87,7 +85,8 @@ Compatibility
 *Fuzzinator* was tested on:
 
 * Linux (Ubuntu 14.04 / 16.04 / 18.04)
-* Mac OS X (El Capitan 10.11 / Sierra 10.12 / High Sierra 10.13 / Mojave 10.14)
+* Mac OS X (El Capitan 10.11 / Sierra 10.12 / High Sierra 10.13 / Mojave 10.14 / Catalina 10.15)
+* Windows (Server 2012 R2 / Server version 1809 / Windows 10)
 
 
 Acknowledgement and Citations

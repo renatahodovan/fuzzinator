@@ -1,11 +1,10 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import argparse
 import json
 import logging
 import os
@@ -19,7 +18,6 @@ from multiprocessing import Lock, Process, Queue
 from urwid import connect_signal, ExitMainLoop, MainLoop, raw_display, util
 
 from ... import Controller
-from .. import build_parser, process_args
 from .tui_listener import TuiListener
 from .widgets import MainWindow
 
@@ -159,21 +157,7 @@ def load_style(style):
     ]
 
 
-def execute(args=None, parser=None):
-    parser = build_parser(parent=parser)
-    parser.add_argument('--force-encoding', metavar='NAME', default=None, choices=['utf-8', 'ascii'],
-                        help='force text encoding used for TUI widgets (%(choices)s; default: autodetect)')
-    parser.add_argument('--utf8', '--utf-8', dest='force_encoding', action='store_const', const='utf-8', default=argparse.SUPPRESS,
-                        help='force UTF-8 encoding (alias for --force-encoding=%(const)s)')
-    parser.add_argument('--log-file', metavar='FILE',
-                        help='redirect stderr (instead of /dev/null; for debugging purposes)')
-    parser.add_argument('-s', '--style', metavar='FILE',
-                        help='alternative style file for TUI')
-    arguments = parser.parse_args(args)
-    error_msg = process_args(arguments)
-    if error_msg:
-        parser.error(error_msg)
-
+def execute(arguments):
     # Redirect or suppress errors to spare tui from superfluous messages.
     if arguments.log_file:
         sys.stdout = open(os.devnull, 'w')

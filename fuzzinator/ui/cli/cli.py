@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -12,19 +12,12 @@ import sys
 from rainbow_logging_handler import RainbowLoggingHandler
 
 from ... import Controller
-from .. import build_parser, process_args
 from .cli_listener import CliListener
 
 root_logger = logging.getLogger()
 
 
-def execute(args=None, parser=None):
-    parser = build_parser(parent=parser)
-    arguments = parser.parse_args(args)
-    error_msg = process_args(arguments)
-    if error_msg:
-        parser.error(error_msg)
-
+def execute(arguments):
     if not root_logger.hasHandlers():
         root_logger.addHandler(RainbowLoggingHandler(sys.stdout))
 

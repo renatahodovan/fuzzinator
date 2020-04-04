@@ -1,12 +1,11 @@
 # Copyright (c) 2019 Tamas Keri.
-# Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2019-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import argparse
 import logging
 import os
 import signal
@@ -18,7 +17,6 @@ from rainbow_logging_handler import RainbowLoggingHandler
 from tornado import ioloop, web
 
 from ... import Controller
-from .. import build_parser, process_args
 
 from .api_handlers import IssueAPIHandler, IssueReportAPIHandler, IssuesAPIHandler, JobAPIHandler, JobsAPIHandler, NotFoundAPIHandler, StatsAPIHandler
 from .ui_handlers import ConfigUIHandler, IssueReportUIHandler, IssuesUIHandler, IssueUIHandler, NotFoundHandler, NotificationsHandler, StatsUIHandler
@@ -140,21 +138,7 @@ class Wui(object):
         logger.warning(msg)
 
 
-def execute(args=None, parser=None):
-    parser = build_parser(parent=parser)
-    parser.add_argument('--bind-ip', metavar='NAME/IP', default='localhost',
-                        help='hostname or IP address to start the service on (default: %(default)s)')
-    parser.add_argument('--bind-ip-all', dest='bind_ip', action='store_const', const='', default=argparse.SUPPRESS,
-                        help='bind service to all available addresses (alias for --bind-ip=%(const)r)')
-    parser.add_argument('--port', metavar='NUM', default=8080, type=int,
-                        help='port to start the service on (default: %(default)d)')
-    parser.add_argument('--develop', action='store_true',
-                        help='run the service in development mode')
-    arguments = parser.parse_args(args)
-    error_msg = process_args(arguments)
-    if error_msg:
-        parser.error(error_msg)
-
+def execute(arguments):
     if not root_logger.hasHandlers():
         root_logger.addHandler(RainbowLoggingHandler(sys.stdout))
     # The INFO level of Tornado's access logging is too chatty, hence they are

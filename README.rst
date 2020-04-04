@@ -2,11 +2,13 @@
 
 *Fuzzinator: Random Testing Framework*
 
-.. image:: https://badge.fury.io/py/fuzzinator.svg
-   :target: https://badge.fury.io/py/fuzzinator
-.. image:: https://travis-ci.org/renatahodovan/fuzzinator.svg?branch=master
+.. image:: https://img.shields.io/pypi/v/fuzzinator?logo=python&logoColor=white
+   :target: https://pypi.org/project/fuzzinator/
+.. image:: https://img.shields.io/pypi/l/fuzzinator?logo=open-source-initiative&logoColor=white
+   :target: https://pypi.org/project/fuzzinator/
+.. image:: https://img.shields.io/travis/renatahodovan/fuzzinator/master?logo=travis&logoColor=white
    :target: https://travis-ci.org/renatahodovan/fuzzinator
-.. image:: https://readthedocs.org/projects/fuzzinator/badge/?version=latest
+.. image:: https://img.shields.io/readthedocs/fuzzinator?logo=read-the-docs&logoColor=white
    :target: http://fuzzinator.readthedocs.io/en/latest/
 
 .. start included documentation

@@ -51,6 +51,8 @@
         <a class="dropdown-item text-secondary" data-format="xml" data-target="all">Export all as XML</a>
         <a class="dropdown-item text-secondary" data-format="xml" data-target="filtered">Export filtered as XML</a>
         <a class="dropdown-item text-secondary" data-format="xml" data-target="page">Export page as XML</a>
+        {% block export_custom %}
+        {% end export_custom %}
       </div>
     </div>
   </div>

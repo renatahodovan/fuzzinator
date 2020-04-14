@@ -9,6 +9,7 @@ from .controller import Controller
 from .pkgdata import __version__
 
 from . import call
+from . import exporter
 from . import formatter
 from . import fuzzer
 from . import listener

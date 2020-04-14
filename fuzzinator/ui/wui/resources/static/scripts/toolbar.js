@@ -131,6 +131,7 @@ $(document).ready(function () {
   $('.export .dropdown-item').on('click', function (event) {
     var target = $(event.currentTarget).data('target');
     var format = $(event.currentTarget).data('format');
+    var ext = $(event.currentTarget).data('ext');
     var collectionName = $('.bootstrap-table .table').attr('id').replace('-table', '');
     var href = `/api/${collectionName}?format=${format}`;
 
@@ -147,7 +148,7 @@ $(document).ready(function () {
       }
     }
     $(event.currentTarget).attr('href', href);
-    $(event.currentTarget).attr('download', `${collectionName}-${target}.${format}`);
+    $(event.currentTarget).attr('download', `${collectionName}-${target}.${ext ? ext : format}`);
     return true;
   });
 });

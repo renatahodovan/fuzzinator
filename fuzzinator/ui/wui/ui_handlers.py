@@ -90,8 +90,16 @@ class IssueUIHandler(BaseUIHandler):
         if issue is None:
             self.send_error(404)
             return
+
         formatter = config_get_callable(self._config, 'sut.' + issue['sut'], ['wui_formatter', 'formatter'])[0] or JsonFormatter
-        self.render('issue.html', issue=issue, issue_body=formatter(issue=issue), tracker=self._config.has_option('sut.' + issue['sut'], 'tracker'))
+        exporter, _ = config_get_callable(self._config, 'sut.' + issue['sut'], 'exporter')
+
+        self.render('issue.html',
+                    issue=issue,
+                    issue_body=formatter(issue=issue),
+                    has_tracker=self._config.has_option('sut.' + issue['sut'], 'tracker'),
+                    has_exporter=exporter is not None,
+                    exporter_ext=getattr(exporter, 'extension', ''))
 
 
 class IssueReportUIHandler(BaseUIHandler):

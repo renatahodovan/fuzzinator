@@ -2,7 +2,7 @@
 
 <!--
  Copyright (c) 2019 Tamas Keri.
- Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+ Copyright (c) 2019-2020 Renata Hodovan, Akos Kiss.
 
  Licensed under the BSD 3-Clause License
  <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -53,7 +53,7 @@
           {% end %}
           <div class="col-12 col-md-12 text-secondary" data-toggle="tool-tip" title="actions">
             <div class="col-12 col-md-12"></div>
-            {% if tracker %}
+            {% if has_tracker %}
             <div class="float-right"><button type="button" class="btn btn-outline-secondary report-issue btn-sm btn-block" title="report" onclick="location.href='/issues/{{ issue['_id'] }}/report'"><i class="material-icons-outlined md-14 align-middle">send</i> Report</button></div>
             {% end %}
             <div class="float-right"><button type="button" class="btn btn-outline-secondary delete-issue btn-sm btn-block" title="delete" onclick="fz.api.deleteIssue('{{ issue['_id'] }}'); location.href='/'"><i class="material-icons-outlined md-14 align-middle">delete</i> Delete</button></div>
@@ -64,6 +64,9 @@
               <ul class="dropdown-menu" role="menu">
                   <li><a role="button" class="dropdown-item" download="{{ issue['_id'] }}.json" href="/api/issues/{{ issue['_id'] }}?format=json">Export as JSON</a></li>
                   <li><a role="button" class="dropdown-item" download="{{ issue['_id'] }}.xml" href="/api/issues/{{ issue['_id'] }}?format=xml">Export as XML</a></li>
+                  {% if has_exporter %}
+                  <li><a role="button" class="dropdown-item" download="{{ issue['_id'] }}{{ exporter_ext }}" href="/api/issues/{{ issue['_id'] }}?format=custom">Custom export as {{  exporter_ext.lstrip('.').upper() }}</a></li>
+                  {% end %}
               </ul>
             </div>
           </div>

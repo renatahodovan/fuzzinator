@@ -44,7 +44,14 @@
   <i class="material-icons-outlined md-24 align-middle">unarchive</i>
   <input id="import-form" type="file" name="files" accept=".json,.xml" multiple onchange="$(this).submit()" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; opacity: 0;">
 </button>
-{% end block %}
+{% end import %}
+
+{% block export_custom %}
+<div class="dropdown-divider"></div>
+<a class="dropdown-item text-secondary" data-format="custom" data-ext="zip" data-target="all">Custom export all in ZIP</a>
+<a class="dropdown-item text-secondary" data-format="custom" data-ext="zip" data-target="filtered">Custom export filtered in ZIP</a>
+<a class="dropdown-item text-secondary" data-format="custom" data-ext="zip" data-target="page">Custom export page in ZIP</a>
+{% end export_custom %}
 
 {% block body %}
 

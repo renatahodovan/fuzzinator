@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -141,6 +141,18 @@ class Controller(object):
 
           See package :mod:`fuzzinator.formatter` for further potential
           callables.
+
+        - Option ``exporter``: Fully qualified name of a python callable that
+          exports the issue dictionary in a custom SUT-specific format. It must
+          accept an ``issue`` keyword argument representing the issue to be
+          exported and its result must be writable to a file, i.e., it must be
+          either a string or a byte array. The export format does not
+          necessarily have to contain all elements of the issue dictionary
+          (e.g., it is often useful to only extract the test input that
+          triggered the issue). (Optional, no custom export for this SUT if
+          option is missing.)
+
+          See package :mod:`fuzzinator.exporter` for potential callables.
 
       - Sections ``fuzz.NAME``: Definitions of a fuzz job named *NAME*
 

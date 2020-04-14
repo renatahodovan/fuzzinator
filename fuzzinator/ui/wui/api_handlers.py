@@ -7,6 +7,9 @@
 
 import json
 
+from io import BytesIO
+from zipfile import ZipFile, ZIP_DEFLATED
+
 import xson
 
 from bson.json_util import default, object_hook, RELAXED_JSON_OPTIONS
@@ -126,11 +129,27 @@ class BaseAPIHandler(RequestHandler):
 
 class IssuesAPIHandler(BaseAPIHandler):
 
+    def send_export(self, issues):
+        zipbuf = BytesIO()
+        with ZipFile(zipbuf, mode='w', compression=ZIP_DEFLATED) as zf:
+            for issue in issues:
+                exporter, _ = config_get_callable(self._config, 'sut.' + issue['sut'], 'exporter')
+                if not exporter:
+                    continue  # silently skip issues with no exporter
+                ext = getattr(exporter, 'extension', '')
+                zf.writestr(str(issue['_id']) + ext, exporter(issue=issue))
+
+        self.set_header('Content-Type', 'application/zip')
+        self.finish(zipbuf.getvalue())
+
     def get(self):
         query = self.get_pagination_query(['fuzzer', 'sut', 'id'])
         query['include_invalid'] = self.get_query_argument('includeInvalid', None) in ('true', 'True', '1')
-        self.send_content(self._db.get_issues(**query),
-                          total=len(self._db.get_issues(query['filter'], session_start=query['session_start'], include_invalid=query['include_invalid'])))
+        if self.get_query_argument('format', None) == 'custom':
+            self.send_export(self._db.get_issues(**query))
+        else:
+            self.send_content(self._db.get_issues(**query),
+                              total=len(self._db.get_issues(query['filter'], session_start=query['session_start'], include_invalid=query['include_invalid'])))
 
     def post(self):
         files = self.get_multipart_content()
@@ -152,12 +171,24 @@ class IssuesAPIHandler(BaseAPIHandler):
 
 class IssueAPIHandler(BaseAPIHandler):
 
+    def send_export(self, issue):
+        exporter, _ = config_get_callable(self._config, 'sut.' + issue['sut'], 'exporter')
+        if not exporter:
+            raise HTTPError(404, reason='exporter not found')  # 404 Client Error: Not Found
+
+        if getattr(exporter, 'type', None):
+            self.set_header('Content-Type', exporter.type)
+        self.finish(exporter(issue=issue))
+
     def get(self, issue_oid):
         issue = self._db.find_issue_by_oid(issue_oid, detailed=True)
         if issue is None:
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
-        self.send_content(issue)
+        if self.get_query_argument('format', None) == 'custom':
+            self.send_export(issue)
+        else:
+            self.send_content(issue)
 
     def post(self, issue_oid):
         issue = self._db.find_issue_by_oid(issue_oid)

@@ -17,6 +17,7 @@ Fuzzinator
 
    fuzzinator
    fuzzinator.call
+   fuzzinator.exporter
    fuzzinator.formatter
    fuzzinator.fuzzer
    fuzzinator.listener

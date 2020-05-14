@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -61,9 +61,9 @@ class TornadoDecorator(object):
 
     def __call__(self, callable):
         ancestor = object if isroutine(callable) else callable
+        decorator = self
 
         class Inherited(ancestor):
-            decorator = self
 
             def __init__(self, *args, **kwargs):
                 if hasattr(ancestor, '__init__'):
@@ -80,7 +80,7 @@ class TornadoDecorator(object):
                     return None
 
                 self.fuzzer_kwargs = kwargs
-                return 'http://localhost:{port}?index={index}'.format(port=self.decorator.port, index=self.index)
+                return 'http://localhost:{port}?index={index}'.format(port=decorator.port, index=self.index)
 
             def __enter__(self, *args, **kwargs):
                 if hasattr(ancestor, '__enter__'):
@@ -93,10 +93,10 @@ class TornadoDecorator(object):
 
                 while True:
                     try:
-                        server = app.listen(self.decorator.port)
+                        server = app.listen(decorator.port)
                         break
                     except OSError:
-                        self.decorator.port += 1
+                        decorator.port += 1
 
                 def ioloop_thread():
                     self.ioloop = IOLoop.current()

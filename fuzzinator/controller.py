@@ -11,6 +11,7 @@ import signal
 import time
 import traceback
 
+from math import inf
 from multiprocessing import Lock, Process, Queue
 
 import psutil
@@ -242,7 +243,7 @@ class Controller(object):
         :param int max_cycles: maximum number to iterate through the fuzz jobs
             defined in the configuration (defaults to ``inf``).
         """
-        max_cycles = max_cycles if max_cycles is not None else float('inf')
+        max_cycles = max_cycles if max_cycles is not None else inf
         cycle = 0
         fuzz_idx = 0
         fuzz_names = list(self.fuzzers)
@@ -329,7 +330,7 @@ class Controller(object):
 
                 if fuzz_idx == 0:
                     cycle += 1
-                if cycle > max_cycles or (not self.fuzzers and max_cycles != float('inf')):
+                if cycle > max_cycles or (not self.fuzzers and max_cycles != inf):
                     while load > 0:
                         time.sleep(1)
                         _poll_jobs()  # only to let running jobs cancelled; newly added jobs don't get scheduled
@@ -350,7 +351,7 @@ class Controller(object):
 
                     # Skip fuzz job if limit on parallel instances is reached.
                     instances = self.config.get(fuzz_section, 'instances', fallback='inf')
-                    instances = float(instances) if instances == 'inf' else int(instances)
+                    instances = inf if instances == 'inf' else int(instances)
                     if instances <= sum(1 for job in running_jobs.values() if isinstance(job['job'], FuzzJob) and job['job'].fuzzer_name == fuzzer_name):
                         continue
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -8,6 +8,8 @@
 import json
 import logging
 import os
+
+from math import inf
 
 import chardet
 import picire
@@ -97,7 +99,7 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
     skip_unremovable = skip_unremovable in [1, '1', True, 'True', 'true']
     skip_whitespace = skip_whitespace in [1, '1', True, 'True', 'true']
     build_hidden_tokens = build_hidden_tokens in [1, '1', True, 'True', 'true']
-    granularity = int(granularity) if granularity != 'inf' else float('inf')
+    granularity = int(granularity) if granularity != 'inf' else inf
     cleanup = cleanup in [1, '1', True, 'True', 'true']
 
     cache_class = getattr(picire, cache_class)

@@ -14,12 +14,13 @@ from pymongo import ASCENDING, MongoClient, ReturnDocument
 
 class MongoDriver(object):
 
-    def __init__(self, uri):
+    def __init__(self, uri, server_selection_timeout):
         self.uri = uri
+        self.server_selection_timeout = server_selection_timeout
 
     @property
     def _db(self):
-        return MongoClient(self.uri).get_database()
+        return MongoClient(self.uri, serverSelectionTimeoutMS=self.server_selection_timeout).get_database()
 
     def init_db(self, fuzzers):
         """

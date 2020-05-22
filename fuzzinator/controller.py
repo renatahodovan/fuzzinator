@@ -43,6 +43,10 @@ class Controller(object):
           execution statistics. (Optional, default:
           ``mongodb://localhost/fuzzinator``)
 
+        - Option ``db_server_selection_timeout``: Controls how long the database
+          driver will wait to find an available server (in milliseconds).
+          (Optional, default: 30000)
+
         - Option ``cost_budget``: (Optional, default: number of cpus)
 
         - Option ``validate_after_update``: Boolean to enable the validation
@@ -223,8 +227,10 @@ class Controller(object):
         self.fuzzers = config_get_fuzzers(self.config)
         self.validate_after_update = config_get_with_writeback(self.config, 'fuzzinator', 'validate_after_update', fallback=False) in [1, '1', True, 'True', 'true']
 
-        self.db = MongoDriver(config_get_with_writeback(self.config, 'fuzzinator', 'db_uri', 'mongodb://localhost/fuzzinator'))
+        self.db = MongoDriver(config_get_with_writeback(self.config, 'fuzzinator', 'db_uri', 'mongodb://localhost/fuzzinator'),
+                              int(config_get_with_writeback(self.config, 'fuzzinator', 'db_server_selection_timeout', '30000')))
         self.db.init_db(self.fuzzers)
+
         self.session_start = time.time()
         self.session_baseline = self.db.get_stats()
 

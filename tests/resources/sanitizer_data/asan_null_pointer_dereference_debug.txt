@@ -1,0 +1,20 @@
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==6512==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x7fff72fcd9c6 bp 0x7ffeee931e30 sp 0x7ffeee931e30 T0)
+==6512==The signal is caused by a WRITE memory access.
+==6512==Hint: address points to the zero page.
+    #0 0x7fff72fcd9c6 in _platform_memmove$VARIANT$Haswell+0xc6 (libsystem_platform.dylib:x86_64+0x9c6)
+    #1 0x7fff72fce073 in _platform_strcpy+0x53 (libsystem_platform.dylib:x86_64+0x1073)
+    #2 0x10134740d in wrap_strcpy+0x3ad (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x4440d)
+    #3 0x1012cf528 in null_point_deref() crashme.cpp:68
+    #4 0x1012d011b in main crashme.cpp:117
+    #5 0x7fff72dd7cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+
+==6512==Register values:
+rax = 0x0000000000000000  rbx = 0x00007ffeee9326c0  rcx = 0x0000000000000020  rdx = 0x0000000000000007  
+rdi = 0x0000000000000000  rsi = 0x00007ffeee9326c0  rbp = 0x00007ffeee931e30  rsp = 0x00007ffeee931e30  
+ r8 = 0x0000000000000000   r9 = 0x0000000000000000  r10 = 0x000000010798d420  r11 = 0xffff8001116cd940  
+r12 = 0x0000000000000000  r13 = 0x0000000000000000  r14 = 0x0000000000000000  r15 = 0x0000000000000007  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (libsystem_platform.dylib:x86_64+0x9c6) in _platform_memmove$VARIANT$Haswell+0xc6
+==6512==ABORTING

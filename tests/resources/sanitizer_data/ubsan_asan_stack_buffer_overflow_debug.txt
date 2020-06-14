@@ -1,0 +1,50 @@
+crashme.cpp:74:15: runtime error: index 102 out of bounds for type 'int [100]'
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior crashme.cpp:74:15 in 
+=================================================================
+==6545==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffee1723738 at pc 0x00010e4de987 bp 0x7ffee1723570 sp 0x7ffee1723568
+READ of size 4 at 0x7ffee1723738 thread T0
+    #0 0x10e4de986 in stack_buffer_overflow(int) crashme.cpp:74
+    #1 0x10e4df179 in main crashme.cpp:121
+    #2 0x7fff72dd7cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+
+Address 0x7ffee1723738 is located in stack of thread T0 at offset 440 in frame
+    #0 0x10e4de5ef in stack_buffer_overflow(int) crashme.cpp:71
+
+  This frame has 1 object(s):
+    [32, 432) 'stack_array' (line 72) <== Memory access at offset 440 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow crashme.cpp:74 in stack_buffer_overflow(int)
+Shadow bytes around the buggy address:
+  0x1fffdc2e4690: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1fffdc2e46a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1fffdc2e46b0: f1 f1 f1 f1 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1fffdc2e46c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1fffdc2e46d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x1fffdc2e46e0: 00 00 00 00 00 00 f3[f3]f3 f3 f3 f3 f3 f3 f3 f3
+  0x1fffdc2e46f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1fffdc2e4700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1fffdc2e4710: f1 f1 f1 f1 00 00 00 f3 f3 f3 f3 f3 00 00 00 00
+  0x1fffdc2e4720: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1fffdc2e4730: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+  Shadow gap:              cc
+==6545==ABORTING

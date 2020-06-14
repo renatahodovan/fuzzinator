@@ -1,0 +1,22 @@
+=================================================================
+==6493==ERROR: AddressSanitizer: attempting double-free on 0x6020000000d0 in thread T0:
+    #0 0x1025aa2c6 in wrap_free+0xa6 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x492c6)
+    #1 0x10252945e in double_free() crashme.cpp:29
+    #2 0x10252b05f in main crashme.cpp:109
+    #3 0x7fff72dd7cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+
+0x6020000000d0 is located 0 bytes inside of 1-byte region [0x6020000000d0,0x6020000000d1)
+freed by thread T0 here:
+    #0 0x1025aa2c6 in wrap_free+0xa6 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x492c6)
+    #1 0x102529455 in double_free() crashme.cpp:28
+    #2 0x10252b05f in main crashme.cpp:109
+    #3 0x7fff72dd7cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+
+previously allocated by thread T0 here:
+    #0 0x1025aa17d in wrap_malloc+0x9d (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x4917d)
+    #1 0x1025293d9 in double_free() crashme.cpp:25
+    #2 0x10252b05f in main crashme.cpp:109
+    #3 0x7fff72dd7cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+
+SUMMARY: AddressSanitizer: double-free (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x492c6) in wrap_free+0xa6
+==6493==ABORTING

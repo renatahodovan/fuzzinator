@@ -1,0 +1,2 @@
+crashme.cpp:91:7: runtime error: left shift of 32 by 30 places cannot be represented in type 'int32_t' (aka 'int')
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior crashme.cpp:91:7 in 

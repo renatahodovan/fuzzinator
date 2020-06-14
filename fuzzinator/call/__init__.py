@@ -14,7 +14,10 @@ from .file_writer_decorator import FileWriterDecorator
 from .gdb_backtrace_decorator import GdbBacktraceDecorator
 from .lldb_backtrace_decorator import LldbBacktraceDecorator
 from .platform_info_decorator import PlatformInfoDecorator
+from .regex_automaton_filter import RegexAutomatonFilter
 from .regex_filter import RegexFilter
+from .sanitizer_analyzer_decorator import SanitizerAnalyzerDecorator
+from .sanitizer_automaton_filter import SanitizerAutomatonFilter
 from .stdin_subprocess_call import StdinSubprocessCall
 from .subprocess_call import SubprocessCall
 from .subprocess_property_decorator import SubprocessPropertyDecorator

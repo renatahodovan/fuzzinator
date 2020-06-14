@@ -1,0 +1,7 @@
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==6441==ERROR: AddressSanitizer: stack-overflow on address 0x7ffedbfedff8 (pc 0x00010fc15b6c bp 0x7ffedbfee000 sp 0x7ffedbfee000 T0)
+    #0 0x10fc15b6c in stack_overflow()+0xc (crashme:x86_64+0x100002b6c)
+
+SUMMARY: AddressSanitizer: stack-overflow (crashme:x86_64+0x100002b6c) in stack_overflow()+0xc
+==6441==ABORTING

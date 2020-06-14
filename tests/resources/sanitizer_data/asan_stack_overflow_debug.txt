@@ -1,0 +1,7 @@
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==6518==ERROR: AddressSanitizer: stack-overflow on address 0x7ffede455ff8 (pc 0x00010d7ada5c bp 0x7ffede456000 sp 0x7ffede456000 T0)
+    #0 0x10d7ada5c in stack_overflow() crashme.cpp:78
+
+SUMMARY: AddressSanitizer: stack-overflow crashme.cpp:78 in stack_overflow()
+==6518==ABORTING

@@ -1,0 +1,48 @@
+=================================================================
+==6499==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x6020000000dc at pc 0x00010f23b719 bp 0x7ffee09c5800 sp 0x7ffee09c57f8
+READ of size 1 at 0x6020000000dc thread T0
+    #0 0x10f23b718 in heap_buffer_overflow(int) crashme.cpp:38
+    #1 0x10f23d0c3 in main crashme.cpp:113
+    #2 0x7fff72dd7cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+
+0x6020000000dc is located 2 bytes to the right of 10-byte region [0x6020000000d0,0x6020000000da)
+allocated by thread T0 here:
+    #0 0x10f2b817d in wrap_malloc+0x9d (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x4917d)
+    #1 0x10f23b601 in heap_buffer_overflow(int) crashme.cpp:37
+    #2 0x10f23d0c3 in main crashme.cpp:113
+    #3 0x7fff72dd7cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow crashme.cpp:38 in heap_buffer_overflow(int)
+Shadow bytes around the buggy address:
+  0x1c03ffffffc0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1c03ffffffd0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1c03ffffffe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1c03fffffff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1c0400000000: fa fa fd fd fa fa 00 00 fa fa 00 05 fa fa 00 06
+=>0x1c0400000010: fa fa 00 00 fa fa 00 06 fa fa 00[02]fa fa fa fa
+  0x1c0400000020: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c0400000030: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c0400000040: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c0400000050: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c0400000060: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+  Shadow gap:              cc
+==6499==ABORTING

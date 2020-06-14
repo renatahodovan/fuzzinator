@@ -1,0 +1,57 @@
+=================================================================
+==6411==ERROR: AddressSanitizer: container-overflow on address 0x603000001708 at pc 0x000101553c60 bp 0x7ffeee6ad6f0 sp 0x7ffeee6ad6e8
+READ of size 8 at 0x603000001708 thread T0
+    #0 0x101553c5f in container_overflow()+0x41f (crashme:x86_64+0x100001c5f)
+    #1 0x101555339 in main+0x419 (crashme:x86_64+0x100003339)
+    #2 0x7fff72dd7cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+
+0x603000001708 is located 24 bytes inside of 32-byte region [0x6030000016f0,0x603000001710)
+allocated by thread T0 here:
+    #0 0x1015d67ed in wrap__Znwm+0x7d (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x557ed)
+    #1 0x10155c170 in std::__1::__libcpp_allocate(unsigned long, unsigned long)+0x20 (crashme:x86_64+0x10000a170)
+    #2 0x10155c084 in std::__1::allocator<long>::allocate(unsigned long, void const*)+0x94 (crashme:x86_64+0x10000a084)
+    #3 0x10155bb28 in std::__1::allocator_traits<std::__1::allocator<long> >::allocate(std::__1::allocator<long>&, unsigned long)+0x28 (crashme:x86_64+0x100009b28)
+    #4 0x10155b6fc in std::__1::__split_buffer<long, std::__1::allocator<long>&>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<long>&)+0x27c (crashme:x86_64+0x1000096fc)
+    #5 0x101559f3e in std::__1::__split_buffer<long, std::__1::allocator<long>&>::__split_buffer(unsigned long, unsigned long, std::__1::allocator<long>&)+0x6e (crashme:x86_64+0x100007f3e)
+    #6 0x10155847c in void std::__1::vector<long, std::__1::allocator<long> >::__push_back_slow_path<long const>(long const&)+0x25c (crashme:x86_64+0x10000647c)
+    #7 0x101554020 in std::__1::vector<long, std::__1::allocator<long> >::push_back(long const&)+0x200 (crashme:x86_64+0x100002020)
+    #8 0x101553a61 in container_overflow()+0x221 (crashme:x86_64+0x100001a61)
+    #9 0x101555339 in main+0x419 (crashme:x86_64+0x100003339)
+    #10 0x7fff72dd7cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+
+HINT: if you don't care about these errors you may set ASAN_OPTIONS=detect_container_overflow=0.
+If you suspect a false positive see also: https://github.com/google/sanitizers/wiki/AddressSanitizerContainerOverflow.
+SUMMARY: AddressSanitizer: container-overflow (crashme:x86_64+0x100001c5f) in container_overflow()+0x41f
+Shadow bytes around the buggy address:
+  0x1c0600000290: 00 00 00 00 fa fa 00 00 00 00 fa fa 00 00 00 00
+  0x1c06000002a0: fa fa 00 00 00 00 fa fa 00 00 00 00 fa fa 00 00
+  0x1c06000002b0: 00 00 fa fa 00 00 00 00 fa fa 00 00 00 00 fa fa
+  0x1c06000002c0: 00 00 00 00 fa fa 00 00 00 00 fa fa 00 00 00 00
+  0x1c06000002d0: fa fa 00 00 00 00 fa fa 00 00 00 00 fa fa 00 00
+=>0x1c06000002e0: 00[fc]fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c06000002f0: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c0600000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c0600000310: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c0600000320: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x1c0600000330: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+  Shadow gap:              cc
+==6411==ABORTING

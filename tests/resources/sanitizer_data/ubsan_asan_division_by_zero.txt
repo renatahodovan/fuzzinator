@@ -1,0 +1,17 @@
+crashme.cpp:100:15: runtime error: division by zero
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior crashme.cpp:100:15 in 
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==6453==ERROR: AddressSanitizer: FPE on unknown address 0x000108b5ef13 (pc 0x000108b5ef13 bp 0x7ffee70a3890 sp 0x7ffee70a3870 T0)
+    #0 0x108b5ef13 in division_by_zero(int)+0xb3 (crashme:x86_64+0x100002f13)
+    #1 0x108b5f128 in main+0x208 (crashme:x86_64+0x100003128)
+    #2 0x7fff72dd7cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+
+==6453==Register values:
+rax = 0x0000000000000002  rbx = 0x00007ffee70a3900  rcx = 0x0000000000000000  rdx = 0x0000000000000000  
+rdi = 0x00007ffee70a33b1  rsi = 0x0000000109891da0  rbp = 0x00007ffee70a3890  rsp = 0x00007ffee70a3870  
+ r8 = 0x0000000108d9f640   r9 = 0x00007ffee70a2b10  r10 = 0x0000000000000000  r11 = 0x0000000000000206  
+r12 = 0x0000000000000000  r13 = 0x0000000000000000  r14 = 0x0000000000000000  r15 = 0x0000000000000000  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: FPE (crashme:x86_64+0x100002f13) in division_by_zero(int)+0xb3
+==6453==ABORTING

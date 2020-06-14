@@ -1,0 +1,48 @@
+=================================================================
+==6447==ERROR: AddressSanitizer: stack-use-after-scope on address 0x7ffee7d7b7e0 at pc 0x000107e86d08 bp 0x7ffee7d7b7b0 sp 0x7ffee7d7b7a8
+WRITE of size 4 at 0x7ffee7d7b7e0 thread T0
+    #0 0x107e86d07 in stack_use_after_scope()+0x187 (crashme:x86_64+0x100002d07)
+    #1 0x107e872e1 in main+0x3c1 (crashme:x86_64+0x1000032e1)
+    #2 0x7fff72dd7cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+
+Address 0x7ffee7d7b7e0 is located in stack of thread T0 at offset 32 in frame
+    #0 0x107e86b8f in stack_use_after_scope()+0xf (crashme:x86_64+0x100002b8f)
+
+  This frame has 1 object(s):
+    [32, 36) 'x' <== Memory access at offset 32 is inside this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-use-after-scope (crashme:x86_64+0x100002d07) in stack_use_after_scope()+0x187
+Shadow bytes around the buggy address:
+  0x1fffdcfaf6a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1fffdcfaf6b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1fffdcfaf6c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1fffdcfaf6d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1fffdcfaf6e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x1fffdcfaf6f0: 00 00 00 00 00 00 00 00 f1 f1 f1 f1[f8]f3 f3 f3
+  0x1fffdcfaf700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1fffdcfaf710: 00 00 00 00 f1 f1 f1 f1 00 00 00 f3 f3 f3 f3 f3
+  0x1fffdcfaf720: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1fffdcfaf730: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x1fffdcfaf740: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+  Shadow gap:              cc
+==6447==ABORTING

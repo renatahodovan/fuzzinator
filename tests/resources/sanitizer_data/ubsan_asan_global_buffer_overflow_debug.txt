@@ -1,0 +1,44 @@
+crashme.cpp:33:15: runtime error: index 102 out of bounds for type 'int [100]'
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior crashme.cpp:33:15 in 
+=================================================================
+==6539==ERROR: AddressSanitizer: global-buffer-overflow on address 0x00010f44a418 at pc 0x00010f4335ca bp 0x7ffee07cd820 sp 0x7ffee07cd818
+READ of size 4 at 0x00010f44a418 thread T0
+    #0 0x10f4335c9 in global_buffer_overflow(int) crashme.cpp:33
+    #1 0x10f435091 in main crashme.cpp:111
+    #2 0x7fff72dd7cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+
+0x00010f44a418 is located 8 bytes to the right of global variable 'global_array' defined in 'crashme.cpp:18:5' (0x10f44a280) of size 400
+SUMMARY: AddressSanitizer: global-buffer-overflow crashme.cpp:33 in global_buffer_overflow(int)
+Shadow bytes around the buggy address:
+  0x100021e89430: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100021e89440: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100021e89450: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100021e89460: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100021e89470: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x100021e89480: 00 00 f9[f9]f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x100021e89490: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100021e894a0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100021e894b0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100021e894c0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100021e894d0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+  Shadow gap:              cc
+==6539==ABORTING

@@ -1,17 +1,15 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import json
 import logging
 import os
-import shlex
 import subprocess
-import sys
 
+from ..config import as_bool, as_dict, as_pargs, as_path
 from .. import Controller
 from . import NonIssue
 
@@ -61,16 +59,16 @@ def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None,
             cwd=/home/alice/foo
             env={"BAR": "1"}
     """
-    env = dict(os.environ, **json.loads(env)) if env else None
-    no_exit_code = no_exit_code in [1, '1', True, 'True', 'true']
+    env = dict(os.environ, **as_dict(env)) if env else None
+    no_exit_code = as_bool(no_exit_code)
     timeout = int(timeout) if timeout else None
     issue = {}
 
     try:
-        proc = subprocess.Popen(shlex.split(command.format(test=test), posix=sys.platform != 'win32'),
+        proc = subprocess.Popen(as_pargs(command.format(test=test)),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
-                                cwd=cwd or os.getcwd(),
+                                cwd=as_path(cwd) if cwd else os.getcwd(),
                                 env=env)
         stdout, stderr = proc.communicate(timeout=timeout)
         logger.debug('%s\n%s', stdout.decode('utf-8', errors='ignore'), stderr.decode('utf-8', errors='ignore'))

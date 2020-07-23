@@ -5,8 +5,7 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import json
-
+from ..config import as_bool, as_list
 from . import CallableDecorator
 from . import NonIssue
 
@@ -46,8 +45,8 @@ class ExitCodeFilter(CallableDecorator):
     """
 
     def decorator(self, exit_codes, invert=False, **kwargs):
-        exit_codes = json.loads(exit_codes)
-        invert = invert in [1, '1', True, 'True', 'true']
+        exit_codes = as_list(exit_codes)
+        invert = as_bool(invert)
 
         def wrapper(fn):
             def filter(*args, **kwargs):

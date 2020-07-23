@@ -1,13 +1,13 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import json
 import re
 
+from ..config import as_list
 from . import CallableDecorator
 from . import NonIssue
 
@@ -45,7 +45,7 @@ class RegexFilter(CallableDecorator):
         patterns = dict()
         for (field, patterns_str) in kwargs.items():
             patterns[field] = []
-            for pattern in json.loads(patterns_str):
+            for pattern in as_list(patterns_str):
                 patterns[field].append(re.compile(pattern.encode('utf-8', errors='ignore'), flags=re.MULTILINE | re.DOTALL))
 
         def wrapper(fn):

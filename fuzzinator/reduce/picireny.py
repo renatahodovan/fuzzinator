@@ -5,16 +5,14 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import json
 import logging
 import os
-
-from math import inf
 
 import chardet
 import picire
 import picireny
 
+from ..config import as_bool, as_int_or_inf, as_list, as_path
 from .picire_tester import PicireTester
 
 logger = logging.getLogger(__name__)
@@ -61,7 +59,7 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
 
             [sut.foo.reduce]
             hddmin=full
-            grammar=/home/alice/grammars-v4/HTMLParser.g4 /home/alice/grammars-v4/HTMLLexer.g4
+            grammar=["/home/alice/grammars-v4/HTMLParser.g4", "/home/alice/grammars-v4/HTMLLexer.g4"]
             start=htmlDocument
             parallel=True
             jobs=4
@@ -70,11 +68,14 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
 
     logging.getLogger('picireny').setLevel(logger.level)
 
-    antlr = picireny.process_antlr4_path(antlr)
+    antlr = picireny.process_antlr4_path(as_path(antlr) if antlr else None)
     if antlr is None:
         return None, []
 
-    input_format, start = picireny.process_antlr4_format(format=format, grammar=json.loads(grammar) if grammar else None, start=start, replacements=replacements)
+    input_format, start = picireny.process_antlr4_format(format=format,
+                                                         grammar=[as_path(g) for g in as_list(grammar)] if grammar else None,
+                                                         start=start,
+                                                         replacements=replacements)
 
     if not (input_format and start):
         logger.warning('Processing the arguments of picireny failed.')
@@ -84,23 +85,23 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
     file_name = issue.get('filename', 'test')
 
     hddmin = picireny.cli.args_hdd_choices[hddmin if hddmin else 'full']
-    parallel = parallel in [1, '1', True, 'True', 'true']
-    combine_loops = combine_loops in [1, '1', True, 'True', 'true']
+    parallel = as_bool(parallel)
+    combine_loops = as_bool(combine_loops)
     split_method = getattr(picire.config_splitters, split_method)
-    subset_first = subset_first in [1, '1', True, 'True', 'true']
+    subset_first = as_bool(subset_first)
     subset_iterator = getattr(picire.config_iterators, subset_iterator)
     complement_iterator = getattr(picire.config_iterators, complement_iterator)
-    jobs = 1 if not parallel else int(jobs)
+    jobs = int(jobs) if parallel else 1
     max_utilization = int(max_utilization)
     encoding = encoding or chardet.detect(src)['encoding'] or 'utf-8'
-    hdd_star = hdd_star in [1, '1', True, 'True', 'true']
-    flatten_recursion = flatten_recursion in [1, '1', True, 'True', 'true']
-    squeeze_tree = squeeze_tree in [1, '1', True, 'True', 'true']
-    skip_unremovable = skip_unremovable in [1, '1', True, 'True', 'true']
-    skip_whitespace = skip_whitespace in [1, '1', True, 'True', 'true']
-    build_hidden_tokens = build_hidden_tokens in [1, '1', True, 'True', 'true']
-    granularity = int(granularity) if granularity != 'inf' else inf
-    cleanup = cleanup in [1, '1', True, 'True', 'true']
+    hdd_star = as_bool(hdd_star)
+    flatten_recursion = as_bool(flatten_recursion)
+    squeeze_tree = as_bool(squeeze_tree)
+    skip_unremovable = as_bool(skip_unremovable)
+    skip_whitespace = as_bool(skip_whitespace)
+    build_hidden_tokens = as_bool(build_hidden_tokens)
+    granularity = as_int_or_inf(granularity)
+    cleanup = as_bool(cleanup)
 
     cache_class = getattr(picire, cache_class)
     if parallel:

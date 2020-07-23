@@ -1,14 +1,14 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import json
 import os
 import pexpect
 
+from ..config import as_dict, as_pargs, as_path
 from . import CallableDecorator
 
 
@@ -62,9 +62,9 @@ class GdbBacktraceDecorator(CallableDecorator):
                     return issue
 
                 try:
-                    child = pexpect.spawn('gdb -ex "set width unlimited" -ex "set pagination off" --args {cmd}'.format(cmd=command.format(test=kwargs['test'])),
-                                          cwd=cwd or os.getcwd(),
-                                          env=dict(os.environ, **json.loads(env or '{}')))
+                    child = pexpect.spawn('gdb', ['-ex', 'set width unlimited', '-ex', 'set pagination off', '--args'] + as_pargs(command.format(test=kwargs['test'])),
+                                          cwd=as_path(cwd) if cwd else os.getcwd(),
+                                          env=dict(os.environ, **as_dict(env or '{}')))
                     child.expect_exact('(gdb) ')
                     child.sendline('run')
                     child.expect_exact('(gdb) ')

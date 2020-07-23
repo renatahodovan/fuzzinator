@@ -8,11 +8,10 @@
 import logging
 import os
 
-from math import inf
-
 import chardet
 import picire
 
+from ..config import as_bool, as_int_or_inf
 from .picire_tester import PicireTester
 
 logger = logging.getLogger(__name__)
@@ -59,14 +58,14 @@ def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
     src = issue['test']
     file_name = issue.get('filename', 'test')
 
-    parallel = parallel in [1, '1', True, 'True', 'true']
-    jobs = 1 if not parallel else int(jobs)
+    parallel = as_bool(parallel)
+    jobs = int(jobs) if parallel else 1
     encoding = encoding or chardet.detect(src)['encoding']
-    granularity = int(granularity) if granularity != 'inf' else inf
-    cleanup = cleanup in [1, '1', True, 'True', 'true']
+    granularity = as_int_or_inf(granularity)
+    cleanup = as_bool(cleanup)
 
-    combine_loops = combine_loops in [1, '1', True, 'True', 'true']
-    subset_first = subset_first in [1, '1', True, 'True', 'true']
+    combine_loops = as_bool(combine_loops)
+    subset_first = as_bool(subset_first)
     max_utilization = int(max_utilization)
 
     split_method = getattr(picire.config_splitters, split_method)

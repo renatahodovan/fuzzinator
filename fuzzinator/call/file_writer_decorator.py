@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,6 +7,7 @@
 
 import os
 
+from ..config import as_path
 from . import CallableDecorator
 
 
@@ -45,7 +46,7 @@ class FileWriterDecorator(CallableDecorator):
         def wrapper(fn):
             def writer(*args, **kwargs):
                 file_content = kwargs['test']
-                file_path = filename.format(uid='{pid}-{id}'.format(pid=os.getpid(), id=id(self)))
+                file_path = as_path(filename.format(uid='{pid}-{id}'.format(pid=os.getpid(), id=id(self))))
                 if 'filename' in kwargs:
                     # Ensure that the test case will be saved to the directory defined by the
                     # config file and its name will be what is expected by the kwargs.

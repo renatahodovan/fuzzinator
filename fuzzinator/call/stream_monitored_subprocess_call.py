@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,17 +7,15 @@
 
 import errno
 import fcntl
-import json
 import logging
 import os
 import re
-import shlex
 import select
 import signal
 import subprocess
-import sys
 import time
 
+from ..config import as_dict, as_list, as_pargs, as_path
 from .. import Controller
 
 logger = logging.getLogger(__name__)
@@ -32,9 +30,9 @@ class StreamMonitoredSubprocessCall(object):
 
     def __init__(self, command, cwd=None, env=None, end_patterns=None, timeout=None, **kwargs):
         self.command = command
-        self.cwd = cwd or os.getcwd()
-        self.end_patterns = [re.compile(pattern.encode('utf-8', errors='ignore'), flags=re.MULTILINE | re.DOTALL) for pattern in json.loads(end_patterns)] if end_patterns else []
-        self.env = dict(os.environ, **json.loads(env)) if env else None
+        self.cwd = as_path(cwd) if cwd else os.getcwd()
+        self.end_patterns = [re.compile(pattern.encode('utf-8', errors='ignore'), flags=re.MULTILINE | re.DOTALL) for pattern in as_list(end_patterns)] if end_patterns else []
+        self.env = dict(os.environ, **as_dict(env)) if env else None
         self.timeout = int(timeout) if timeout else None
 
     def __enter__(self):
@@ -47,7 +45,7 @@ class StreamMonitoredSubprocessCall(object):
         if self.timeout:
             start_time = time.time()
 
-        proc = subprocess.Popen(shlex.split(self.command.format(test=test), posix=sys.platform != 'win32'),
+        proc = subprocess.Popen(as_pargs(self.command.format(test=test)),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 cwd=self.cwd or os.getcwd(),

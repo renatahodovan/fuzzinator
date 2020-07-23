@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -8,6 +8,8 @@
 import datetime
 import os
 import time
+
+from ..config import as_path
 
 
 def TimestampUpdateCondition(path, age):
@@ -37,7 +39,7 @@ def TimestampUpdateCondition(path, age):
             path=/home/alice/foo/bin/foo
             age=7:00:00:00
     """
-
+    path = as_path(path)
     if not os.path.exists(path):
         return True
 

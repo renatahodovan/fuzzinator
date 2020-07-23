@@ -1,9 +1,11 @@
-# Copyright (c) 2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
+
+from ..config import as_path
 
 
 class TemplateFormatter(object):
@@ -32,11 +34,11 @@ class TemplateFormatter(object):
 
     def __init__(self, short='', short_file=None, long='', long_file=None):
         if short_file:
-            with open(short_file, 'r') as f:
+            with open(as_path(short_file), 'r') as f:
                 short = f.read()
 
         if long_file:
-            with open(long_file, 'r') as f:
+            with open(as_path(long_file), 'r') as f:
                 long = f.read()
 
         self.templates = {

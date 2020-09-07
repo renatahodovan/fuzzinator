@@ -148,6 +148,8 @@ def execute(arguments):
     logger.info('Server started at: http://%s:%d', arguments.bind_ip or 'localhost', arguments.port)
 
     controller = Controller(config=arguments.config)
+    if arguments.validate is not None:
+        controller.validate_all(sut_name=arguments.validate)
     wui = Wui(controller, arguments.port, arguments.bind_ip, arguments.develop)
     fuzz_process = Process(target=controller.run, args=(), kwargs={'max_cycles': arguments.max_cycles})
 

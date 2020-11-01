@@ -94,15 +94,15 @@ class BaseAPIHandler(RequestHandler):
     def get_content(self):
         try:
             return self.loads[self.load_mime(self.request.headers.get('Content-Type').split(';')[0])](self.request.body.decode('utf-8', errors='ignore'))
-        except ValueError:
-            raise HTTPError(400, reason='malformed request body')   # 400 Client Error: Bad Request
+        except ValueError as exc:
+            raise HTTPError(400, reason='malformed request body') from exc  # 400 Client Error: Bad Request
 
     def get_multipart_content(self):
         if self.request.headers.get('Content-Type').split(';')[0] == 'multipart/form-data':
             try:
                 return [self.loads[self.load_mime(file.content_type)](file.body.decode('utf-8', errors='ignore')) for file in self.request.files['files']]
-            except ValueError:
-                raise HTTPError(400, reason='malformed request body')   # 400 Client Error: Bad Request
+            except ValueError as exc:
+                raise HTTPError(400, reason='malformed request body') from exc  # 400 Client Error: Bad Request
         else:
             return [self.get_content()]
 

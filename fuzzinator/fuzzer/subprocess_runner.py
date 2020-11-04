@@ -1,18 +1,16 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import json
 import logging
-import shlex
+import os
 import shutil
 import subprocess
-import os
-import sys
 
+from ..config import as_bool, as_dict, as_pargs, as_path
 from .. import Controller
 
 logger = logging.getLogger(__name__)
@@ -65,18 +63,18 @@ class SubprocessRunner(object):
         # uid is used to make sure we create unique directory for the generated test cases.
         self.uid = '{pid}-{id}'.format(pid=os.getpid(), id=id(self))
 
-        self.outdir = outdir.format(uid=self.uid)
-        self.command = command
-        self.cwd = cwd or os.getcwd()
-        self.env = dict(os.environ, **json.loads(env)) if env else None
+        self.outdir = as_path(outdir.format(uid=self.uid))
+        self.command = as_pargs(command.format(uid=self.uid))
+        self.cwd = as_path(cwd) if cwd else os.getcwd()
+        self.env = dict(os.environ, **as_dict(env)) if env else None
         self.timeout = int(timeout) if timeout else None
-        self.contents = contents in [1, '1', True, 'True', 'true']
+        self.contents = as_bool(contents)
         self.tests = []
 
     def __enter__(self):
         os.makedirs(self.outdir, exist_ok=True)
         try:
-            proc = subprocess.Popen(shlex.split(self.command.format(uid=self.uid), posix=sys.platform != 'win32'),
+            proc = subprocess.Popen(self.command,
                                     cwd=self.cwd,
                                     env=self.env,
                                     stdout=subprocess.PIPE,

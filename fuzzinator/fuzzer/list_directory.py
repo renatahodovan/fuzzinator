@@ -10,6 +10,8 @@ import os
 
 from pathlib import Path
 
+from ..config import as_bool, as_path
+
 logger = logging.getLogger(__name__)
 
 
@@ -51,7 +53,8 @@ class ListDirectory(object):
             pattern=/home/alice/foo-old-bugs/**/*.js
     """
     def __init__(self, pattern, contents=True, **kwargs):
-        self.contents = contents in [1, '1', True, 'True', 'true']
+        self.contents = as_bool(contents)
+        pattern = as_path(pattern)
         path = Path(pattern)
         anchor, pattern = ('.', pattern) if not path.anchor else (path.anchor, str(path.relative_to(path.anchor)))
         self.tests = [str(fn) for fn in Path(anchor).glob(pattern) if os.path.isfile(str(fn))]

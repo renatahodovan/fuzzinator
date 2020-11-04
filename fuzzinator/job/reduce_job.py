@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,7 +7,7 @@
 
 import os
 
-from ..config import config_get_callable
+from ..config import as_path, config_get_callable
 from .call_job import CallJob
 from .validate_job import ValidateJob
 
@@ -27,7 +27,7 @@ class ReduceJob(CallJob):
 
         self.issue = issue
         self.cost = int(config.get(sut_section, 'reduce_cost', fallback=config.get(sut_section, 'cost', fallback=1)))
-        self.work_dir = config.get('fuzzinator', 'work_dir')
+        self.work_dir = as_path(config.get('fuzzinator', 'work_dir'))
 
     def run(self):
         valid, issues = ValidateJob(id=self.id,

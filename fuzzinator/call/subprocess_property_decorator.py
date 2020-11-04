@@ -1,17 +1,15 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import json
 import logging
 import os
-import shlex
 import subprocess
-import sys
 
+from ..config import as_dict, as_pargs, as_path
 from .. import Controller
 from . import CallableDecorator
 
@@ -63,11 +61,11 @@ class SubprocessPropertyDecorator(CallableDecorator):
                     return issue
 
                 try:
-                    proc = subprocess.Popen(shlex.split(command, posix=sys.platform != 'win32'),
-                                            cwd=cwd or os.getcwd(),
+                    proc = subprocess.Popen(as_pargs(command),
+                                            cwd=as_path(cwd) if cwd else os.getcwd(),
                                             stdout=subprocess.PIPE,
                                             stderr=subprocess.PIPE,
-                                            env=dict(os.environ, **json.loads(env or '{}')))
+                                            env=dict(os.environ, **as_dict(env or '{}')))
                     stdout, stderr = proc.communicate(timeout=timeout)
                     if proc.returncode == 0:
                         issue[property] = stdout

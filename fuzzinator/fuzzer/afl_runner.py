@@ -1,14 +1,15 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import json
 import logging
 import os
 import pexpect
+
+from ..config import as_dict, as_pargs, as_path
 
 logger = logging.getLogger(__name__)
 
@@ -81,15 +82,15 @@ class AFLRunner(object):
 
     def __init__(self, afl_fuzz, input, output, sut_command, cwd=None, env=None, timeout=None, dictionary=None,
                  master_name=None, slave_name=None, **kwargs):
-        self.afl_fuzz = afl_fuzz
-        self.input = input
-        self.output = output.format(uid=str(id(self)))
-        self.sut_command = sut_command
-        self.cwd = cwd
-        self.env = json.loads(env) if env else dict()
+        self.afl_fuzz = as_path(afl_fuzz)
+        self.input = as_path(input)
+        self.output = as_path(output.format(uid=str(id(self))))
+        self.sut_command = as_pargs(sut_command.format(test='@@'))
+        self.cwd = as_path(cwd) if cwd else None
+        self.env = as_dict(env) if env else dict()
         self.env.update({'AFL_NO_UI': '1'})
         self.timeout = timeout
-        self.dictionary = dictionary
+        self.dictionary = as_path(dictionary) if dictionary else None
         self.master_name = master_name
         self.slave_name = slave_name
 
@@ -114,17 +115,16 @@ class AFLRunner(object):
                 with open(test, 'rb') as f:
                     return f.read()
 
-            command = '{afl} {input} {output} {timeout} {dictionary} {master_name} {slave_name} {sut_command}'.format(
-                afl=self.afl_fuzz,
-                input='-i {i}'.format(i=self.input) if self.iteration == 1 else '-i-',
-                output='-o {o}'.format(o=self.output),
-                timeout='-t {t}'.format(t=self.timeout) if self.timeout else '',
-                dictionary='-x {x}'.format(x=self.dictionary) if self.dictionary else '',
-                master_name='-M {n}'.format(n=self.master_name) if self.master_name else '',
-                slave_name='-S {n}'.format(n=self.slave_name) if self.slave_name else '',
-                sut_command=self.sut_command.format(test='@@'))
+            command = \
+                (['-i', self.input] if self.iteration == 1 else ['-i-']) + \
+                ['-o', self.output] + \
+                (['-t', self.timeout] if self.timeout else []) + \
+                (['-x', self.dictionary] if self.dictionary else []) + \
+                (['-M', self.master_name] if self.master_name else []) + \
+                (['-S', self.slave_name] if self.slave_name else []) + \
+                self.sut_command
 
-            child = pexpect.spawn(command, cwd=self.cwd, env=self.env)
+            child = pexpect.spawn(self.afl_fuzz, command, cwd=self.cwd, env=self.env)
             child.expect(['Fuzzing test case [#]{next_it}.*'.format(next_it=self.iteration), pexpect.EOF], timeout=None)
             child.terminate(force=True)
 

@@ -1,14 +1,14 @@
-# Copyright (c) 2017-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import json
 import os
 import pexpect
 
+from ..config import as_dict, as_pargs, as_path
 from . import CallableDecorator
 
 
@@ -67,9 +67,9 @@ class LldbBacktraceDecorator(CallableDecorator):
 
                 try:
                     expect_patterns = [r'\(lldb\) ', pexpect.EOF, pexpect.TIMEOUT]
-                    child = pexpect.spawn('lldb -X -- {cmd}'.format(cmd=command.format(test=kwargs['test'])),
-                                          cwd=cwd or os.getcwd(),
-                                          env=dict(os.environ, **json.loads(env or '{}')))
+                    child = pexpect.spawn('lldb', ['-X', '--'] + as_pargs(command.format(test=kwargs['test'])),
+                                          cwd=as_path(cwd) if cwd else os.getcwd(),
+                                          env=dict(os.environ, **as_dict(env or '{}')))
                     while child.expect(expect_patterns, timeout=timeout) == 0:
                         pass
                     child.sendline('run')

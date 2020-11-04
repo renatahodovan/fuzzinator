@@ -1,12 +1,11 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import json
-
+from ..config import as_list
 from . import CallableDecorator
 
 
@@ -39,7 +38,7 @@ class UniqueIdDecorator(CallableDecorator):
     """
 
     def decorator(self, properties, **kwargs):
-        properties = json.loads(properties) if properties else None
+        properties = as_list(properties) if properties else None
 
         def wrapper(fn):
             def filter(*args, **kwargs):

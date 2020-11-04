@@ -1,17 +1,15 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import json
 import logging
 import os
-import shlex
 import subprocess
-import sys
 
+from ..config import as_dict, as_pargs, as_path
 from .. import Controller
 
 logger = logging.getLogger(__name__)
@@ -49,11 +47,11 @@ def SubprocessUpdate(command, cwd=None, env=None, timeout=None):
 
     timeout = int(timeout) if timeout else None
     try:
-        proc = subprocess.Popen(shlex.split(command, posix=sys.platform != 'win32'),
+        proc = subprocess.Popen(as_pargs(command),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
-                                cwd=cwd or os.getcwd(),
-                                env=dict(os.environ, **json.loads(env or '{}')))
+                                cwd=as_path(cwd) if cwd else os.getcwd(),
+                                env=dict(os.environ, **as_dict(env or '{}')))
         stdout, stderr = proc.communicate(timeout=timeout)
         stdout_str = stdout.decode('utf-8', errors='ignore')
         if proc.returncode != 0:

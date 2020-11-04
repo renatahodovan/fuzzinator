@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,11 +7,16 @@
 
 import hashlib
 import importlib
+import json
+import os
+import shlex
+import sys
 
 from collections import OrderedDict
 from configparser import ConfigParser, ExtendedInterpolation
 from inspect import isclass
 from io import StringIO
+from math import inf
 
 
 def import_entity(name):
@@ -140,3 +145,35 @@ def config_get_fuzzers(config):
         fuzzers[fuzzer] = dict(sut=sut, subconfig=hashlib.md5(src.encode('utf-8', errors='ignore')).hexdigest()[:9], src=src)
 
     return fuzzers
+
+
+def as_list(s):
+    if isinstance(s, list):
+        return s
+    return json.loads(s)
+
+
+def as_dict(s):
+    if isinstance(s, dict):
+        return s
+    return json.loads(s)
+
+
+def as_bool(s):
+    if isinstance(s, bool):
+        return s
+    return s in [1, '1', 'True', 'true']
+
+
+def as_int_or_inf(s):
+    if isinstance(s, int) or s == inf:
+        return s
+    return inf if s == 'inf' else int(s)
+
+
+def as_path(s):
+    return os.path.expanduser(os.path.expandvars(s))
+
+
+def as_pargs(s):
+    return [as_path(e) for e in shlex.split(s, posix=sys.platform != 'win32')]

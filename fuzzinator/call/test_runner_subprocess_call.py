@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,15 +7,13 @@
 
 import errno
 import fcntl
-import json
 import logging
 import os
 import select
-import shlex
 import subprocess
-import sys
 import time
 
+from ..config import as_bool, as_dict, as_list, as_pargs, as_path
 from .. import Controller
 
 logger = logging.getLogger(__name__)
@@ -29,12 +27,12 @@ class TestRunnerSubprocessCall(object):
     """
 
     def __init__(self, command, cwd=None, env=None, end_texts=None, init_wait=None, timeout_per_test=None, **kwargs):
-        self.end_texts = json.loads(end_texts) if end_texts else []
-        self.init_wait = init_wait in [1, '1', True, 'True', 'true']
+        self.end_texts = as_list(end_texts) if end_texts else []
+        self.init_wait = as_bool(init_wait)
         self.timeout_per_test = int(timeout_per_test) if timeout_per_test else None
-        self.cwd = cwd or os.getcwd()
-        self.command = command
-        self.env = dict(os.environ, **json.loads(env)) if env else None
+        self.cwd = as_path(cwd) if cwd else os.getcwd()
+        self.command = as_pargs(command)
+        self.env = dict(os.environ, **as_dict(env)) if env else None
         self.proc = None
 
     def __enter__(self):
@@ -59,7 +57,7 @@ class TestRunnerSubprocessCall(object):
             return None
 
     def start(self, init_wait=True):
-        self.proc = subprocess.Popen(shlex.split(self.command, posix=sys.platform != 'win32'),
+        self.proc = subprocess.Popen(self.command,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
                                      stdin=subprocess.PIPE,

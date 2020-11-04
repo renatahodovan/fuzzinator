@@ -16,7 +16,7 @@ from multiprocessing import Lock, Process, Queue
 
 import psutil
 
-from .config import config_get_callable, config_get_fuzzers, config_get_kwargs, config_get_with_writeback, import_entity
+from .config import as_bool, as_int_or_inf, as_path, config_get_callable, config_get_fuzzers, config_get_kwargs, config_get_with_writeback, import_entity
 from .job import FuzzJob, ReduceJob, UpdateJob, ValidateJob
 from .listener import ListenerManager
 from .mongo_driver import MongoDriver
@@ -37,7 +37,7 @@ class Controller(object):
         - Option ``work_dir``: Pattern of work directory for temporary files,
           which may contain the substring ``{uid}`` as a placeholder for a
           unique string (replaced by the framework). (Optional, default:
-          ``~/.fuzzinator-{uid}``)
+          ``~/.fuzzinator/{uid}``)
 
         - Option ``db_uri``: URI to a MongoDB database to store found issues and
           execution statistics. (Optional, default:
@@ -221,14 +221,18 @@ class Controller(object):
         """
         self.config = config
 
-        self.capacity = int(config_get_with_writeback(self.config, 'fuzzinator', 'cost_budget', str(os.cpu_count())))
-        self.work_dir = config_get_with_writeback(self.config, 'fuzzinator', 'work_dir', os.path.join(os.getcwd(), '.fuzzinator-{uid}')).format(uid=os.getpid())
-        self.config.set('fuzzinator', 'work_dir', self.work_dir)
+        if not self.config.has_section('fuzzinator'):
+            self.config.add_section('fuzzinator')
+        work_dir = self.config.get('fuzzinator', 'work_dir', fallback=os.path.join('~', '.fuzzinator', '{uid}')).format(uid=os.getpid())
+        self.config.set('fuzzinator', 'work_dir', work_dir.replace('$', '$$'))
+        self.work_dir = as_path(work_dir)
         self.fuzzers = config_get_fuzzers(self.config)
-        self.validate_after_update = config_get_with_writeback(self.config, 'fuzzinator', 'validate_after_update', fallback=False) in [1, '1', True, 'True', 'true']
 
-        self.db = MongoDriver(config_get_with_writeback(self.config, 'fuzzinator', 'db_uri', 'mongodb://localhost/fuzzinator'),
-                              int(config_get_with_writeback(self.config, 'fuzzinator', 'db_server_selection_timeout', '30000')))
+        self.capacity = int(config_get_with_writeback(self.config, 'fuzzinator', 'cost_budget', fallback=str(os.cpu_count())))
+        self.validate_after_update = as_bool(config_get_with_writeback(self.config, 'fuzzinator', 'validate_after_update', fallback='False'))
+
+        self.db = MongoDriver(config_get_with_writeback(self.config, 'fuzzinator', 'db_uri', fallback='mongodb://localhost/fuzzinator'),
+                              int(config_get_with_writeback(self.config, 'fuzzinator', 'db_server_selection_timeout', fallback='30000')))
         self.db.init_db(self.fuzzers)
 
         self.session_start = time.time()
@@ -356,8 +360,7 @@ class Controller(object):
                     fuzz_idx = (fuzz_idx + 1) % len(self.fuzzers)
 
                     # Skip fuzz job if limit on parallel instances is reached.
-                    instances = self.config.get(fuzz_section, 'instances', fallback='inf')
-                    instances = inf if instances == 'inf' else int(instances)
+                    instances = as_int_or_inf(self.config.get(fuzz_section, 'instances', fallback='inf'))
                     if instances <= sum(1 for job in running_jobs.values() if isinstance(job['job'], FuzzJob) and job['job'].fuzzer_name == fuzzer_name):
                         continue
 
@@ -449,7 +452,7 @@ class Controller(object):
         with self._shared_lock:
             self._shared_queue.put((UpdateJob, dict(sut_name=sut_name), priority))
 
-        if self.config.get('sut.' + sut_name, 'validate_after_update', fallback=self.validate_after_update) in [1, '1', True, 'True', 'true']:
+        if as_bool(self.config.get('sut.' + sut_name, 'validate_after_update', fallback=self.validate_after_update)):
             self.validate_all(sut_name)
 
         return True

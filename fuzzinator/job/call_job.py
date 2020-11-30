@@ -34,10 +34,7 @@ class CallJob(object):
                           reported=False))
 
         # Generate default hash ID for the test if does not exist.
-        if 'id' not in issue or not issue['id']:
-            hasher = hashlib.md5()
-            hasher.update(test if isinstance(test, bytes) else str(test).encode('utf-8'))
-            issue['id'] = hasher.hexdigest()
+        self.ensure_id(issue)
 
         # Save new issues.
         if self.db.add_issue(issue):
@@ -45,3 +42,11 @@ class CallJob(object):
             self.listener.on_issue_added(ident=self.id, issue=issue)
         else:
             self.listener.on_issue_updated(ident=self.id, issue=issue)
+
+    # Ensure that issue has an id, and if not, adds one
+    def ensure_id(self, issue):
+        if 'id' not in issue or not issue['id']:
+            test = issue['test']
+            hasher = hashlib.md5()
+            hasher.update(test if isinstance(test, bytes) else str(test).encode('utf-8'))
+            issue['id'] = hasher.hexdigest()

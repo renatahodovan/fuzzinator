@@ -40,4 +40,4 @@ class TestExporter(object):
         self.type = type
 
     def __call__(self, issue):
-        return issue.get('reduced', issue['test'])
+        return issue.get('reduced') or issue['test']

@@ -40,6 +40,8 @@ class ValidateJob(CallJob):
 
         if issue:
             issue['test'] = self.issue['test']
+
+            self.ensure_id(issue)
             if issue['id'] == self.issue['id'] and not self.issue.get('invalid'):
                 self.db.update_issue_by_oid(self.issue['_id'], issue)
                 return True, new_issues

@@ -47,6 +47,7 @@ setup(
         'keyrings.alt',
         'markdown',
         'oauth2client',
+        'paramiko',
         'pexpect',
         'picire==19.3',
         'picireny==19.3',

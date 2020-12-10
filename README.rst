@@ -10,6 +10,8 @@
    :target: https://travis-ci.org/renatahodovan/fuzzinator
 .. image:: https://img.shields.io/readthedocs/fuzzinator?logo=read-the-docs&logoColor=white
    :target: http://fuzzinator.readthedocs.io/en/latest/
+.. image:: https://img.shields.io/gitter/room/inbugwetrust/fuzzinator?color=blueviolet&logo=gitter&logoColor=white
+   :target: https://gitter.im/inbugwetrust/fuzzinator
 
 .. start included documentation
 

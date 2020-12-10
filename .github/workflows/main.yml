@@ -1,0 +1,76 @@
+name: main
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        # FIXME: windows-latest fails in picireny.cli.process_antlr4_path
+        # relpath(antlr) cannot handle when antlr-4.7.1-complete.jar is on a
+        # different drive than current directory
+        # "ValueError: path is on mount 'C:', start on mount 'D:'"
+        python-version: [3.5, 3.6, 3.7, 3.8]
+    runs-on: ${{ matrix.os }}
+    steps:
+      # - run: git config --global core.autocrlf input
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - run: pip install --upgrade tox
+      - run: tox -v -e py
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - run: pip install --upgrade tox
+      - run: tox -v -e lint
+
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: pip install --upgrade tox
+      - run: tox -v -e eslint
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - run: pip install --upgrade tox
+      - run: tox -v -e docs
+
+  publish:
+    needs: [test, lint, eslint, docs]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - run: pip install --upgrade tox setuptools
+      - run: tox -v -e twine-check
+      - run: python setup.py sdist
+      - uses: pypa/gh-action-pypi-publish@master
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && github.repository == 'renatahodovan/fuzzinator'
+        with:
+          password: ${{ secrets.pypi_token }}

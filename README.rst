@@ -6,8 +6,8 @@
    :target: https://pypi.org/project/fuzzinator/
 .. image:: https://img.shields.io/pypi/l/fuzzinator?logo=open-source-initiative&logoColor=white
    :target: https://pypi.org/project/fuzzinator/
-.. image:: https://img.shields.io/travis/renatahodovan/fuzzinator/master?logo=travis&logoColor=white
-   :target: https://travis-ci.org/renatahodovan/fuzzinator
+.. image:: https://img.shields.io/github/workflow/status/renatahodovan/fuzzinator/main/master?logo=github&logoColor=white
+   :target: https://github.com/renatahodovan/fuzzinator/actions
 .. image:: https://img.shields.io/readthedocs/fuzzinator?logo=read-the-docs&logoColor=white
    :target: http://fuzzinator.readthedocs.io/en/latest/
 .. image:: https://img.shields.io/gitter/room/inbugwetrust/fuzzinator?color=blueviolet&logo=gitter&logoColor=white

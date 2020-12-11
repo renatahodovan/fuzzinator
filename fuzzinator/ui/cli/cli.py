@@ -25,6 +25,8 @@ def execute(arguments):
     controller.listener += CliListener()
 
     try:
+        if arguments.validate is not None:
+            controller.validate_all(sut_name=arguments.validate)
         controller.run(max_cycles=arguments.max_cycles)
     except KeyboardInterrupt:
         Controller.kill_process_tree(os.getpid(), kill_root=False)

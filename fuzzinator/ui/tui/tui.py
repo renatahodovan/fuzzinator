@@ -176,6 +176,8 @@ def execute(arguments):
         util.set_encoding(arguments.force_encoding)
 
     controller = Controller(config=arguments.config)
+    if arguments.validate is not None:
+        controller.validate_all(sut_name=arguments.validate)
     tui = Tui(controller, style=style)
     controller.listener += TuiListener(tui.pipe, tui.events, tui.lock)
     fuzz_process = Process(target=controller.run, args=(), kwargs={'max_cycles': arguments.max_cycles})

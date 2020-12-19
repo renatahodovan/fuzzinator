@@ -25,23 +25,27 @@ class RegexAutomatonFilter(CallableDecorator):
         be given to the decorator).
         Two kinds of instructions can be assigned to every pattern which are
         encoded as a prefix to the regex pattern in the form of:
-        `m<inst1><inst2> /<pattern>/`.
+        ``m<inst1><inst2> /<pattern>/``.
         The first instruction defines what to do with the groups of a matching
         pattern:
-          - s: Save every group into the issue dictionary even if it exists.
-          - a: Add only new fields to the issue dictionary.
-          - c: Clear the whole issue dictionary.
-          - n: Do not add any groups to the issue dictionary.
+
+            - s: Save every group into the issue dictionary even if it exists.
+            - a: Add only new fields to the issue dictionary.
+            - c: Clear the whole issue dictionary.
+            - n: Do not add any groups to the issue dictionary.
+
         The second instruction defines how to continue the processing of the
         input after a match:
-          - c: Continue the processing of the current line with the next
-            pattern.
-          - s: Stop the processing of the current line and continue with the
-            next line.
-          - t: Terminate the processing of the whole input and return with the
-            current version of the issue dictionary.
+
+            - c: Continue the processing of the current line with the next
+              pattern.
+            - s: Stop the processing of the current line and continue with the
+              next line.
+            - t: Terminate the processing of the whole input and return with the
+              current version of the issue dictionary.
+
         If a pattern lacks the instructions and the slashes then it is
-        interpreted as an `msc /<pattern>/`.
+        interpreted as an ``msc /<pattern>/``.
 
     **Example configuration snippet:**
 

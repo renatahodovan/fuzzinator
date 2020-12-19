@@ -39,7 +39,7 @@ setup(
     setup_requires=['setuptools_scm'],
     use_scm_version=fuzzinator_version,
     install_requires=[
-        'chardet',
+        'chardet<4',  # FIXME: <4 is not a direct constraint but required by requests
         'chevron',
         'google-api-python-client',
         'jinja2',
@@ -54,6 +54,7 @@ setup(
         'PyGithub',
         'pymongo',
         'pyperclip',
+        'requests<2.25',  # FIXME: not a direct dependency, required by PyGithub & requests conflict
         'python-bugzilla',
         'python-gitlab',
         'rainbow_logging_handler',

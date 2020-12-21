@@ -89,7 +89,7 @@ class RegexAutomatonFilter(CallableDecorator):
                             if not match:
                                 continue
 
-                            match_items = match.groupdict().items()
+                            match_items = [(k, v) for k, v in match.groupdict().items() if v is not None]
                             # Set every dictionary field from match groups.
                             if field_op == 's':
                                 issue_details.update(match_items)

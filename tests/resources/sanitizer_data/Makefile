@@ -21,7 +21,9 @@ ASAN_TESTS = \
 UBSAN_ASAN_TESTS = \
 	division-by-zero \
 	global-buffer-overflow \
-	stack-buffer-overflow
+	stack-buffer-overflow \
+	null-deref-read \
+	null-deref-write
 
 UBSAN_TESTS = \
 	shifts \

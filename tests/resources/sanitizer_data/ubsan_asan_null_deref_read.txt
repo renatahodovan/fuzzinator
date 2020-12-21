@@ -1,0 +1,19 @@
+crashme.cpp:105:18: runtime error: load of null pointer of type 'int'
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior crashme.cpp:105:18 in 
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==39451==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x000108de4955 bp 0x7ffee6e1e830 sp 0x7ffee6e1e810 T0)
+==39451==The signal is caused by a READ memory access.
+==39451==Hint: address points to the zero page.
+    #0 0x108de4954 in null_deref_read() (crashme:x86_64+0x100003954)
+    #1 0x108de4cab in main (crashme:x86_64+0x100003cab)
+    #2 0x7fff20355620 in start (libdyld.dylib:x86_64+0x15620)
+
+==39451==Register values:
+rax = 0x0000000000000000  rbx = 0x00007ffee6e1e8a0  rcx = 0x0000100000000000  rdx = 0x0000000000000000  
+rdi = 0x0000000000000000  rsi = 0x0000000109b54b18  rbp = 0x00007ffee6e1e830  rsp = 0x00007ffee6e1e810  
+ r8 = 0x00000001090d2400   r9 = 0x00007ffee6e1daf0  r10 = 0x0000000000000000  r11 = 0x0000000000000206  
+r12 = 0x0000000000000000  r13 = 0x0000000000000000  r14 = 0x0000000000000000  r15 = 0x0000000000000000  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (crashme:x86_64+0x100003954) in null_deref_read()
+==39451==ABORTING

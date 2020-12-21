@@ -1,0 +1,19 @@
+crashme.cpp:110:5: runtime error: store to null pointer of type 'int'
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior crashme.cpp:110:5 in 
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==39509==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x000100013945 bp 0x7ffeefbef830 sp 0x7ffeefbef810 T0)
+==39509==The signal is caused by a WRITE memory access.
+==39509==Hint: address points to the zero page.
+    #0 0x100013944 in null_deref_write() crashme.cpp
+    #1 0x100013c0a in main crashme.cpp:121
+    #2 0x7fff20355620 in start (libdyld.dylib:x86_64+0x15620)
+
+==39509==Register values:
+rax = 0x0000000000000000  rbx = 0x00007ffeefbef8a0  rcx = 0x0000100000000000  rdx = 0x0000000000000000  
+rdi = 0x0000000000000000  rsi = 0x0000000100d8eb18  rbp = 0x00007ffeefbef830  rsp = 0x00007ffeefbef810  
+ r8 = 0x000000010030c400   r9 = 0x00007ffeefbeeaf0  r10 = 0x0000000000000000  r11 = 0x0000000000000206  
+r12 = 0x0000000000000000  r13 = 0x0000000000000000  r14 = 0x0000000000000000  r15 = 0x0000000000000000  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV crashme.cpp in null_deref_write()
+==39509==ABORTING

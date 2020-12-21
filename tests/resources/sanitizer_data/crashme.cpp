@@ -100,11 +100,25 @@ void division_by_zero(int x) {
     int i = x / (x - x);
 }
 
+void null_deref_read() {
+    int *p = NULL;
+    printf("%d", *p);
+}
+
+void null_deref_write() {
+    int *p = NULL;
+    *p = 1;
+}
+
 int main(int argc, char **argv) {
     if (argc == 2) {
         string crashtype = string(argv[1]);
         if (crashtype == "division-by-zero") {
             division_by_zero(argc);
+        } else if (crashtype == "null-deref-read") {
+            null_deref_read();
+        } else if (crashtype == "null-deref-write") {
+            null_deref_write();
         } else if (crashtype == "double-free") {
             double_free();
         } else if (crashtype == "global-buffer-overflow") {

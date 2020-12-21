@@ -69,8 +69,8 @@ class SanitizerAnalyzerDecorator(CallableDecorator):
             (b'null pointer returned from function declared to never return null', b'invalid-null-return'),
             (b'shift', b'undefined-shift'),
             (b'execution reached an unreachable program point', b'unreachable code'),
-            (b'signed integer overflow', b'signed-integer-overflow'),
             (b'unsigned integer overflow', b'unsigned-integer-overflow'),
+            (b'signed integer overflow', b'signed-integer-overflow'),
             (b'variable length array bound evaluates to non-positive value', b'non-positive-vla-bound-value'),
 
             # The following types are supersets of other types, and should be placed

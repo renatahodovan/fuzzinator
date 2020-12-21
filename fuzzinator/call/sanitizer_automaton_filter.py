@@ -21,10 +21,10 @@ class SanitizerAutomatonFilter(RegexAutomatonFilter):
     """
 
     STACK_PREFIX = r'#(?P<frame_id>\d+)\s+(?P<address>[xX\da-fA-F]+)\s+'
-    STACK_FUNCTION_OFFSET = r'in\s+(?P<function>[^+ ]+)\s*(\+(?P<offset>[xX\da-fA-F]+))?\s+'
-    STACK_FILE_LINE_CHAR = r'(?P<file>[^: ]+):(?P<line>\d+)(?::(?P<char>\d+))?'
+    STACK_FUNCTION_OFFSET = r'in\s+(?P<function>.+?)\s*(\+(?P<offset>[xX\da-fA-F]+))?\s+'
+    STACK_FILE_LINE_CHAR = r'(?P<file>[^()]+?):(?P<line>\d+)(?::(?P<char>\d+))?'
     STACK_MODULE_OFFSET = r'\((?P<module>[^+]+)(\+(?P<module_offset>[xX\da-fA-F]+))?\)'
-    STACK_FUNCTION_MODULE_OFFSET = r'in\s*(?P<function>[^+ ]+)\s+\((?P<module>.+?)\+(?P<module_offset>[xX\da-fA-F]+)\)'
+    STACK_FUNCTION_MODULE_OFFSET = r'in\s*(?P<function>.+?)\s+\((?P<module>.+?)\+(?P<module_offset>[xX\da-fA-F]+)\)'
 
     def __init__(self, **kwargs):
         stderr_field = 'stderr'
@@ -33,7 +33,7 @@ class SanitizerAutomatonFilter(RegexAutomatonFilter):
             r'mns /libsystem_platform|libclang_rt|libdyld|libc.so|libasan.so/',
             r'mac /The signal is caused by a (?P<mem_access>[A-Z]+) memory access/',  # ASAN_READ_OR_WRITE_REGEX1
             r'mac /(?P<mem_access>[A-Z]+ of size \d+)/',  # ASAN_READ_OR_WRITE_REGEX2
-            r'mas /\s+(?P<sanitizer>.+?Sanitizer)\s*:\s+(?P<error_type>.+?) on (?P<address_type>unknown address |address |)(?P<address>[xX0-9a-fA-F]+)/',
+            r'mas /\s+(?P<sanitizer>.+?Sanitizer)\s*:\s+(?P<error_type>.+?) on (?P<address_type>unknown address|address|)\s*(?P<address>[xX0-9a-fA-F]+)/',
             # SAN_ADDR_REGEX
             r'mas /((?P<file>[^: ]+):(?P<line>\d+)(?::(?P<char>\d+))?:\s+)?(?P<ubsan>runtime error): (?P<error_type>.*)/',  # UBSAN_RUNTIME_ERROR_REGEX
 

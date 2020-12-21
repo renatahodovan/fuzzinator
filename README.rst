@@ -99,8 +99,14 @@ Acknowledgement and Citations
 The authors are immensely grateful to Dr. Heinz Doofenshmirtz for the continuous
 inspiration.
 
-Background on *Fuzzinator* is published in (R. Hodovan, A. Kiss: "Fuzzinator: An
-Open-Source Modular Random Testing Framework", ICST 2018).
+Background on *Fuzzinator* is published in:
+
+* Renata Hodovan and Akos Kiss. Fuzzinator: An Open-Source Modular Random
+  Testing Framework.
+  In Proceedings of the 11th IEEE International Conference on Software Testing,
+  Verification and Validation (ICST 2018), pages 416-421, Vasteras, Sweden,
+  April 2018. IEEE.
+  https://doi.org/10.1109/ICST.2018.00050
 
 .. end included documentation
 

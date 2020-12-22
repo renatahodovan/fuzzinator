@@ -16,7 +16,7 @@ from multiprocessing import Lock, Process, Queue
 
 import psutil
 
-from .config import as_bool, as_int_or_inf, as_path, config_get_callable, config_get_fuzzers, config_get_kwargs, config_get_with_writeback, import_entity
+from .config import as_bool, as_int_or_inf, as_path, config_get_callable, config_get_fuzzers, config_get_kwargs, import_entity
 from .job import FuzzJob, ReduceJob, UpdateJob, ValidateJob
 from .listener import ListenerManager
 from .mongo_driver import MongoDriver
@@ -221,18 +221,16 @@ class Controller(object):
         """
         self.config = config
 
-        if not self.config.has_section('fuzzinator'):
-            self.config.add_section('fuzzinator')
-        work_dir = self.config.get('fuzzinator', 'work_dir', fallback=os.path.join('~', '.fuzzinator', '{uid}')).format(uid=os.getpid())
+        work_dir = self.config.get('fuzzinator', 'work_dir').format(uid=os.getpid())
         self.config.set('fuzzinator', 'work_dir', work_dir.replace('$', '$$'))
         self.work_dir = as_path(work_dir)
         self.fuzzers = config_get_fuzzers(self.config)
 
-        self.capacity = int(config_get_with_writeback(self.config, 'fuzzinator', 'cost_budget', fallback=str(os.cpu_count())))
-        self.validate_after_update = as_bool(config_get_with_writeback(self.config, 'fuzzinator', 'validate_after_update', fallback='False'))
+        self.capacity = int(self.config.get('fuzzinator', 'cost_budget'))
+        self.validate_after_update = as_bool(self.config.get('fuzzinator', 'validate_after_update'))
 
-        self.db = MongoDriver(config_get_with_writeback(self.config, 'fuzzinator', 'db_uri', fallback='mongodb://localhost/fuzzinator'),
-                              int(config_get_with_writeback(self.config, 'fuzzinator', 'db_server_selection_timeout', fallback='30000')))
+        self.db = MongoDriver(self.config.get('fuzzinator', 'db_uri'),
+                              int(self.config.get('fuzzinator', 'db_server_selection_timeout')))
         self.db.init_db(self.fuzzers)
 
         self.session_start = time.time()

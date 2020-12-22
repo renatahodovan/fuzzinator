@@ -92,16 +92,6 @@ def config_get_callable(config, section, options):
     return callable_ctx, entity_kwargs
 
 
-def config_get_with_writeback(config, section, option, fallback):
-    if not config.has_section(section):
-        config.add_section(section)
-
-    if not config.has_option(section, option) or not config.get(section, option):
-        config.set(section, option, fallback)
-
-    return config.get(section, option)
-
-
 def config_get_fuzzers(config):
 
     def filter_available_sections(section_name):

@@ -9,6 +9,7 @@
 import argparse
 import configparser
 import logging
+import os
 import re
 import sys
 
@@ -21,6 +22,16 @@ def process_args(args):
     config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(),
                                        strict=False,
                                        allow_no_value=True)
+
+    config.read_dict({
+        'fuzzinator': {
+            'work_dir': os.path.join('~', '.fuzzinator', '{uid}'),
+            'cost_budget': str(os.cpu_count()),
+            'validate_after_update': 'False',
+            'db_uri': 'mongodb://localhost/fuzzinator',
+            'db_server_selection_timeout': '30000',
+        }
+    })
 
     parsed_fn = config.read(args.config)
     if len(parsed_fn) != len(args.config):

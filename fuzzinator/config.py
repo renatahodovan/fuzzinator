@@ -13,7 +13,7 @@ import shlex
 import sys
 
 from collections import OrderedDict
-from configparser import ConfigParser, ExtendedInterpolation
+from configparser import ConfigParser
 from inspect import isclass
 from io import StringIO
 from math import inf
@@ -133,9 +133,7 @@ def config_get_fuzzers(config):
 
     for fuzzer in fuzzer_names:
         sut = config.get('fuzz.' + fuzzer, 'sut')
-        sub_parser = ConfigParser(interpolation=ExtendedInterpolation(),
-                                  strict=False,
-                                  allow_no_value=True)
+        sub_parser = ConfigParser(interpolation=None, strict=False, allow_no_value=True)
         filter_available_sections('sut.' + sut)
         filter_available_sections('fuzz.' + fuzzer)
 

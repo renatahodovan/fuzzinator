@@ -30,7 +30,7 @@ class SanitizerAutomatonFilter(RegexAutomatonFilter):
         stderr_field = 'stderr'
         stderr_patterns = as_list(kwargs.pop(stderr_field, '[]'))
         stderr_patterns.extend([
-            r'mns /libsystem_platform|libclang_rt|libdyld|libc.so|libasan.so/',
+            r'mns /libsystem_platform|libclang_rt|libdyld|libc.so|glibc|libasan.so/',
             r'mac /The signal is caused by a (?P<mem_access>[A-Z]+) memory access/',  # ASAN_READ_OR_WRITE_REGEX1
             r'mac /(?P<mem_access>[A-Z]+ of size \d+)/',  # ASAN_READ_OR_WRITE_REGEX2
             r'mas /\s+(?P<sanitizer>.+?Sanitizer)\s*:\s+(?P<error_type>.+?) on (?P<address_type>unknown address|address|)\s*(?P<address>[xX0-9a-fA-F]+)/',

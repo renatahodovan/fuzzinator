@@ -10,7 +10,7 @@ jobs:
         # relpath(antlr) cannot handle when antlr-4.7.1-complete.jar is on a
         # different drive than current directory
         # "ValueError: path is on mount 'C:', start on mount 'D:'"
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [3.5, 3.6, 3.7, 3.8, 3.9]
     runs-on: ${{ matrix.os }}
     steps:
       # - run: git config --global core.autocrlf input

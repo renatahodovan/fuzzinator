@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -36,7 +36,7 @@ setup(
     long_description=open('README.rst').read(),
     zip_safe=False,
     include_package_data=True,
-    setup_requires=['setuptools_scm'],
+    setup_requires=['setuptools_scm<6.0.0'],  # FIXME: pinning setuptools_scm required for py3.5
     use_scm_version=fuzzinator_version,
     install_requires=[
         'chardet<4',  # FIXME: <4 is not a direct constraint but required by requests

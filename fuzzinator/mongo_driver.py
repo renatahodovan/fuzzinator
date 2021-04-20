@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 # Copyright (c) 2019 Tamas Keri.
 #
 # Licensed under the BSD 3-Clause License
@@ -96,7 +96,7 @@ class MongoDriver(object):
     def get_issues(self, filter=None, skip=0, limit=0, sort=None, include_invalid=True, session_start=None, detailed=False):
         filter = filter or {}
         if session_start:
-            filter['first_seen'] = {'$gte': session_start}
+            filter['first_seen'] = {'$gte': datetime.utcfromtimestamp(session_start)}
         if not include_invalid:
             filter['invalid'] = {'$exists': False}
 
@@ -164,7 +164,7 @@ class MongoDriver(object):
             {'$lookup': {
                 'from': 'fuzzinator_issues',
                 'pipeline': ([] if not session_start else [
-                    {'$match': {'first_seen': {'$gte': session_start}}}
+                    {'$match': {'first_seen': {'$gte': datetime.utcfromtimestamp(session_start)}}}
                 ]) + [
                     {'$addFields': {'subconfig': {'$ifNull': ['$subconfig.subconfig', None]}}},
                     {'$group': {

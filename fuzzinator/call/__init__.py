@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -14,6 +14,7 @@ from .file_writer_decorator import FileWriterDecorator
 from .gdb_backtrace_decorator import GdbBacktraceDecorator
 from .lldb_backtrace_decorator import LldbBacktraceDecorator
 from .platform_info_decorator import PlatformInfoDecorator
+from .regex_automaton import RegexAutomaton
 from .regex_automaton_filter import RegexAutomatonFilter
 from .regex_filter import RegexFilter
 from .sanitizer_analyzer_decorator import SanitizerAnalyzerDecorator

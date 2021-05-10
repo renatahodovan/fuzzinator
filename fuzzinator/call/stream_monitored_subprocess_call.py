@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -9,7 +9,6 @@ import errno
 import fcntl
 import logging
 import os
-import re
 import select
 import signal
 import subprocess
@@ -17,6 +16,7 @@ import time
 
 from ..config import as_dict, as_list, as_pargs, as_path
 from .. import Controller
+from . import RegexAutomaton
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class StreamMonitoredSubprocessCall(object):
     def __init__(self, command, cwd=None, env=None, end_patterns=None, timeout=None, **kwargs):
         self.command = command
         self.cwd = as_path(cwd) if cwd else os.getcwd()
-        self.end_patterns = [re.compile(pattern.encode('utf-8', errors='ignore'), flags=re.MULTILINE | re.DOTALL) for pattern in as_list(end_patterns)] if end_patterns else []
+        self.end_patterns = [RegexAutomaton.split_pattern(p.encode('utf-8', errors='ignore')) for p in as_list(end_patterns)] if end_patterns else []
         self.env = dict(os.environ, **as_dict(env)) if env else None
         self.timeout = int(timeout) if timeout else None
 
@@ -52,14 +52,15 @@ class StreamMonitoredSubprocessCall(object):
                                 env=self.env)
 
         streams = {'stdout': b'', 'stderr': b''}
-        issue = None
 
         select_fds = [stream.fileno() for stream in [proc.stderr, proc.stdout]]
         for fd in select_fds:
             fl = fcntl.fcntl(fd, fcntl.F_GETFL)
             fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
+        issue = dict()
         end_loop = False
+        regex_automaton = RegexAutomaton(self.end_patterns)
         while not end_loop:
             try:
                 try:
@@ -77,11 +78,10 @@ class StreamMonitoredSubprocessCall(object):
                                 break
                             streams[stream] += chunk
 
-                        for pattern in self.end_patterns:
-                            match = pattern.search(streams[stream])
-                            if match is not None:
-                                end_loop = True
-                                issue = match.groupdict()
+                        # Process the stream content line-by-line.
+                        terminate, new_details = regex_automaton.process(streams[stream].splitlines(), issue)
+                        if new_details or terminate:
+                            end_loop = True
 
                 if proc.poll() is not None or (self.timeout and time.time() - start_time > self.timeout):
                     break
@@ -95,4 +95,5 @@ class StreamMonitoredSubprocessCall(object):
             issue.update(dict(exit_code=proc.returncode,
                               stderr=streams['stderr'],
                               stdout=streams['stdout']))
-        return issue
+            return issue
+        return None

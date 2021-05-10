@@ -26,6 +26,7 @@ from .unique_id_decorator import UniqueIdDecorator
 
 try:
     from .stream_monitored_subprocess_call import StreamMonitoredSubprocessCall
+    from .sanitized_stream_monitor_subprocess_call import SanitizedStreamMonitoredSubprocessCall
 except ImportError:
     pass
 

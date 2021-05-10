@@ -23,6 +23,53 @@ logger = logging.getLogger(__name__)
 
 class StreamMonitoredSubprocessCall(object):
     """
+    Subprocess invocation-based call of a SUT that takes test input on its
+    command line. The main difference from
+    :func:`fuzzinator.call.SubprocessCall` is that it continuously monitors
+    the stdout and stderr streams of the SUT and forces it to terminate if
+    some predefined patterns are appearing.
+
+    **Mandatory parameter of the SUT call:**
+
+      - ``command``: string to pass to the child shell as a command to run (all
+        occurrences of ``{test}`` in the string are replaced by the actual test
+        input).
+
+    **Optional parameters of the SUT call:**
+
+      - ``cwd``: if not ``None``, change working directory before the command
+        invocation.
+      - ``env``: if not ``None``, a dictionary of variable names-values to
+        update the environment with.
+      - ``end_patterns``: array of patterns to match against the lines of stdout
+        and stderr streams. The patterns and instructions are interpreted as
+        defined in :class:`fuzzinator.call.RegexAutomaton`.
+      - ``timeout``: run subprocess with timeout.
+
+    **Result of the SUT call:**
+
+      - If processing stdout and stderr with ``end_patterns`` doesn't produce
+        any result, no issue is returned.
+      - Otherwise, an issue with keys from the matching patterns of
+        ``end_pattern`` extended with the ``'exit_code'``, ``'stdout'``, and
+        ``'stderr'`` properties is returned.
+
+    **Example configuration snippet:**
+
+        .. code-block:: ini
+
+            [sut.foo]
+            call=fuzzinator.call.StreamMonitoredSubprocessCall
+
+            [sut.foo.call.init]
+            # assuming that {test} is something that can be interpreted by foo as
+            # command line argument
+            command=./bin/foo {test}
+            cwd=/home/alice/foo
+            env={"BAR": "1"}
+            end_patterns=["mss /(?P<file>[^:]+):(?P<line>[0-9]+): (?P<func>[^:]+): (?P<msg>Assertion `.*' failed)/"]
+            timeout=30
+
     .. note::
 
        Not available on platforms without fcntl support (e.g., Windows).

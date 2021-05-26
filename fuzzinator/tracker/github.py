@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -22,12 +22,12 @@ from .base import BaseTracker
 class GithubTracker(BaseTracker):
 
     def __init__(self, repository, token=None):
-        self.org, self.repository = repository.split('/')
+        self.repository = repository
         self.ghapi = Github(login_or_token=token)
         self.project = self.ghapi.get_repo(repository)
 
     def find_issue(self, query):
-        issues = list(self.ghapi.search_issues('+'.join(query.split()), state='open', org=self.org, repo=self.repository))
+        issues = list(self.ghapi.search_issues('repo:{repository} is:issue is:open {query}'.format(repository=self.repository, query=query)))
         return [{'id': issue.number, 'title': issue.title, 'url': issue.html_url} for issue in issues]
 
     def report_issue(self, title, body):

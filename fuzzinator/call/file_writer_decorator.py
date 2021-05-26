@@ -32,7 +32,7 @@ class FileWriterDecorator(CallableDecorator):
 
             [sut.foo]
             call=fuzzinator.call.SubprocessCall
-            call.decorate(0)=fuzzionator.call.FileWriterDecorator
+            call.decorate(0)=fuzzinator.call.FileWriterDecorator
 
             [sut.foo.call]
             # assuming that foo takes one file as input specified on command line

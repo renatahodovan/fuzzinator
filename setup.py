@@ -36,7 +36,7 @@ setup(
     long_description=open('README.rst').read(),
     zip_safe=False,
     include_package_data=True,
-    setup_requires=['setuptools_scm<6.0.0'],  # FIXME: pinning setuptools_scm required for py3.5
+    setup_requires=['setuptools_scm'],
     use_scm_version=fuzzinator_version,
     install_requires=[
         'chardet<4',  # FIXME: <4 is not a direct constraint but required by requests

@@ -1,5 +1,5 @@
 # Copyright (c) 2019 Tamas Keri.
-# Copyright (c) 2019-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2019-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -19,6 +19,7 @@ from tornado.websocket import WebSocketHandler
 from ...config import config_get_callable
 from ...formatter import JsonFormatter
 from ...pkgdata import __version__
+from ...tracker import TrackerError
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +117,13 @@ class IssueReportUIHandler(BaseUIHandler):
             return
 
         formatter = config_get_callable(self._config, 'sut.' + issue['sut'], ['formatter'])[0] or JsonFormatter
-        duplicates = tracker.find_issue(issue['id'])
+
+        duplicates = []
+        try:
+            duplicates = tracker.find_issue(issue['id'])
+        except TrackerError as e:
+            logger.error(str(e), exc_info=e)
+
         tracker_name = tracker.__class__.__name__.replace('Tracker', '')
         template = 'report-' + tracker_name.lower() + '.html'
         template = template if exists(join(self.get_template_path(), template)) else 'report.html'

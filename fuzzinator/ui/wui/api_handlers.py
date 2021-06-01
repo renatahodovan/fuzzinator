@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2019-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,6 +6,7 @@
 # according to those terms.
 
 import json
+import traceback
 
 from io import BytesIO
 from zipfile import ZipFile, ZIP_DEFLATED
@@ -17,6 +18,7 @@ from pymongo import ASCENDING, DESCENDING
 from tornado.web import HTTPError, RequestHandler
 
 from ...config import config_get_callable
+from ...tracker import TrackerError
 
 
 class BaseAPIHandler(RequestHandler):
@@ -95,6 +97,7 @@ class BaseAPIHandler(RequestHandler):
         try:
             return self.loads[self.load_mime(self.request.headers.get('Content-Type').split(';')[0])](self.request.body.decode('utf-8', errors='ignore'))
         except ValueError as exc:
+            self._wui.send_notification('error', data={'title': 'Content loading failed', 'body': str(exc)})
             raise HTTPError(400, reason='malformed request body') from exc  # 400 Client Error: Bad Request
 
     def get_multipart_content(self):
@@ -102,6 +105,7 @@ class BaseAPIHandler(RequestHandler):
             try:
                 return [self.loads[self.load_mime(file.content_type)](file.body.decode('utf-8', errors='ignore')) for file in self.request.files['files']]
             except ValueError as exc:
+                self._wui.send_notification('error', data={'title': 'Multipart content loading failed', 'body': str(exc)})
                 raise HTTPError(400, reason='malformed request body') from exc  # 400 Client Error: Bad Request
         else:
             return [self.get_content()]
@@ -154,6 +158,7 @@ class IssuesAPIHandler(BaseAPIHandler):
     def post(self):
         files = self.get_multipart_content()
         if not files:
+            self._wui.send_notification('error', data={'title': 'Issue uploading failed', 'body': 'Nothing to upload.'})
             raise HTTPError(400, reason='no issue added')  # 400 Client Error: Bad Request
 
         issues_added = 0
@@ -174,6 +179,8 @@ class IssueAPIHandler(BaseAPIHandler):
     def send_export(self, issue):
         exporter, _ = config_get_callable(self._config, 'sut.' + issue['sut'], 'exporter')
         if not exporter:
+            self._wui.send_notification('error', data={'title': 'Issue export failed',
+                                                       'body': 'The exporter setup is missing from the configuration (sut.{sut}.exporter).'.format(sut=issue['sut'])})
             raise HTTPError(404, reason='exporter not found')  # 404 Client Error: Not Found
 
         if getattr(exporter, 'type', None):
@@ -183,6 +190,8 @@ class IssueAPIHandler(BaseAPIHandler):
     def get(self, issue_oid):
         issue = self._db.find_issue_by_oid(issue_oid, detailed=True)
         if issue is None:
+            self._wui.send_notification('error', data={'title': 'Issue request failed',
+                                                       'body': 'No issue with id={id}.'.format(id=issue_oid)})
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
         if self.get_query_argument('format', None) == 'custom':
@@ -193,6 +202,8 @@ class IssueAPIHandler(BaseAPIHandler):
     def post(self, issue_oid):
         issue = self._db.find_issue_by_oid(issue_oid)
         if issue is None:
+            self._wui.send_notification('error', data={'title': 'Issue editing failed',
+                                                       'body': 'No issue with id={id}.'.format(id=issue_oid)})
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
         self._db.update_issue_by_oid(issue_oid, self.get_content())
@@ -202,6 +213,8 @@ class IssueAPIHandler(BaseAPIHandler):
     def delete(self, issue_oid):
         issue = self._db.find_issue_by_oid(issue_oid)
         if issue is None:
+            self._wui.send_notification('error', data={'title': 'Issue deletion failed',
+                                                       'body': 'No issue with id={id}.'.format(id=issue_oid)})
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
         self._db.remove_issue_by_oid(issue_oid)
@@ -214,15 +227,26 @@ class IssueReportAPIHandler(BaseAPIHandler):
     def post(self, issue_oid):
         issue = self._db.find_issue_by_oid(issue_oid)
         if issue is None:
+            self._wui.send_notification('error', data={'title': 'Issue reporting failed',
+                                                       'body': 'No issue with id={id}.'.format(id=issue_oid)})
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
         tracker = config_get_callable(self._config, 'sut.' + issue['sut'], 'tracker')[0]
         if not tracker:
+            self._wui.send_notification('error', data={'title': 'Issue reporting failed',
+                                                       'body': 'The tracker setup is missing from the configuration (sut.{sut}.tracker).'.format(sut=issue['sut'])})
             raise HTTPError(404, reason='tracker not found')  # 404 Client Error: Not Found
 
-        self._db.update_issue_by_oid(issue_oid, {'reported': tracker.report_issue(**self.get_content())['url']})
-        self._wui.send_notification('refresh_issues')
-        self.set_status(204, reason='issue reported')  # 204 Success: No Content
+        try:
+            self._db.update_issue_by_oid(issue_oid, {'reported': tracker.report_issue(**self.get_content())['url']})
+            self._wui.send_notification('refresh_issues')
+            self.set_status(204, reason='issue reported')  # 204 Success: No Content
+        except TrackerError as e:
+            data = {'title': str(e), 'body': str(e.__cause__)}
+            if self.application.settings.get('serve_traceback'):
+                data['exc_info'] = traceback.format_exc()
+            self._wui.send_notification('error', data=data)
+            self.set_status(400, reason='issue report failed')  # 400 Client Error: Bad Request
 
 
 class JobsAPIHandler(BaseAPIHandler):
@@ -238,6 +262,8 @@ class JobsAPIHandler(BaseAPIHandler):
 
         issue = self._db.find_issue_by_oid(issue_oid)
         if issue is None:
+            self._wui.send_notification('error', data={'title': '{job} job creation failed'.format(job=job_type.capitalize()),
+                                                       'body': 'No issue with id={id}.'.format(id=issue_oid)})
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
         success = {
@@ -246,6 +272,10 @@ class JobsAPIHandler(BaseAPIHandler):
         }[job_type](issue)
 
         if not success:
+            self._wui.send_notification('error',
+                                        data={'title': '{job} job creation failed'.format(job=job_type.capitalize()),
+                                              'body': 'The {job} setup is missing from the configuration ({conf}).'.format(job=job_type,
+                                                                                                                           conf='sut.{sut}{reduce}'.format(sut=issue['sut'], reduce='.reduce' if job_type == 'reduce' else ''))})
             raise HTTPError(400, reason='missing config')   # 400 Client Error: Bad Request
         self.set_status(201, reason='job added')    # 201 Success: Created
 
@@ -256,6 +286,8 @@ class JobAPIHandler(BaseAPIHandler):
         job_id = int(job_id)
         job = self._wui.jobs.get(job_id)
         if job is None:
+            self._wui.send_notification('error', data={'title': 'Job request failed',
+                                                       'body': 'No job with id={id}.'.format(id=job_id)})
             raise HTTPError(404, reason='job not found')    # 404 Client Error: Not Found
 
         self.send_content(job)
@@ -264,6 +296,8 @@ class JobAPIHandler(BaseAPIHandler):
         job_id = int(job_id)
         job = self._wui.jobs.get(job_id)
         if job is None:
+            self._wui.send_notification('error', data={'title': 'Job cancelation failed',
+                                                       'body': 'No job with id={id}.'.format(id=job_id)})
             raise HTTPError(404, reason='job not found')    # 404 Client Error: Not Found
 
         self._controller.cancel_job(job_id)

@@ -1,19 +1,23 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+import logging
+
 from urwid import *
 
 from ...config import config_get_callable
 from ...formatter import JsonFormatter
-from ...tracker import BaseTracker, BugzillaTracker
+from ...tracker import BaseTracker, BugzillaTracker, TrackerError
 from .button import FormattedButton
 from .decor_widgets import PatternBox
 from .dialogs import BugEditor
 from .graphics import fz_box_pattern
+
+logger = logging.getLogger(__name__)
 
 
 class ReportDialog(PopUpTarget):
@@ -52,12 +56,15 @@ class ReportDialog(PopUpTarget):
     def find_duplicates(self):
         dups_walker = SimpleListWalker([self.edit_dups])
         options = []
-        for issue in self.tracker.find_issue(self.issue_title.get_text()[0]):
-            radio_btn = RadioButton(options, issue['url'], on_state_change=self.set_duplicate)
-            # Select the first suggested bug if there is not set any.
-            if self.duplicate is None:
-                self.duplicate = radio_btn.label
-            dups_walker.append(radio_btn)
+        try:
+            for issue in self.tracker.find_issue(self.issue_title.get_text()[0]):
+                radio_btn = RadioButton(options, issue['url'], on_state_change=self.set_duplicate)
+                # Select the first suggested bug if there is not set any.
+                if self.duplicate is None:
+                    self.duplicate = radio_btn.label
+                dups_walker.append(radio_btn)
+        except TrackerError as e:
+            logger.error(str(e), exc_info=e)
         self.body.insert(0, Columns([('fixed', 13, Text(('dialog_secondary', 'Duplicates: '))),
                                      ('weight', 10, BoxAdapter(ListBox(dups_walker), height=len(dups_walker)))]))
 
@@ -66,9 +73,12 @@ class ReportDialog(PopUpTarget):
         return dict()
 
     def send_report(self):
-        issue_url = self.tracker.report_issue(**self.get_report_data())['url']
-        self.result.set_text(('dialog_secondary', 'Reported at: {url}'.format(url=issue_url)))
-        self.db.update_issue_by_oid(self.issue['_id'], {'reported': issue_url})
+        try:
+            issue_url = self.tracker.report_issue(**self.get_report_data())['url']
+            self.result.set_text(('dialog_secondary', 'Reported at: {url}'.format(url=issue_url)))
+            self.db.update_issue_by_oid(self.issue['_id'], {'reported': issue_url})
+        except TrackerError as e:
+            logger.error(str(e), exc_info=e)
 
     def save_reported(self):
         if self.edit_dups.text:

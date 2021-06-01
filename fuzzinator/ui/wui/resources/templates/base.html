@@ -73,6 +73,7 @@
             </div>
           </nav>
           <!--mainTab -->
+          <div id="toast-container" class="sticky-top sticky-offset position-sticky d-flex flex-column w-100"></div>
           <div class="tab-content" id="mainTabContent">
             {% block toolbar %}
             {% end toolbar %}
@@ -227,6 +228,18 @@
           <div class="col-12 text-truncate text-secondary small" data-toggle="tool-tip" title="issue"><i class="material-icons-outlined md-14 align-text-top">priority_high</i> <span class="job-issue"> </span></div>
         </div>
         <!-- validate job card end -->
+      </div>
+    </template>
+    <template id="notification-toast-template">
+      <div class="toast toast-error close-on-click" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <i class="material-icons-outlined md-18 align-text-top">priority_high</i>
+          <strong class="mr-auto toast-title"></strong>
+          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <pre class="toast-body"></pre>
       </div>
     </template>
     <!-- templates end -->

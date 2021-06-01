@@ -168,3 +168,30 @@ input[type="radio"]:checked + label:before {
 .form-control {
   height: unset;
 }
+
+.toast {
+  padding: 16px;
+  border: 1px solid;
+  border-left: 6px solid transparent;
+  border-radius: 2px;
+  transition: all 0.32s ease-in-out;
+  -webkit-box-shadow: 0px 0px 9px rgba(0, 0, 0, .25);
+  box-shadow: 0px 0px 9px rgba(0, 0, 0, .25);
+  flex-basis: 100%;
+  max-width: 100%;
+}
+
+.toast-error {
+  color: #a94442;
+  background-color: #ffecec;
+  border-color: #f5aca6;
+}
+
+.toast-body {
+  margin-bottom: 0;
+}
+
+.sticky-offset {
+  top: 58px;
+}
+

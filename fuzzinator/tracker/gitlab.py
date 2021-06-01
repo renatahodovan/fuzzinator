@@ -5,9 +5,9 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-from gitlab import Gitlab
+from gitlab import Gitlab, exceptions
 
-from .base import BaseTracker
+from .base import BaseTracker, TrackerError
 
 
 class GitlabTracker(BaseTracker):
@@ -18,16 +18,22 @@ class GitlabTracker(BaseTracker):
         self.project = gl.projects.get(gl.search('projects', project)[0]['id'])
 
     def find_issue(self, query):
-        issues = [issue for issue in self.project.search('issues', query) if issue['state'] == 'opened']
-        return [{'id': issue['id'],
-                 'title': issue['title'],
-                 'url': issue['web_url']} for issue in issues]
+        try:
+            issues = [issue for issue in self.project.search('issues', query) if issue['state'] == 'opened']
+            return [{'id': issue['id'],
+                     'title': issue['title'],
+                     'url': issue['web_url']} for issue in issues]
+        except (exceptions.GitlabAuthenticationError, exceptions.GitlabSearchError) as e:
+            raise TrackerError('Finding possible duplicates failed') from e
 
     def report_issue(self, title, body):
-        new_issue = self.project.issues.create(dict(title=title, description=body))
-        return {'id': new_issue.attributes['id'],
-                'title': new_issue.attributes['title'],
-                'url': new_issue.attributes['web_url']}
+        try:
+            new_issue = self.project.issues.create(dict(title=title, description=body))
+            return {'id': new_issue.attributes['id'],
+                    'title': new_issue.attributes['title'],
+                    'url': new_issue.attributes['web_url']}
+        except (exceptions.GitlabAuthenticationError, exceptions.GitlabCreateError) as e:
+            raise TrackerError('Issue reporting failed') from e
 
     def __call__(self, issue):
         pass

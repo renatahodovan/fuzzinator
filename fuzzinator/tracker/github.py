@@ -12,11 +12,11 @@ try:
     # for now if we cannot load the github module at all. This workaround just
     # postpones the error to the point when ``GithubReport`` is actually used,
     # so be warned, don't do that on Windows!
-    from github import Github
+    from github import Github, GithubException
 except ImportError:
     pass
 
-from .base import BaseTracker
+from .base import BaseTracker, TrackerError
 
 
 class GithubTracker(BaseTracker):
@@ -27,12 +27,18 @@ class GithubTracker(BaseTracker):
         self.project = self.ghapi.get_repo(repository)
 
     def find_issue(self, query):
-        issues = list(self.ghapi.search_issues('repo:{repository} is:issue is:open {query}'.format(repository=self.repository, query=query)))
-        return [{'id': issue.number, 'title': issue.title, 'url': issue.html_url} for issue in issues]
+        try:
+            issues = list(self.ghapi.search_issues('repo:{repository} is:issue is:open {query}'.format(repository=self.repository, query=query)))
+            return [{'id': issue.number, 'title': issue.title, 'url': issue.html_url} for issue in issues]
+        except GithubException as e:
+            raise TrackerError('Finding possible duplicates failed') from e
 
     def report_issue(self, title, body):
-        new_issue = self.project.create_issue(title=title, body=body)
-        return {'id': new_issue.number, 'title': new_issue.title, 'url': new_issue.html_url}
+        try:
+            new_issue = self.project.create_issue(title=title, body=body)
+            return {'id': new_issue.number, 'title': new_issue.title, 'url': new_issue.html_url}
+        except GithubException as e:
+            raise TrackerError('Issue reporting failed') from e
 
     def __call__(self, issue):
         pass

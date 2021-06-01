@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -10,7 +10,7 @@ import httplib2
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
-from .base import BaseTracker
+from .base import BaseTracker, TrackerError
 
 
 # https://chromium.googlesource.com/infra/infra/+/master/appengine/monorail/doc/api.md
@@ -31,18 +31,24 @@ class MonorailTracker(BaseTracker):
                                         version='v1')
 
     def find_issue(self, query):
-        issues = self.monorail.issues().list(projectId=self.project_id, can='open', q=query).execute().get('items', [])
-        return [{'id': issue['id'],
-                 'title': issue['summary'],
-                 'url': self.weburl_template.format(project_id=self.project_id, ident=issue['id'])} for issue in issues]
+        try:
+            issues = self.monorail.issues().list(projectId=self.project_id, can='open', q=query).execute().get('items', [])
+            return [{'id': issue['id'],
+                     'title': issue['summary'],
+                     'url': self.weburl_template.format(project_id=self.project_id, ident=issue['id'])} for issue in issues]
+        except Exception as e:
+            raise TrackerError('Finding possible duplicates failed') from e
 
     def report_issue(self, title, body):
-        new_issue = self.monorail.issues().insert(projectId=self.project_id,
-                                                  body=dict(summary=title,
-                                                            description=body)).execute()
-        return {'id': new_issue['id'],
-                'title': new_issue['summary'],
-                'url': self.weburl_template.format(project_id=self.project_id, ident=new_issue['id'])}
+        try:
+            new_issue = self.monorail.issues().insert(projectId=self.project_id,
+                                                      body=dict(summary=title,
+                                                                description=body)).execute()
+            return {'id': new_issue['id'],
+                    'title': new_issue['summary'],
+                    'url': self.weburl_template.format(project_id=self.project_id, ident=new_issue['id'])}
+        except Exception as e:
+            raise TrackerError('Issue reporting failed') from e
 
     def __call__(self, issue):
         pass

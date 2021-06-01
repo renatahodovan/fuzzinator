@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019 Tamas Keri.
- * Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+ * Copyright (c) 2019-2021 Renata Hodovan, Akos Kiss.
  *
  * Licensed under the BSD 3-Clause License
  * <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -33,6 +33,20 @@ $(document).ready(function () {
   fz.notifications.onmessage['issue_added'] = function () {
     $('.badge').text(Number($('.badge').text()) + 1);
     fireworks();
+  };
+
+  fz.notifications.onmessage['error'] = function (data) {
+    var toast = document.importNode($('#notification-toast-template').prop('content').cloneNode(true), true).children[0];
+    $(toast).find('.toast-title').text(data.title);
+    var body = data.body;
+    if (data.exc_info) {
+      body += data.exc_info;
+    }
+    $(toast).find('.toast-body').text(body);
+    $('#toast-container').append(toast);
+    $(toast).toast({'autohide': false})
+    $(toast).on('click', function() { $(toast).toast('dispose'); $(toast).remove(); });
+    $(toast).toast('show');
   };
 
   fz.notifications.start();

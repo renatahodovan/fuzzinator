@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -11,7 +11,7 @@ from io import BytesIO
 
 from bugzilla import *
 
-from .base import BaseTracker
+from .base import BaseTracker, TrackerError
 
 
 class BugzillaTracker(BaseTracker):
@@ -27,25 +27,31 @@ class BugzillaTracker(BaseTracker):
             os.remove(self.bzapi.cookiefile)
 
     def find_issue(self, query):
-        issues = self.bzapi.query(self.bzapi.build_query(product=self.product,
-                                                         status=['NEW', 'REOPENED', 'ASSIGNED'],
-                                                         short_desc=query,
-                                                         include_fields=['id', 'summary', 'weburl']))
-        return [{'id': issue.bug_id, 'title': issue.summary, 'url': issue.weburl} for issue in issues]
+        try:
+            issues = self.bzapi.query(self.bzapi.build_query(product=self.product,
+                                                             status=['NEW', 'REOPENED', 'ASSIGNED'],
+                                                             short_desc=query,
+                                                             include_fields=['id', 'summary', 'weburl']))
+            return [{'id': issue.bug_id, 'title': issue.summary, 'url': issue.weburl} for issue in issues]
+        except BugzillaError as e:
+            raise TrackerError('Finding possible duplicates failed') from e
 
     def report_issue(self, title, body, product, product_version, component, blocks, test=None, extension='txt'):
-        create_info = self.bzapi.build_createbug(summary=title,
-                                                 description=body,
-                                                 product=product,
-                                                 version=product_version,
-                                                 component=component,
-                                                 blocks=blocks)
+        try:
+            create_info = self.bzapi.build_createbug(summary=title,
+                                                     description=body,
+                                                     product=product,
+                                                     version=product_version,
+                                                     component=component,
+                                                     blocks=blocks)
 
-        bug = self.bzapi.createbug(create_info)
-        if test:
-            with BytesIO(test) as f:
-                self.bzapi.attachfile(idlist=bug.bug_id, attachfile=f, description='Test', is_patch=False, file_name='test.{ext}'.format(ext=extension))
-        return {'id': bug.bug_id, 'title': bug.summary, 'url': bug.weburl}
+            bug = self.bzapi.createbug(create_info)
+            if test:
+                with BytesIO(test) as f:
+                    self.bzapi.attachfile(idlist=bug.bug_id, attachfile=f, description='Test', is_patch=False, file_name='test.{ext}'.format(ext=extension))
+            return {'id': bug.bug_id, 'title': bug.summary, 'url': bug.weburl}
+        except BugzillaError as e:
+            raise TrackerError('Issue reporting failed') from e
 
     def __call__(self, issue):
         pass

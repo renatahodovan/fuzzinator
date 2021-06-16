@@ -82,6 +82,7 @@ def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None,
             return issue
     except subprocess.TimeoutExpired:
         logger.debug('Timeout expired in the SUT\'s subprocess runner.')
-        Controller.kill_process_tree(proc.pid)
+        proc.kill()
+        proc.communicate()
 
     return NonIssue(issue) if issue else None

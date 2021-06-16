@@ -10,7 +10,6 @@ import os
 import subprocess
 
 from ..config import as_bool, as_dict, as_pargs, as_path
-from .. import Controller
 from . import NonIssue
 
 logger = logging.getLogger(__name__)

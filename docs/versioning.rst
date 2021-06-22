@@ -8,7 +8,7 @@ Version Scheme
 The project uses a date-based version scheme conforming to PEP440_. The
 identifiers of official releases follow the "YY.MM" form (e.g., "16.10" for the
 version released on October, 2016), while development versions between two
-releases append a "+n.commit" suffix to the identifier of the last official
+releases append a "-n+commit" suffix to the identifier of the last official
 release (counting the additional commits on top of the release and naming the
 topmost commit).
 

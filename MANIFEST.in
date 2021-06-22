@@ -1,8 +1,0 @@
-include README.rst
-include LICENSE.rst
-include RELNOTES.rst
-include MANIFEST.in
-recursive-include fuzzinator/ui/tui/resources *
-recursive-include fuzzinator/ui/wui/resources *
-global-exclude __pycache__
-global-exclude *.py[co]

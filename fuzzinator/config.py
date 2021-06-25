@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,7 +6,6 @@
 # according to those terms.
 
 import hashlib
-import importlib
 import json
 import os
 import shlex
@@ -18,10 +17,7 @@ from inspect import isclass
 from io import StringIO
 from math import inf
 
-
-def import_entity(name):
-    steps = name.split('.')
-    return getattr(importlib.import_module('.'.join(steps[0:-1])), steps[-1])
+from inators.imp import import_object
 
 
 def config_get_kwargs(config, section):
@@ -57,7 +53,7 @@ def config_get_callable(config, section, options):
 
         # get the python entity (function or callable context manager class) named
         # in $(section:option) and its call arguments given in $(section.option:*)
-        entity = import_entity(config.get(section, option))
+        entity = import_object(config.get(section, option))
         entity_kwargs = config_get_kwargs(config, section + '.' + option)
 
         # find decorator classes named in $(section:option.decorate(*)) and apply
@@ -68,7 +64,7 @@ def config_get_callable(config, section, options):
                              if opt.startswith(opt_prefix) and opt.endswith(opt_suffix)]
         decorator_options.sort(key=lambda opt, pre=opt_prefix, suf=opt_suffix: int(opt[len(pre):-len(suf)]))
         for decopt in decorator_options:
-            decorator_class = import_entity(config.get(section, decopt))
+            decorator_class = import_object(config.get(section, decopt))
             decorator_kwargs = config_get_kwargs(config, section + '.' + decopt)
             decorator = decorator_class(**decorator_kwargs)
             entity = decorator(entity)

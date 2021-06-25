@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 # Copyright (c) 2019 Tamas Keri.
 #
 # Licensed under the BSD 3-Clause License
@@ -12,6 +12,8 @@ import logging
 import os
 import re
 import sys
+
+import inators
 
 from .pkgdata import __version__
 
@@ -63,9 +65,8 @@ def process_args(args):
 
     args.config = config
 
-    root_logger.setLevel(args.log_level)
-
-    sys.setrecursionlimit(args.sys_recursion_limit)
+    inators.arg.process_log_level_argument(args, root_logger)
+    inators.arg.process_sys_recursion_limit_argument(args)
 
     return None
 
@@ -99,13 +100,9 @@ def execute():
                         help='validate issues of all SUTs before running any fuzz jobs (alias for --validate=%(const)r)')
     parser.add_argument('--show-config', action='store_true',
                         help='show complete config')
-    parser.add_argument('-l', '--log-level', metavar='LEVEL', default='INFO',
-                        help='set log level (default: %(default)s)')
-    parser.add_argument('-v', dest='log_level', action='store_const', const='DEBUG', default=argparse.SUPPRESS,
-                        help='verbose mode (alias for -l %(const)s)')
-    parser.add_argument('--sys-recursion-limit', metavar='NUM', type=int, default=sys.getrecursionlimit(),
-                        help='override maximum depth of the Python interpreter stack (default: %(default)d)')
-    parser.add_argument('--version', action='version', version='%(prog)s {version}'.format(version=__version__))
+    inators.arg.add_log_level_argument(parser)
+    inators.arg.add_sys_recursion_limit_argument(parser)
+    inators.arg.add_version_argument(parser, __version__)
     ui.add_arguments(parser)
     args = parser.parse_args(more_args)
 

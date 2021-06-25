@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -16,7 +16,9 @@ from multiprocessing import Lock, Process, Queue
 
 import psutil
 
-from .config import as_bool, as_int_or_inf, as_path, config_get_callable, config_get_fuzzers, config_get_kwargs, import_entity
+from inators.imp import import_object
+
+from .config import as_bool, as_int_or_inf, as_path, config_get_callable, config_get_fuzzers, config_get_kwargs
 from .job import FuzzJob, ReduceJob, UpdateJob, ValidateJob
 from .listener import ListenerManager
 from .mongo_driver import MongoDriver
@@ -238,7 +240,7 @@ class Controller(object):
 
         self.listener = ListenerManager()
         for name in config_get_kwargs(self.config, 'listeners'):
-            entity = import_entity(self.config.get('listeners', name))
+            entity = import_object(self.config.get('listeners', name))
             self.listener += entity(config=config, **config_get_kwargs(config, 'listeners.' + name + '.init'))
 
         self._shared_queue = Queue()

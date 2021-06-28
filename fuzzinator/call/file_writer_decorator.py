@@ -58,7 +58,7 @@ class FileWriterDecorator(CallableDecorator):
 
                 kwargs['test'] = file_path
                 issue = fn(*args, **kwargs)
-                if issue is not None:
+                if issue:
                     issue['filename'] = os.path.basename(file_path)
 
                 os.remove(file_path)

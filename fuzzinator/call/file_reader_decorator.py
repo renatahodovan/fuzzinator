@@ -37,10 +37,10 @@ class FileReaderDecorator(CallableDecorator):
             def reader(*args, **kwargs):
                 issue = fn(*args, **kwargs)
 
-                if issue is not None:
+                if issue:
                     with open(kwargs['test'], 'rb') as f:
-                        issue['filename'] = os.path.basename(kwargs['test'])
                         issue['test'] = f.read()
+                    issue['filename'] = os.path.basename(kwargs['test'])
 
                 return issue
 

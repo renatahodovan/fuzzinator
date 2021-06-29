@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -43,7 +43,7 @@ class RegexFilter(CallableDecorator):
 
     def decorator(self, **kwargs):
         patterns = dict()
-        for (field, patterns_str) in kwargs.items():
+        for field, patterns_str in kwargs.items():
             patterns[field] = []
             for pattern in as_list(patterns_str):
                 patterns[field].append(re.compile(pattern.encode('utf-8', errors='ignore'), flags=re.MULTILINE | re.DOTALL))
@@ -55,8 +55,8 @@ class RegexFilter(CallableDecorator):
                     return issue
 
                 updated = False
-                for field in patterns:
-                    for pattern in patterns[field]:
+                for field, field_patterns in patterns.items():
+                    for pattern in field_patterns:
                         match = pattern.search(issue.get(field, b''))
                         if match is not None:
                             issue.update(match.groupdict())

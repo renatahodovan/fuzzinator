@@ -117,7 +117,7 @@ class StreamMonitoredSubprocessCall(object):
                         continue
                     raise
 
-                for stream, _ in streams.items():
+                for stream in streams:
                     if getattr(proc, stream).fileno() in read_fds:
                         while True:
                             chunk = getattr(proc, stream).read(512)

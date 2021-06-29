@@ -23,7 +23,7 @@ class Multiton(type):
 
 class BaseTracker(metaclass=Multiton):
 
-    def find_issue(self, issue):
+    def find_issue(self, query):
         pass
 
     def report_issue(self, **kwargs):

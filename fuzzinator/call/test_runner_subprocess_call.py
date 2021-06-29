@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -91,13 +91,13 @@ class TestRunnerSubprocessCall(object):
                         continue
                     raise
 
-                for stream, _ in streams.items():
+                for stream in streams:
                     if getattr(self.proc, stream).fileno() in read_fds:
                         while True:
-                            stdout_chunk = getattr(self.proc, stream).read(512)
-                            if not stdout_chunk:
+                            chunk = getattr(self.proc, stream).read(512)
+                            if not chunk:
                                 break
-                            streams[stream] += stdout_chunk
+                            streams[stream] += chunk
 
                         for end_pattern in self.end_texts:
                             if end_pattern.encode('utf-8') in streams[stream]:

@@ -1,15 +1,19 @@
 # Copyright (c) 2017-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2021 Paulo Matos, Igalia S.L.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+import logging
 import os
 import pexpect
 
 from ..config import as_dict, as_pargs, as_path
 from . import CallableDecorator
+
+logger = logging.getLogger(__name__)
 
 
 class LldbBacktraceDecorator(CallableDecorator):
@@ -83,8 +87,8 @@ class LldbBacktraceDecorator(CallableDecorator):
 
                     child.sendline('quit')
                     issue['backtrace'] = backtrace
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning('Failed to obtain lldb backtrace', exc_info=e)
 
                 return issue
 

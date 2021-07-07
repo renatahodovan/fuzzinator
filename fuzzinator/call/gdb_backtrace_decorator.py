@@ -1,15 +1,19 @@
 # Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2021 Paulo Matos, Igalia S.L.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+import logging
 import os
 import pexpect
 
 from ..config import as_dict, as_pargs, as_path
 from . import CallableDecorator
+
+logger = logging.getLogger(__name__)
 
 
 class GdbBacktraceDecorator(CallableDecorator):
@@ -73,8 +77,8 @@ class GdbBacktraceDecorator(CallableDecorator):
                     backtrace = child.before
                     child.terminate(force=True)
                     issue['backtrace'] = backtrace
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning('Failed to obtain gdb backtrace', exc_info=e)
 
                 return issue
 

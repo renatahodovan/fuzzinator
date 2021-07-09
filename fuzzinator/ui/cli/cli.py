@@ -25,10 +25,6 @@ def execute(arguments):
     controller.listener += CliListener()
 
     try:
-        if arguments.validate is not None:
-            controller.validate_all(sut_name=arguments.validate)
-        if arguments.reduce is not None:
-            controller.reduce_all(sut_name=arguments.reduce)
-        controller.run(max_cycles=arguments.max_cycles)
+        controller.run(max_cycles=arguments.max_cycles, validate=arguments.validate, reduce=arguments.reduce)
     except KeyboardInterrupt:
         Controller.kill_process_tree(os.getpid(), kill_root=False)

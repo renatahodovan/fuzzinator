@@ -148,12 +148,8 @@ def execute(arguments):
     logger.info('Server started at: http://%s:%d', arguments.bind_ip or 'localhost', arguments.port)
 
     controller = Controller(config=arguments.config)
-    if arguments.validate is not None:
-        controller.validate_all(sut_name=arguments.validate)
-    if arguments.reduce is not None:
-        controller.reduce_all(sut_name=arguments.reduce)
     wui = Wui(controller, arguments.port, arguments.bind_ip, arguments.develop)
-    fuzz_process = Process(target=controller.run, args=(), kwargs={'max_cycles': arguments.max_cycles})
+    fuzz_process = Process(target=controller.run, args=(), kwargs={'max_cycles': arguments.max_cycles, 'validate': arguments.validate, 'reduce': arguments.reduce})
 
     iol = ioloop.IOLoop.instance()
     iol_clb = ioloop.PeriodicCallback(wui.update_ui, 1000)

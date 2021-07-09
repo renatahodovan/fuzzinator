@@ -246,12 +246,18 @@ class Controller(object):
         self._shared_queue = Queue()
         self._shared_lock = Lock()
 
-    def run(self, *, max_cycles=None):
+    def run(self, *, max_cycles=None, validate=None, reduce=None):
         """
         Start the fuzz session.
 
         :param int max_cycles: maximum number to iterate through the fuzz jobs
             defined in the configuration (defaults to ``inf``).
+        :param str validate: name of SUT to validate issues of at the start of
+            the fuzz session (the empty string denotes all SUTs; defaults to no
+            SUT).
+        :param str reduce: name of SUT to reduce issues of at the start of the
+            fuzz session (the empty string denotes all SUTs; defaults to no
+            SUT).
         """
         max_cycles = max_cycles if max_cycles is not None else inf
         cycle = 0
@@ -331,6 +337,11 @@ class Controller(object):
                 if ident_idx:
                     self.listener.on_job_removed(ident=ident)
                     del job_queue[ident_idx[0]]
+
+        if validate is not None:
+            self.validate_all(sut_name=validate)
+        if reduce is not None:
+            self.reduce_all(sut_name=reduce)
 
         try:
             while True:

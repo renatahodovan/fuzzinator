@@ -45,6 +45,8 @@ class Tui(object):
         self.pipe = self.loop.watch_pipe(self.update_ui)
         self.loop.set_alarm_in(0.1, self.update_timer, self.view.logo.timer)
 
+        controller.listener += TuiListener(self.pipe, self.events, self.lock)
+
         connect_signal(self.view.issues_table, 'refresh', lambda source: self.loop.draw_screen())
         connect_signal(self.view.stat_table, 'refresh', lambda source: self.loop.draw_screen())
 
@@ -176,13 +178,8 @@ def execute(arguments):
         util.set_encoding(arguments.force_encoding)
 
     controller = Controller(config=arguments.config)
-    if arguments.validate is not None:
-        controller.validate_all(sut_name=arguments.validate)
-    if arguments.reduce is not None:
-        controller.reduce_all(sut_name=arguments.reduce)
     tui = Tui(controller, style=style)
-    controller.listener += TuiListener(tui.pipe, tui.events, tui.lock)
-    fuzz_process = Process(target=controller.run, args=(), kwargs={'max_cycles': arguments.max_cycles})
+    fuzz_process = Process(target=controller.run, args=(), kwargs={'max_cycles': arguments.max_cycles, 'validate': arguments.validate, 'reduce': arguments.reduce})
 
     try:
         fuzz_process.start()

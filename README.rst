@@ -28,9 +28,9 @@ needed during a fuzz session:
 
 All the above features are fully customizable either by writing a simple config
 file or by implementing Python snippets to cover special needs. Check out some
-slides_ about *Fuzzinator* for a general overview, or see the
-`Tutorial <docs/tutorial.rst>`_ for a detailed walk-through. There is also a
-repository collecting configurations_ for various real-life SUTs and fuzzers.
+slides_ about *Fuzzinator* for a general overview, or see the Tutorial_ for a
+detailed walk-through. There is also a repository collecting configurations_ for
+various real-life SUTs and fuzzers.
 
 To help tracking the progress of the fuzzing, *Fuzzinator* provides three
 interfaces:

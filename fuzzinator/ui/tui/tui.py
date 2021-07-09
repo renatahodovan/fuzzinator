@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -178,6 +178,8 @@ def execute(arguments):
     controller = Controller(config=arguments.config)
     if arguments.validate is not None:
         controller.validate_all(sut_name=arguments.validate)
+    if arguments.reduce is not None:
+        controller.reduce_all(sut_name=arguments.reduce)
     tui = Tui(controller, style=style)
     controller.listener += TuiListener(tui.pipe, tui.events, tui.lock)
     fuzz_process = Process(target=controller.run, args=(), kwargs={'max_cycles': arguments.max_cycles})

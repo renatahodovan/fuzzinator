@@ -98,6 +98,10 @@ def execute():
                         help='validate issues of SUT before running any fuzz jobs')
     parser.add_argument('--validate-all', dest='validate', action='store_const', const='', default=argparse.SUPPRESS,
                         help='validate issues of all SUTs before running any fuzz jobs (alias for --validate=%(const)r)')
+    parser.add_argument('--reduce', metavar='NAME',
+                        help='reduce issues of SUT before running any fuzz jobs')
+    parser.add_argument('--reduce-all', dest='reduce', action='store_const', const='', default=argparse.SUPPRESS,
+                        help='reduce issues of all SUTs before running any fuzz jobs (alias for --reduce=%(const)r)')
     parser.add_argument('--show-config', action='store_true',
                         help='show complete config')
     inators.arg.add_log_level_argument(parser)

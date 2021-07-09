@@ -466,7 +466,7 @@ class Controller(object):
     def reduce_all(self, sut_name=None):
         sut_name = [sut_name] if sut_name else [section.split('.', maxsplit=1)[1] for section in self.config.sections() if section.startswith('sut.') and section.count('.') == 1]
         for issue in self.db.find_issues_by_suts(sut_name):
-            if not issue.get('reported') and not issue.get('reduced'):
+            if not issue.get('reported') and not issue.get('reduced') and not issue.get('invalid'):
                 self.add_reduce_job(issue)
 
     def cancel_job(self, ident):

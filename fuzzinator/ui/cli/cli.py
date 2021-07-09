@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -27,6 +27,8 @@ def execute(arguments):
     try:
         if arguments.validate is not None:
             controller.validate_all(sut_name=arguments.validate)
+        if arguments.reduce is not None:
+            controller.reduce_all(sut_name=arguments.reduce)
         controller.run(max_cycles=arguments.max_cycles)
     except KeyboardInterrupt:
         Controller.kill_process_tree(os.getpid(), kill_root=False)

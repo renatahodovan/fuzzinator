@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -10,5 +10,6 @@ from .byte_flip_decorator import ByteFlipDecorator
 from .file_writer_decorator import FileWriterDecorator
 from .list_directory import ListDirectory
 from .random_content import RandomContent
+from .random_integer import RandomInteger
 from .subprocess_runner import SubprocessRunner
 from .tornado_decorator import TornadoDecorator

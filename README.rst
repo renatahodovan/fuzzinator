@@ -82,7 +82,7 @@ Usage
 
 A common form of *Fuzzinator*'s usage::
 
-    fuzzinator --wui --utf8 <path/to/the/config.ini>
+    fuzzinator --wui <path/to/the/config.ini>
 
 
 Compatibility
@@ -90,8 +90,8 @@ Compatibility
 
 *Fuzzinator* was tested on:
 
-* Linux (Ubuntu 14.04 / 16.04 / 18.04)
-* Mac OS X (El Capitan 10.11 / Sierra 10.12 / High Sierra 10.13 / Mojave 10.14 / Catalina 10.15)
+* Linux (Ubuntu 14.04 / 16.04 / 18.04 / 20.04)
+* OS X / macOS (10.11 / 10.12 / 10.13 / 10.14 / 10.15 / 11)
 * Windows (Server 2012 R2 / Server version 1809 / Windows 10)
 
 

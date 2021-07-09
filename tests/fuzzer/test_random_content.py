@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -19,4 +19,4 @@ def test_random_content(fuzzer_kwargs, exp_min_len, exp_max_len):
     for index in range(100):
         out = fuzzinator.fuzzer.RandomContent(index=index, **fuzzer_kwargs)
         out_len = len(out)
-        assert out_len >= exp_min_len and out_len <= exp_max_len
+        assert exp_min_len <= out_len <= exp_max_len

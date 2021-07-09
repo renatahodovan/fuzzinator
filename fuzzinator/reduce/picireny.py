@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -82,6 +82,12 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
         return None, []
 
     src = issue['test']
+    if isinstance(src, bytes):
+        encoding = encoding or chardet.detect(src)['encoding'] or 'latin-1'
+    else:
+        encoding = encoding or 'latin-1'
+        src = src.encode(encoding, errors='ignore')
+
     file_name = issue.get('filename', 'test')
 
     hddmin = picireny.cli.args_hdd_choices[hddmin if hddmin else 'full']
@@ -93,7 +99,6 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
     complement_iterator = getattr(picire.config_iterators, complement_iterator)
     jobs = int(jobs) if parallel else 1
     max_utilization = int(max_utilization)
-    encoding = encoding or chardet.detect(src)['encoding'] or 'utf-8'
     hdd_star = as_bool(hdd_star)
     flatten_recursion = as_bool(flatten_recursion)
     squeeze_tree = as_bool(squeeze_tree)

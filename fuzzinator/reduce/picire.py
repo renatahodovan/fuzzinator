@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -56,11 +56,16 @@ def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
     logging.getLogger('picire').setLevel(logger.level)
 
     src = issue['test']
-    file_name = issue.get('filename', 'test')
+    if isinstance(src, bytes):
+        encoding = encoding or chardet.detect(src)['encoding'] or 'latin-1'
+    else:
+        encoding = encoding or 'latin-1'
+        src = src.encode(encoding, errors='ignore')
 
+    file_name = issue.get('filename', 'test')
     parallel = as_bool(parallel)
     jobs = int(jobs) if parallel else 1
-    encoding = encoding or chardet.detect(src)['encoding']
+
     granularity = as_int_or_inf(granularity)
     cleanup = as_bool(cleanup)
 

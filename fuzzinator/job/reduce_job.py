@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -40,6 +40,7 @@ class ReduceJob(CallJob):
 
         sut_section = 'sut.' + self.sut_name
         sut_call, sut_call_kwargs = config_get_callable(self.config, sut_section, ['reduce_call', 'call'])
+        sut_call_kwargs.update(self.issue)
         reduce, reduce_kwargs = config_get_callable(self.config, sut_section, 'reduce')
 
         with reduce:

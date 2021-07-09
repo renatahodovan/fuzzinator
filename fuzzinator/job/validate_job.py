@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -31,9 +31,9 @@ class ValidateJob(CallJob):
 
     def validate(self):
         sut_call, sut_call_kwargs = config_get_callable(self.config, 'sut.' + self.sut_name, ['validate_call', 'reduce_call', 'call'])
+        sut_call_kwargs.update(self.issue)
 
         with sut_call:
-            sut_call_kwargs.update(self.issue)
             issue = sut_call(**sut_call_kwargs)
 
         new_issues = []

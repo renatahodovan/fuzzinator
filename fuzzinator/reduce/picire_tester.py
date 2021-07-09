@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -26,7 +26,7 @@ class PicireTester(object):
         test = codecs.encode(self._test_builder(config), self._encoding, 'ignore')
         with self._sut_call:
             filename = self._test_pattern % '_'.join(str(i) for i in config_id)
-            issue = self._sut_call(test=test, filename=filename, **self._sut_call_kwargs)
+            issue = self._sut_call(**dict(self._sut_call_kwargs, test=test, filename=filename))
 
             # Second chance for flaky tests in case of 'assert' check.
             if config_id == 'assert' and not issue:

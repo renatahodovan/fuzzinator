@@ -32,8 +32,7 @@ $(document).ready(function () {
     progress.attr('data-maxvalue', maxValue);
 
     if (maxValue == Infinity) {
-      progress.addClass('progress-bar-striped progress-bar-animated');
-      progress.attr('style', 'width: 100%');
+      $(job).find('.progress-text').text('0');
     }
     $('#jobs').append(document.importNode(job, true));
   };
@@ -44,13 +43,17 @@ $(document).ready(function () {
     var jobCard = $(`#job-${data.ident}`);
     if (jobCard.length !== 0) {
       var progress = jobCard.find('.progress-bar');
-      if (progress.attr('data-maxvalue') < Infinity) {
-        var percent = Math.round(data.progress / progress.attr('data-maxvalue') * 100);
+      if ($(progress).data('maxvalue') < Infinity) {
+        var percent = Math.round(data.progress / $(progress).data('maxvalue') * 100);
         progress.css('width', `${percent}%`);
         progress.attr('aria-valuenow', percent);
         jobCard.find('.progress-text').text(`${percent}%`);
       } else {
         jobCard.find('.progress-text').text(new Intl.NumberFormat({ notation: "scientific" }).format(data.progress));
+        if (!progress.hasClass('progress-bar-striped')) {
+          progress.attr('style', 'width: 100%');
+          progress.addClass('progress-bar-striped');
+        }
       }
     }
   };
@@ -59,6 +62,13 @@ $(document).ready(function () {
     var jobCard = $(`#job-${data.ident}`);
     if (jobCard.length !== 0 && jobCard.hasClass('bg-secondary')) {
       jobCard.removeClass('bg-secondary').addClass('bg-success');
+    }
+    if ($(jobCard).data('job-type') == 'fuzz') {
+      var progress = $(jobCard).find('.progress-bar');
+      if ($(progress).data('maxvalue') == Infinity) {
+        progress.attr('style', 'width: 100%');
+        progress.addClass('progress-bar-striped');
+      }
     }
   };
 

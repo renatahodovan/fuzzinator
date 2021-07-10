@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -82,8 +82,11 @@ class EmailListener(EventListener):
         msg['To'] = self.to_address
         msg['Subject'] = subject
 
-        server = smtplib.SMTP(self.smtp_host, self.smtp_port)
-        server.starttls()
-        server.login(self.from_address, self.pwd or keyring.get_password('fuzzinator', self.from_address))
-        server.send_message(msg)
-        server.quit()
+        try:
+            server = smtplib.SMTP(self.smtp_host, self.smtp_port)
+            server.starttls()
+            server.login(self.from_address, self.pwd or keyring.get_password('fuzzinator', self.from_address))
+            server.send_message(msg)
+            server.quit()
+        except Exception as e:
+            logger.warning('E-mail sending failed.', exc_info=e)

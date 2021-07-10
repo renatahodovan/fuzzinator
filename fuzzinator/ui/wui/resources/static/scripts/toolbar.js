@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Renata Hodovan, Akos Kiss.
+ * Copyright (c) 2019-2021 Renata Hodovan, Akos Kiss.
  *
  * Licensed under the BSD 3-Clause License
  * <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -12,10 +12,11 @@
 (function ($) {
   'use strict';
 
-  var BootstrapTable = $.fn.bootstrapTable.Constructor;
+  var BootstrapTable = $.BootstrapTable;
   var _initServer = BootstrapTable.prototype.initServer;
   var _initCookie = BootstrapTable.prototype.initCookie;
   var _init = BootstrapTable.prototype.init;
+  var _onSearch = BootstrapTable.prototype.onSearch;
 
   $.merge($.fn.bootstrapTable.defaults.cookiesEnabled, ['bs.table.includeInvalid', 'bs.table.showAll']);
 
@@ -69,6 +70,13 @@
     $.fn.bootstrapTable.utils.setCookie(this, 'bs.table.sortName', this.options.sortName);
   };
 
+  BootstrapTable.prototype.onSearch = function () {
+    _onSearch.apply(this, Array.prototype.slice.apply(arguments));
+    // This cookie saving must be done here, since the 'search' option of our bstables are not
+    // set, hence it wouldn't be saved otherwise.
+    $.fn.bootstrapTable.utils.setCookie(this, 'bs.table.searchText', this.options.searchText);
+  };
+
   BootstrapTable.prototype.initSearchText = function () {
     if (this.options.searchText !== '') {
       var $search = $('#table-search');
@@ -76,19 +84,18 @@
       this.onSearch({currentTarget: $search, firedByInitSearchText: true});
     }
   };
-
 })(jQuery);
 
 
 $(document).ready(function () {
   'use strict';
 
-  var bst = $('.bootstrap-table .table').data()['bootstrap.table'];
+  var bst = $('#issues-table, #stats-table').data()['bootstrap.table'];
 
   $('#table-search').off('keyup drop blur').on('keyup drop blur', function (event) {
     clearTimeout(0);
     setTimeout(function () {
-        bst.onSearch(event);
+        bst.onSearch({currentTarget: event.currentTarget});
     }, 500);
   });
 

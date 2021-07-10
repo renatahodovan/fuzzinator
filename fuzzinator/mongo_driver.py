@@ -6,10 +6,14 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+import logging
+
 from datetime import datetime
 
 from bson.objectid import ObjectId
 from pymongo import ASCENDING, MongoClient, ReturnDocument
+
+logger = logging.getLogger(__name__)
 
 
 class MongoDriver(object):
@@ -67,31 +71,35 @@ class MongoDriver(object):
         # Remove _id from imported issues.
         issue.pop('_id', None)
 
-        if 'subconfig' in issue and 'src' in issue['subconfig']:
-            src = issue['subconfig'].pop('src')
-            self.update_config(issue['subconfig']['subconfig'], src)
+        try:
+            if 'subconfig' in issue and 'src' in issue['subconfig']:
+                src = issue['subconfig'].pop('src')
+                self.update_config(issue['subconfig']['subconfig'], src)
 
-        result = self._db.fuzzinator_issues.find_one_and_update(
-            {'sut': issue['sut'], 'id': issue['id'], 'invalid': invalid or {'$exists': False}},
-            {'$setOnInsert': dict(issue, first_seen=first_seen),
-             '$max': dict(last_seen=last_seen),
-             '$inc': dict(count=1)},
-            upsert=True,
-            return_document=ReturnDocument.AFTER,
-        )
-
-        if count:
             result = self._db.fuzzinator_issues.find_one_and_update(
                 {'sut': issue['sut'], 'id': issue['id'], 'invalid': invalid or {'$exists': False}},
-                {'$max': dict(count=count)},
+                {'$setOnInsert': dict(issue, first_seen=first_seen),
+                 '$max': dict(last_seen=last_seen),
+                 '$inc': dict(count=1)},
+                upsert=True,
                 return_document=ReturnDocument.AFTER,
             )
 
-        issue.update(result)
-        # `first_seen` and `last_seen` values cannot be compared to `now` due
-        # to some rounding in pymongo, the returning values can be slightly
-        # different from the value stored in `now` (on nanosecond level).
-        return issue['first_seen'] == issue['last_seen']
+            if count:
+                result = self._db.fuzzinator_issues.find_one_and_update(
+                    {'sut': issue['sut'], 'id': issue['id'], 'invalid': invalid or {'$exists': False}},
+                    {'$max': dict(count=count)},
+                    return_document=ReturnDocument.AFTER,
+                )
+
+            issue.update(result)
+            # `first_seen` and `last_seen` values cannot be compared to `now` due
+            # to some rounding in pymongo, the returning values can be slightly
+            # different from the value stored in `now` (on nanosecond level).
+            return issue['first_seen'] == issue['last_seen']
+        except Exception as e:
+            logger.warning('Issue saving failed: %s', issue['id'], exc_info=e)
+            return False
 
     def get_issues(self, filter=None, skip=0, limit=0, sort=None, include_invalid=True, session_start=None, detailed=False):
         filter = filter or {}

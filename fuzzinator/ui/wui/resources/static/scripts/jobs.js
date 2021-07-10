@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+ * Copyright (c) 2019-2021 Renata Hodovan, Akos Kiss.
  *
  * Licensed under the BSD 3-Clause License
  * <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -27,8 +27,13 @@ $(document).ready(function () {
     if ('issue_id' in data) {
       $(job).find('.job-issue').text(data.issue_id);
     }
-    if ('batch' in data || 'size' in data) {
-      $(job).find('.progress-bar').attr('data-maxvalue', Math.max(data.batch || 0, data.size || 0));
+    var maxValue = data.batch || data.size || 0;
+    var progress = $(job).find('.progress-bar');
+    progress.attr('data-maxvalue', maxValue);
+
+    if (maxValue == Infinity) {
+      progress.addClass('progress-bar-striped progress-bar-animated');
+      progress.attr('style', 'width: 100%');
     }
     $('#jobs').append(document.importNode(job, true));
   };
@@ -39,10 +44,14 @@ $(document).ready(function () {
     var jobCard = $(`#job-${data.ident}`);
     if (jobCard.length !== 0) {
       var progress = jobCard.find('.progress-bar');
-      var percent = Math.round(data.progress / progress.attr('data-maxvalue') * 100);
-      progress.css('width', `${percent}%`);
-      progress.attr('aria-valuenow', percent);
-      jobCard.find('.progress-text').text(`${percent}%`);
+      if (progress.attr('data-maxvalue') < Infinity) {
+        var percent = Math.round(data.progress / progress.attr('data-maxvalue') * 100);
+        progress.css('width', `${percent}%`);
+        progress.attr('aria-valuenow', percent);
+        jobCard.find('.progress-text').text(`${percent}%`);
+      } else {
+        jobCard.find('.progress-text').text(new Intl.NumberFormat({ notation: "scientific" }).format(data.progress));
+      }
     }
   };
 

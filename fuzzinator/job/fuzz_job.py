@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -77,8 +77,8 @@ class FuzzJob(CallJob):
                         if issue:
                             issue_count += 1
 
-                        self.listener.on_job_progressed(ident=self.id, progress=index)
                         if index - stat_updated >= self.refresh:
+                            self.listener.on_job_progressed(ident=self.id, progress=index)
                             self.db.update_stat(self.sut_name, self.fuzzer_name, self.subconfig_id, index - stat_updated, issue_count)
                             self.listener.on_stats_updated()
                             issue_count = 0

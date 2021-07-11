@@ -12,78 +12,77 @@
 (function ($) {
   'use strict';
 
-  var BootstrapTable = $.BootstrapTable;
-  var _initServer = BootstrapTable.prototype.initServer;
-  var _initCookie = BootstrapTable.prototype.initCookie;
-  var _init = BootstrapTable.prototype.init;
-  var _onSearch = BootstrapTable.prototype.onSearch;
-
   $.merge($.fn.bootstrapTable.defaults.cookiesEnabled, ['bs.table.includeInvalid', 'bs.table.showAll']);
+  const utils = $.fn.bootstrapTable.utils;
 
-  BootstrapTable.prototype.initCookie = function () {
-    _initCookie.apply(this, Array.prototype.slice.apply(arguments));
+  $.BootstrapTable = class extends $.BootstrapTable {
+    initCookie (...args) {
+      super.initCookie(...args);
 
-    if ('includeInvalid' in this.options) {
-        var includeInvalidCookie = $.fn.bootstrapTable.utils.getCookie(this, this.options.cookieIdTable, 'bs.table.includeInvalid');
-        this.options.includeInvalid = includeInvalidCookie !== null ? includeInvalidCookie == 'true' : this.options.includeInvalid;
-    }
-
-    var showAllCookie = $.fn.bootstrapTable.utils.getCookie(this, this.options.cookieIdTable, 'bs.table.showAll');
-    this.options.showAll = showAllCookie !== null ? showAllCookie == 'true' : this.options.showAll;
-  };
-
-  BootstrapTable.prototype.init = function () {
-    _init.apply(this, Array.prototype.slice.apply(arguments));
-
-    if ('includeInvalid' in this.options && !this.options.includeInvalid) {
-      $('.include-invalid i').first().removeClass('invisible');
-    }
-
-    if (!this.options.showAll) {
-      $('.show-all i').first().removeClass('invisible');
-    }
-  };
-
-  BootstrapTable.prototype.initServer = function () {
-    _initServer.apply(this, Array.prototype.slice.apply(arguments));
-    var that = this;
-
-    $('.sort-menu .sort-name').each(function () {
-      $(this).children('i').first().removeClass('invisible');
-      if ($(this).data('value') !== that.options.sortName) {
-        $(this).children('i').first().addClass('invisible');
+      if ('includeInvalid' in this.options) {
+          var includeInvalidCookie = utils.getCookie(this, this.options.cookieIdTable, 'bs.table.includeInvalid');
+          this.options.includeInvalid = includeInvalidCookie !== null ? includeInvalidCookie == 'true' : this.options.includeInvalid;
       }
-    });
 
-    $('.sort-menu .sort-order').each(function () {
-      $(this).children('i').first().removeClass('invisible');
-      if ($(this).data('value') !== that.options.sortOrder) {
-        $(this).children('i').first().addClass('invisible');
-      }
-    });
-  };
-
-  BootstrapTable.prototype.onSort = function () {
-    this.trigger('sort', this.options.sortName, this.options.sortOrder);
-    this.initServer(this.options.silentSort);
-    $.fn.bootstrapTable.utils.setCookie(this, 'bs.table.sortOrder', this.options.sortOrder);
-    $.fn.bootstrapTable.utils.setCookie(this, 'bs.table.sortName', this.options.sortName);
-  };
-
-  BootstrapTable.prototype.onSearch = function () {
-    _onSearch.apply(this, Array.prototype.slice.apply(arguments));
-    // This cookie saving must be done here, since the 'search' option of our bstables are not
-    // set, hence it wouldn't be saved otherwise.
-    $.fn.bootstrapTable.utils.setCookie(this, 'bs.table.searchText', this.options.searchText);
-  };
-
-  BootstrapTable.prototype.initSearchText = function () {
-    if (this.options.searchText !== '') {
-      var $search = $('#table-search');
-      $search.val(this.options.searchText);
-      this.onSearch({currentTarget: $search, firedByInitSearchText: true});
+      var showAllCookie = utils.getCookie(this, this.options.cookieIdTable, 'bs.table.showAll');
+      this.options.showAll = showAllCookie !== null ? showAllCookie == 'true' : this.options.showAll;
     }
-  };
+
+    init (...args) {
+      super.init(...args);
+
+      if ('includeInvalid' in this.options && !this.options.includeInvalid) {
+        $('.include-invalid i').first().removeClass('invisible');
+      }
+
+      if (!this.options.showAll) {
+        $('.show-all i').first().removeClass('invisible');
+      }
+    }
+
+    initServer (...args) {
+      super.initServer(...args);
+      var that = this;
+
+      $('.sort-menu .sort-name').each(function () {
+        $(this).children('i').first().removeClass('invisible');
+        if ($(this).data('value') !== that.options.sortName) {
+          $(this).children('i').first().addClass('invisible');
+        }
+      });
+
+      $('.sort-menu .sort-order').each(function () {
+        $(this).children('i').first().removeClass('invisible');
+        if ($(this).data('value') !== that.options.sortOrder) {
+          $(this).children('i').first().addClass('invisible');
+        }
+      });
+    }
+
+    onSort () {
+      this.trigger('sort', this.options.sortName, this.options.sortOrder);
+      this.initServer(this.options.silentSort);
+      utils.setCookie(this, 'bs.table.sortOrder', this.options.sortOrder);
+      utils.setCookie(this, 'bs.table.sortName', this.options.sortName);
+    }
+
+    onSearch (...args) {
+      super.onSearch(...args);
+      // This cookie saving must be done here, since the 'search' option of our bstables are not
+      // set, hence it wouldn't be saved otherwise.
+      utils.setCookie(this, 'bs.table.searchText', this.options.searchText);
+    }
+
+    initSearchText () {
+      // Calling super wouldn't have any effect since it's bound to the 'search' option
+      // which isn't set for Fuzzinator.
+      if (this.options.searchText !== '') {
+        var $search = $('#table-search');
+        $search.val(this.options.searchText);
+        this.onSearch({currentTarget: $search, firedByInitSearchText: true});
+      }
+    }
+  }
 })(jQuery);
 
 

@@ -40,7 +40,7 @@ class SanitizerAutomatonFilter(RegexAutomatonFilter):
         r'mat /' + STACK_PREFIX + STACK_FUNCTION_OFFSET + STACK_MODULE_OFFSET + r'/',
         r'mat /' + STACK_PREFIX + STACK_FUNCTION_MODULE_OFFSET + r'/',
         r'mat /' + STACK_PREFIX + STACK_FUNCTION_OFFSET + r'/',
-        r'mat /' + STACK_PREFIX + STACK_MODULE_OFFSET + r'/',
+        r'mas /' + STACK_PREFIX + STACK_MODULE_OFFSET + r'/',
         r'mac /pc (?P<pc_zero>\(nil\)|0x00000000|0x000000000000)/',  # STACK_FRAME_ZERO
     ]
 

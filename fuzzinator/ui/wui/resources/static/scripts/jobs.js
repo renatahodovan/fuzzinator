@@ -35,11 +35,15 @@ $(document).ready(function () {
       $(job).find('.progress-text').text('0');
     }
     $('#jobs').append(document.importNode(job, true));
+
+    if ('progress' in data) {
+      jobProgressed(data);
+    }
   };
 
   fz.notifications.onmessage['job_added'] = jobAdded;
 
-  fz.notifications.onmessage['job_progressed'] = function (data) {
+  var jobProgressed = function (data) {
     var jobCard = $(`#job-${data.ident}`);
     if (jobCard.length !== 0) {
       var progress = jobCard.find('.progress-bar');
@@ -57,6 +61,8 @@ $(document).ready(function () {
       }
     }
   };
+
+  fz.notifications.onmessage['job_progressed'] = jobProgressed;
 
   fz.notifications.onmessage['job_activated'] = function (data) {
     var jobCard = $(`#job-${data.ident}`);

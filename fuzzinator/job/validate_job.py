@@ -23,7 +23,8 @@ class ValidateJob(CallJob):
         super().__init__(id, config, subconfig_id, sut_name, fuzzer_name, db, listener)
 
         self.issue = issue
-        self.cost = int(config.get('sut.' + sut_name, 'validate_cost', fallback=config.get('sut.' + sut_name, 'cost', fallback=1)))
+        capacity = int(config.get('fuzzinator', 'cost_budget'))
+        self.cost = min(int(config.get('sut.' + sut_name, 'validate_cost', fallback=config.get('sut.' + sut_name, 'cost', fallback=1))), capacity)
 
     def run(self):
         _, new_issues = self.validate()

@@ -26,7 +26,8 @@ class ReduceJob(CallJob):
         super().__init__(id, config, subconfig_id, sut_name, fuzzer_name, db, listener)
 
         self.issue = issue
-        self.cost = int(config.get(sut_section, 'reduce_cost', fallback=config.get(sut_section, 'cost', fallback=1)))
+        capacity = int(config.get('fuzzinator', 'cost_budget'))
+        self.cost = min(int(config.get(sut_section, 'reduce_cost', fallback=config.get(sut_section, 'cost', fallback=1))), capacity)
         self.work_dir = as_path(config.get('fuzzinator', 'work_dir'))
 
     def run(self):

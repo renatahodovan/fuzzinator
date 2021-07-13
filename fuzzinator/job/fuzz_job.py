@@ -21,7 +21,8 @@ class FuzzJob(CallJob):
         sut_name = config.get(fuzz_section, 'sut')
         super().__init__(id, config, subconfig_id, sut_name, fuzzer_name, db, listener)
 
-        self.cost = int(config.get('sut.' + sut_name, 'cost', fallback=1))
+        capacity = int(config.get('fuzzinator', 'cost_budget'))
+        self.cost = min(int(config.get('sut.' + sut_name, 'cost', fallback=1)), capacity)
         self.batch = float(config.get(fuzz_section, 'batch', fallback=1))
         self.refresh = float(config.get(fuzz_section, 'refresh', fallback=self.batch))
 

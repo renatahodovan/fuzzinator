@@ -10,7 +10,6 @@ import os
 import subprocess
 
 from ..config import as_bool, as_dict, as_pargs, as_path, decode
-from ..controller import Controller
 from .call import Call
 from .non_issue import NonIssue
 
@@ -68,25 +67,25 @@ class StdinSubprocessCall(Call):
         issue = {}
 
         try:
-            proc = subprocess.Popen(as_pargs(self.command),
-                                    stdin=subprocess.PIPE,
+            result = subprocess.run(as_pargs(self.command),
+                                    input=test,
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE,
                                     cwd=self.cwd,
-                                    env=self.env)
-            stdout, stderr = proc.communicate(input=test, timeout=self.timeout)
-            stdout, stderr = decode(stdout, self.encoding), decode(stderr, self.encoding)
+                                    env=self.env,
+                                    timeout=self.timeout,
+                                    check=False)
+            stdout, stderr = decode(result.stdout, self.encoding), decode(result.stderr, self.encoding)
             logger.debug('%s\n%s', stdout, stderr)
 
             issue = {
-                'exit_code': proc.returncode,
+                'exit_code': result.returncode,
                 'stdout': stdout,
                 'stderr': stderr,
             }
-            if self.no_exit_code or proc.returncode != 0:
+            if self.no_exit_code or result.returncode != 0:
                 return issue
         except subprocess.TimeoutExpired as e:
             logger.debug('StdinSubprocessCall execution timeout (%ds) expired.', e.timeout)
-            Controller.kill_process_tree(proc.pid)
 
         return NonIssue(issue) if issue else None

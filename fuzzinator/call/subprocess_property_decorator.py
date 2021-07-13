@@ -10,7 +10,6 @@ import os
 import subprocess
 
 from ..config import as_dict, as_pargs, as_path, decode
-from ..controller import Controller
 from .call_decorator import CallDecorator
 
 logger = logging.getLogger(__name__)
@@ -69,24 +68,21 @@ class SubprocessPropertyDecorator(CallDecorator):
                 return issue
 
             try:
-                proc = subprocess.Popen(as_pargs(self.command),
+                result = subprocess.run(as_pargs(self.command),
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE,
                                         cwd=self.cwd,
-                                        env=self.env)
-                stdout, stderr = proc.communicate(timeout=self.timeout)
-                stdout, stderr = decode(stdout, self.encoding), decode(stderr, self.encoding)
-                if proc.returncode == 0:
-                    issue[self.property] = stdout
-                else:
-                    logger.debug('SubprocessPropertyDecorator exited with nonzero exit code while setting the \'%s\' property.\n%s\n%s',
-                                 self.property,
-                                 stdout,
-                                 stderr)
+                                        env=self.env,
+                                        timeout=self.timeout,
+                                        check=True)
+                issue[self.property] = decode(result.stdout, self.encoding)
             except subprocess.TimeoutExpired as e:
                 logger.debug('SubprocessPropertyDecorator execution timeout (%ds) expired while setting the \'%s\' property.', e.timeout, self.property)
-                Controller.kill_process_tree(proc.pid)
-
+            except subprocess.CalledProcessError as e:
+                logger.warning('SubprocessPropertyDecorator exited with nonzero exit code while setting the \'%s\' property.\n%s\n%s',
+                               self.property,
+                               decode(e.stdout, self.encoding),
+                               decode(e.stderr, self.encoding))
             return issue
 
         return decorated_call

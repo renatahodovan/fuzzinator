@@ -10,7 +10,6 @@ import os
 import subprocess
 
 from ..config import as_dict, as_pargs, as_path, decode
-from ..controller import Controller
 from .update import Update
 
 logger = logging.getLogger(__name__)
@@ -56,20 +55,18 @@ class SubprocessUpdate(Update):
 
     def __call__(self):
         try:
-            proc = subprocess.Popen(as_pargs(self.command),
+            result = subprocess.run(as_pargs(self.command),
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE,
                                     cwd=self.cwd,
-                                    env=self.env)
-            stdout, stderr = proc.communicate(timeout=self.timeout)
-            stdout, stderr = decode(stdout, self.encoding), decode(stderr, self.encoding)
-            if proc.returncode != 0:
-                logger.warning('SUT update command returned with nonzero exit code (%d).\n%s\n%s',
-                               proc.returncode,
-                               stdout,
-                               stderr)
-            else:
-                logger.info('Update succeeded.\n%s', stdout)
+                                    env=self.env,
+                                    timeout=self.timeout,
+                                    check=True)
+            logger.info('Update succeeded.\n%s', decode(result.stdout, self.encoding))
         except subprocess.TimeoutExpired as e:
             logger.debug('SUT update execution timeout (%ds) expired.', e.timeout)
-            Controller.kill_process_tree(proc.pid)
+        except subprocess.CalledProcessError as e:
+            logger.warning('SUT update command returned with nonzero exit code (%d).\n%s\n%s',
+                           e.returncode,
+                           decode(e.stdout, self.encoding),
+                           decode(e.stderr, self.encoding))

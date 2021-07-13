@@ -11,7 +11,6 @@ import shutil
 import subprocess
 
 from ..config import as_bool, as_dict, as_pargs, as_path, decode
-from ..controller import Controller
 from .fuzzer import Fuzzer
 
 logger = logging.getLogger(__name__)
@@ -79,20 +78,19 @@ class SubprocessRunner(Fuzzer):
     def __enter__(self):
         os.makedirs(self.work_dir, exist_ok=True)
         try:
-            proc = subprocess.Popen(self.command,
-                                    cwd=self.cwd,
-                                    env=self.env,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE)
-            stdout, stderr = proc.communicate(timeout=self.timeout)
-            if proc.returncode != 0:
-                logger.warning('Fuzzer command returned with nonzero exit code (%d).\n%s\n%s', proc.returncode,
-                               decode(stdout, self.encoding),
-                               decode(stderr, self.encoding))
+            subprocess.run(self.command,
+                           cwd=self.cwd,
+                           env=self.env,
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE,
+                           timeout=self.timeout,
+                           check=True)
         except subprocess.TimeoutExpired as e:
             logger.debug('Fuzzer execution timeout (%ds) expired.', e.timeout)
-            Controller.kill_process_tree(proc.pid)
-
+        except subprocess.CalledProcessError as e:
+            logger.warning('Fuzzer command returned with nonzero exit code (%d).\n%s\n%s', e.returncode,
+                           decode(e.stdout, self.encoding),
+                           decode(e.stderr, self.encoding))
         self.tests = [os.path.join(self.work_dir, test) for test in os.listdir(self.work_dir)]
         return self
 

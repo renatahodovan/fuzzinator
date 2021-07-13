@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -53,7 +53,7 @@ class AnonymizeDecorator(CallableDecorator):
                     ks = list(issue.keys())
 
                 for key in ks:
-                    issue[key] = issue.get(key, b'').replace(bytes(old_text, 'utf-8'), bytes(new_text or '', 'utf-8'))
+                    issue[key] = issue.get(key, '').replace(old_text, new_text or '')
 
                 return issue
 

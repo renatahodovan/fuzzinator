@@ -13,7 +13,7 @@ import select
 import subprocess
 import time
 
-from ..config import as_dict, as_list, as_pargs, as_path
+from ..config import as_dict, as_list, as_pargs, as_path, decode
 from .. import Controller
 from . import RegexAutomaton
 
@@ -44,6 +44,7 @@ class StreamMonitoredSubprocessCall(object):
         and stderr streams. The patterns and instructions are interpreted as
         defined in :class:`fuzzinator.call.RegexAutomaton`.
       - ``timeout``: run subprocess with timeout.
+      - ``encoding``: stdout and stderr encoding (default: autodetect).
 
     **Result of the SUT call:**
 
@@ -74,12 +75,13 @@ class StreamMonitoredSubprocessCall(object):
        Not available on platforms without fcntl support (e.g., Windows).
     """
 
-    def __init__(self, command, cwd=None, env=None, end_patterns=None, timeout=None, **kwargs):
+    def __init__(self, command, cwd=None, env=None, end_patterns=None, timeout=None, encoding=None, **kwargs):
         self.command = command
         self.cwd = as_path(cwd) if cwd else os.getcwd()
-        self.end_patterns = [RegexAutomaton.split_pattern(p.encode('utf-8', errors='ignore')) for p in as_list(end_patterns)] if end_patterns else []
+        self.end_patterns = [RegexAutomaton.split_pattern(p) for p in as_list(end_patterns)] if end_patterns else []
         self.env = dict(os.environ, **as_dict(env)) if env else None
         self.timeout = int(timeout) if timeout else None
+        self.encoding = encoding
 
     def __enter__(self):
         return self
@@ -97,7 +99,7 @@ class StreamMonitoredSubprocessCall(object):
                                 cwd=self.cwd or os.getcwd(),
                                 env=self.env)
 
-        streams = {'stdout': b'', 'stderr': b''}
+        streams = {'stdout': '', 'stderr': ''}
 
         select_fds = [stream.fileno() for stream in [proc.stderr, proc.stdout]]
         for fd in select_fds:
@@ -122,7 +124,7 @@ class StreamMonitoredSubprocessCall(object):
                             chunk = getattr(proc, stream).read(512)
                             if not chunk:
                                 break
-                            streams[stream] += chunk
+                            streams[stream] += decode(chunk, self.encoding)
 
                         # Process the stream content line-by-line.
                         terminate, new_details = regex_automaton.process(streams[stream].splitlines(), issue)
@@ -135,8 +137,7 @@ class StreamMonitoredSubprocessCall(object):
                 logger.warning('Exception in stream filtering.', exc_info=e)
 
         Controller.kill_process_tree(proc.pid)
-
-        logger.debug('%s\n%s', streams['stdout'].decode('utf-8', errors='ignore'), streams['stderr'].decode('utf-8', errors='ignore'))
+        logger.debug('%s\n%s', streams['stdout'], streams['stderr'])
         if issue:
             issue.update(dict(exit_code=proc.returncode,
                               stderr=streams['stderr'],

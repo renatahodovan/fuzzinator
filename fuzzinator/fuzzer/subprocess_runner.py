@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -10,7 +10,7 @@ import os
 import shutil
 import subprocess
 
-from ..config import as_bool, as_dict, as_pargs, as_path
+from ..config import as_bool, as_dict, as_pargs, as_path, decode
 from .. import Controller
 
 logger = logging.getLogger(__name__)
@@ -41,6 +41,7 @@ class SubprocessRunner(object):
       - ``timeout``: run subprocess with timeout.
       - ``contents``: if it's true then the content of the files will be returned
          instead of their path (boolean value, True by default).
+      - ``encoding``: stdout and stderr encoding (default: autodetect).
 
     **Example configuration snippet:**
 
@@ -59,7 +60,7 @@ class SubprocessRunner(object):
             command=barfuzzer -n ${fuzz.foo-with-bar:batch} -o ${outdir}
     """
 
-    def __init__(self, outdir, command, cwd=None, env=None, timeout=None, contents=True, **kwargs):
+    def __init__(self, outdir, command, cwd=None, env=None, timeout=None, contents=True, encoding=None, **kwargs):
         # uid is used to make sure we create unique directory for the generated test cases.
         self.uid = '{pid}-{id}'.format(pid=os.getpid(), id=id(self))
 
@@ -69,6 +70,7 @@ class SubprocessRunner(object):
         self.env = dict(os.environ, **as_dict(env)) if env else None
         self.timeout = int(timeout) if timeout else None
         self.contents = as_bool(contents)
+        self.encoding = encoding
         self.tests = []
 
     def __enter__(self):
@@ -82,11 +84,12 @@ class SubprocessRunner(object):
             stdout, stderr = proc.communicate(timeout=self.timeout)
             if proc.returncode != 0:
                 logger.warning('Fuzzer command returned with nonzero exit code (%d).\n%s\n%s', proc.returncode,
-                               stdout.decode('utf-8', errors='ignore'),
-                               stderr.decode('utf-8', errors='ignore'))
-        except subprocess.TimeoutExpired:
-            logger.debug('Timeout expired in the fuzzer\'s subprocess runner.')
+                               decode(stdout, self.encoding),
+                               decode(stderr, self.encoding))
+        except subprocess.TimeoutExpired as e:
+            logger.debug('Fuzzer execution timeout (%ds) expired.', e.timeout)
             Controller.kill_process_tree(proc.pid)
+
         self.tests = [os.path.join(self.outdir, test) for test in os.listdir(self.outdir)]
         return self
 

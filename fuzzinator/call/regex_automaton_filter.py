@@ -46,7 +46,7 @@ class RegexAutomatonFilter(CallableDecorator):
         for stream, desc in kwargs.items():
             if stream not in patterns:
                 patterns[stream] = []
-            patterns[stream].extend(RegexAutomaton.split_pattern(p.encode('utf-8', errors='ignore')) for p in as_list(desc))
+            patterns[stream].extend(RegexAutomaton.split_pattern(p) for p in as_list(desc))
 
         def wrapper(fn):
             def filter(*args, **kwargs):
@@ -58,7 +58,7 @@ class RegexAutomatonFilter(CallableDecorator):
                 for field, instructions in patterns.items():
                     # Process the field content line-by-line.
                     regex_automaton = RegexAutomaton(instructions, existing_fields=set(issue.keys()))
-                    terminate, _ = regex_automaton.process(issue.get(field, b'').splitlines(), issue_details)
+                    terminate, _ = regex_automaton.process(issue.get(field, '').splitlines(), issue_details)
                     if terminate:
                         if not issue_details:
                             return NonIssue(issue)

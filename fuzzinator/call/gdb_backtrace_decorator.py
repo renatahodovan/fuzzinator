@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 # Copyright (c) 2021 Paulo Matos, Igalia S.L.
 #
 # Licensed under the BSD 3-Clause License
@@ -10,7 +10,7 @@ import logging
 import os
 import pexpect
 
-from ..config import as_dict, as_pargs, as_path
+from ..config import as_dict, as_pargs, as_path, decode
 from . import CallableDecorator
 
 logger = logging.getLogger(__name__)
@@ -33,6 +33,7 @@ class GdbBacktraceDecorator(CallableDecorator):
         invocation.
       - ``env``: if not ``None``, a dictionary of variable names-values to
         update the environment with.
+      - ``encoding``: stdout and stderr encoding (default: autodetect).
 
     The new ``'backtrace'`` issue property will contain the result of GDB's
     ``bt`` command after the halt of the SUT.
@@ -58,7 +59,7 @@ class GdbBacktraceDecorator(CallableDecorator):
             env={"BAR": "1", "BAZ": "1"}
     """
 
-    def decorator(self, command, cwd=None, env=None, **kwargs):
+    def decorator(self, command, cwd=None, env=None, encoding=None, **kwargs):
         def wrapper(fn):
             def filter(*args, **kwargs):
                 issue = fn(*args, **kwargs)
@@ -76,7 +77,7 @@ class GdbBacktraceDecorator(CallableDecorator):
                     child.expect_exact('(gdb) ')
                     backtrace = child.before
                     child.terminate(force=True)
-                    issue['backtrace'] = backtrace
+                    issue['backtrace'] = decode(backtrace, encoding)
                 except Exception as e:
                     logger.warning('Failed to obtain gdb backtrace', exc_info=e)
 

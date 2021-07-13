@@ -46,7 +46,7 @@ class RegexFilter(CallableDecorator):
         for field, patterns_str in kwargs.items():
             patterns[field] = []
             for pattern in as_list(patterns_str):
-                patterns[field].append(re.compile(pattern.encode('utf-8', errors='ignore'), flags=re.MULTILINE | re.DOTALL))
+                patterns[field].append(re.compile(pattern, flags=re.MULTILINE | re.DOTALL))
 
         def wrapper(fn):
             def filter(*args, **kwargs):
@@ -57,7 +57,7 @@ class RegexFilter(CallableDecorator):
                 updated = False
                 for field, field_patterns in patterns.items():
                     for pattern in field_patterns:
-                        match = pattern.search(issue.get(field, b''))
+                        match = pattern.search(issue.get(field, ''))
                         if match is not None:
                             issue.update(match.groupdict())
                             updated = True

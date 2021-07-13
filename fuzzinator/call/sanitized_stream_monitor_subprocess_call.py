@@ -25,4 +25,4 @@ class SanitizedStreamMonitoredSubprocessCall(StreamMonitoredSubprocessCall):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.end_patterns.extend(RegexAutomaton.split_pattern(p.encode('utf-8', errors='ignore')) for p in SanitizerAutomatonFilter.STDERR_PATTERNS)
+        self.end_patterns.extend(RegexAutomaton.split_pattern(p) for p in SanitizerAutomatonFilter.STDERR_PATTERNS)

@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2021 Renata Hodovan, Akos Kiss.
 # Copyright (c) 2021 Paulo Matos, Igalia S.L.
 #
 # Licensed under the BSD 3-Clause License
@@ -10,7 +10,7 @@ import logging
 import os
 import pexpect
 
-from ..config import as_dict, as_pargs, as_path
+from ..config import as_dict, as_pargs, as_path, decode
 from . import CallableDecorator
 
 logger = logging.getLogger(__name__)
@@ -35,6 +35,7 @@ class LldbBacktraceDecorator(CallableDecorator):
         update the environment with.
       - ``timeout``: timeout (in seconds) to wait between two lldb commands
         (integer number, 1 by default).
+      - ``encoding``: stdout and stderr encoding (default: autodetect).
 
     The new ``'backtrace'`` issue property will contain the result of Lldb's
     ``bt`` command after the halt of the SUT.
@@ -60,7 +61,7 @@ class LldbBacktraceDecorator(CallableDecorator):
             env={"BAR": "1", "BAZ": "1"}
     """
 
-    def decorator(self, command, cwd=None, env=None, timeout=None, **kwargs):
+    def decorator(self, command, cwd=None, env=None, timeout=None, encoding=None, **kwargs):
         timeout = int(timeout) if timeout is not None else 1
 
         def wrapper(fn):
@@ -86,7 +87,7 @@ class LldbBacktraceDecorator(CallableDecorator):
                         backtrace += child.before
 
                     child.sendline('quit')
-                    issue['backtrace'] = backtrace
+                    issue['backtrace'] = decode(backtrace, encoding)
                 except Exception as e:
                     logger.warning('Failed to obtain lldb backtrace', exc_info=e)
 

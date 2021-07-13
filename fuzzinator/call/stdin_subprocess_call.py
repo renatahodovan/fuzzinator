@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -9,14 +9,14 @@ import logging
 import os
 import subprocess
 
-from ..config import as_bool, as_dict, as_pargs, as_path
+from ..config import as_bool, as_dict, as_pargs, as_path, decode
 from .. import Controller
 from . import NonIssue
 
 logger = logging.getLogger(__name__)
 
 
-def StdinSubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None, timeout=None, **kwargs):
+def StdinSubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None, timeout=None, encoding=None, **kwargs):
     """
     Subprocess invocation-based call of a SUT that takes a test input on its
     stdin stream.
@@ -34,6 +34,7 @@ def StdinSubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=Non
       - ``no_exit_code``: makes possible to force issue creation regardless of
         the exit code.
       - ``timeout``: run subprocess with timeout.
+      - ``encoding``: stdout and stderr encoding (default: autodetect).
 
     **Result of the SUT call:**
 
@@ -66,7 +67,8 @@ def StdinSubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=Non
                                 cwd=as_path(cwd) if cwd else os.getcwd(),
                                 env=env)
         stdout, stderr = proc.communicate(input=test, timeout=timeout)
-        logger.debug('%s\n%s', stdout.decode('utf-8', errors='ignore'), stderr.decode('utf-8', errors='ignore'))
+        stdout, stderr = decode(stdout, encoding), decode(stderr, encoding)
+        logger.debug('%s\n%s', stdout, stderr)
 
         issue = {
             'exit_code': proc.returncode,
@@ -75,8 +77,8 @@ def StdinSubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=Non
         }
         if no_exit_code or proc.returncode != 0:
             return issue
-    except subprocess.TimeoutExpired:
-        logger.debug('Timeout expired in the SUT\'s stdin subprocess runner.')
+    except subprocess.TimeoutExpired as e:
+        logger.debug('StdinSubprocessCall execution timeout (%ds) expired.', e.timeout)
         Controller.kill_process_tree(proc.pid)
 
     return NonIssue(issue) if issue else None

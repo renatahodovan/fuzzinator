@@ -37,7 +37,7 @@ class RegexAutomaton(object):
     If a pattern lacks the instructions and the slashes then it is
     interpreted as an ``msc /<pattern>/``.
     """
-    regex_pattern = re.compile(b'm(?P<field_op>.)(?P<next_line_op>.) */(?P<regex>.*)/')
+    regex_pattern = re.compile(r'm(?P<field_op>.)(?P<next_line_op>.) */(?P<regex>.*)/')
 
     def __init__(self, instructions, existing_fields=None):
         self.instructions = instructions
@@ -47,7 +47,7 @@ class RegexAutomaton(object):
     def split_pattern(cls, pattern):
         match = cls.regex_pattern.fullmatch(pattern)
         if match:
-            return re.compile(match.group('regex')), chr(match.group('field_op')[0]), chr(match.group('next_line_op')[0])
+            return re.compile(match.group('regex')), match.group('field_op')[0], match.group('next_line_op')[0]
         return re.compile(pattern), 's', 'c'
 
     def process_line(self, line, issue):

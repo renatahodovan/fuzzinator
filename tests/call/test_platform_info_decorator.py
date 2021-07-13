@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -14,12 +14,12 @@ from common_call import mock_always_fail_call, mock_never_fail_call, MockAlwaysF
 
 
 @pytest.mark.parametrize('call_init_kwargs, call_kwargs', [
-    ({'init_foo': b'init_bar'}, {'foo': b'bar'})
+    ({'init_foo': 'init_bar'}, {'foo': 'bar'})
 ])
 @pytest.mark.parametrize('call, exp', [
-    (mock_always_fail_call, {'foo': b'bar'}),
+    (mock_always_fail_call, {'foo': 'bar'}),
     (mock_never_fail_call, None),
-    (MockAlwaysFailCall, {'init_foo': b'init_bar', 'foo': b'bar'}),
+    (MockAlwaysFailCall, {'init_foo': 'init_bar', 'foo': 'bar'}),
     (MockNeverFailCall,  None),
 ])
 def test_platform_info_decorator(call, call_init_kwargs, call_kwargs, exp):

@@ -13,7 +13,7 @@ import select
 import subprocess
 import time
 
-from ..config import as_bool, as_dict, as_list, as_pargs, as_path
+from ..config import as_bool, as_dict, as_list, as_pargs, as_path, decode
 from .. import Controller
 
 logger = logging.getLogger(__name__)
@@ -26,13 +26,14 @@ class TestRunnerSubprocessCall(object):
        Not available on platforms without fcntl support (e.g., Windows).
     """
 
-    def __init__(self, command, cwd=None, env=None, end_texts=None, init_wait=None, timeout_per_test=None, **kwargs):
+    def __init__(self, command, cwd=None, env=None, end_texts=None, init_wait=None, timeout_per_test=None, encoding=None, **kwargs):
         self.end_texts = as_list(end_texts) if end_texts else []
         self.init_wait = as_bool(init_wait)
         self.timeout_per_test = int(timeout_per_test) if timeout_per_test else None
         self.cwd = as_path(cwd) if cwd else os.getcwd()
         self.command = as_pargs(command)
         self.env = dict(os.environ, **as_dict(env)) if env else None
+        self.encoding = encoding
         self.proc = None
 
     def __enter__(self):
@@ -97,10 +98,10 @@ class TestRunnerSubprocessCall(object):
                             chunk = getattr(self.proc, stream).read(512)
                             if not chunk:
                                 break
-                            streams[stream] += chunk
+                            streams[stream] += decode(chunk, self.encoding)
 
                         for end_pattern in self.end_texts:
-                            if end_pattern.encode('utf-8') in streams[stream]:
+                            if end_pattern in streams[stream]:
                                 end_loop = True
                                 break
 
@@ -109,7 +110,7 @@ class TestRunnerSubprocessCall(object):
             except IOError as e:
                 logger.warning('Exception in stream filtering.', exc_info=e)
 
-        logger.debug('%s\n%s', streams['stdout'].decode('utf-8', errors='ignore'), streams['stderr'].decode('utf-8', errors='ignore'))
+        logger.debug('%s\n%s', streams['stdout'], streams['stderr'])
         return {
             'exit_code': self.proc.returncode,
             'stderr': streams['stderr'],

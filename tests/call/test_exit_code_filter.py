@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -14,14 +14,14 @@ from common_call import mock_always_fail_call, mock_never_fail_call, MockAlwaysF
 
 
 @pytest.mark.parametrize('call_init_kwargs, call_kwargs', [
-    ({'init_foo': b'init_bar'}, {'foo': b'bar', 'exit_code': 42})
+    ({'init_foo': 'init_bar'}, {'foo': 'bar', 'exit_code': 42})
 ])
 @pytest.mark.parametrize('call, dec_kwargs, exp', [
     (mock_always_fail_call, {'exit_codes': '[]'}, fuzzinator.call.NonIssue),
     (mock_always_fail_call, {'exit_codes': '[41,43]'}, fuzzinator.call.NonIssue),
-    (mock_always_fail_call, {'exit_codes': '[41,42,43]'}, {'foo': b'bar', 'exit_code': 42}),
-    (mock_always_fail_call, {'exit_codes': '[]', 'invert': 'true'}, {'foo': b'bar', 'exit_code': 42}),
-    (mock_always_fail_call, {'exit_codes': '[41,43]', 'invert': 'true'}, {'foo': b'bar', 'exit_code': 42}),
+    (mock_always_fail_call, {'exit_codes': '[41,42,43]'}, {'foo': 'bar', 'exit_code': 42}),
+    (mock_always_fail_call, {'exit_codes': '[]', 'invert': 'true'}, {'foo': 'bar', 'exit_code': 42}),
+    (mock_always_fail_call, {'exit_codes': '[41,43]', 'invert': 'true'}, {'foo': 'bar', 'exit_code': 42}),
     (mock_always_fail_call, {'exit_codes': '[41,42,43]', 'invert': 'true'}, fuzzinator.call.NonIssue),
 
     (mock_never_fail_call, {'exit_codes': '[41,42,43]'}, None),
@@ -29,9 +29,9 @@ from common_call import mock_always_fail_call, mock_never_fail_call, MockAlwaysF
 
     (MockAlwaysFailCall, {'exit_codes': '[]'}, fuzzinator.call.NonIssue),
     (MockAlwaysFailCall, {'exit_codes': '[41,43]'}, fuzzinator.call.NonIssue),
-    (MockAlwaysFailCall, {'exit_codes': '[41,42,43]'}, {'init_foo': b'init_bar', 'foo': b'bar', 'exit_code': 42}),
-    (MockAlwaysFailCall, {'exit_codes': '[]', 'invert': 'true'}, {'init_foo': b'init_bar', 'foo': b'bar', 'exit_code': 42}),
-    (MockAlwaysFailCall, {'exit_codes': '[41,43]', 'invert': 'true'}, {'init_foo': b'init_bar', 'foo': b'bar', 'exit_code': 42}),
+    (MockAlwaysFailCall, {'exit_codes': '[41,42,43]'}, {'init_foo': 'init_bar', 'foo': 'bar', 'exit_code': 42}),
+    (MockAlwaysFailCall, {'exit_codes': '[]', 'invert': 'true'}, {'init_foo': 'init_bar', 'foo': 'bar', 'exit_code': 42}),
+    (MockAlwaysFailCall, {'exit_codes': '[41,43]', 'invert': 'true'}, {'init_foo': 'init_bar', 'foo': 'bar', 'exit_code': 42}),
     (MockAlwaysFailCall, {'exit_codes': '[41,42,43]', 'invert': 'true'}, fuzzinator.call.NonIssue),
 
     (MockNeverFailCall, {'exit_codes': '[41,42,43]'}, None),

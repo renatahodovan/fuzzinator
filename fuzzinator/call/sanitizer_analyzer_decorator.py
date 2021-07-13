@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2020-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -32,76 +32,76 @@ class SanitizerAnalyzerDecorator(CallableDecorator):
     HIGH = 'High'
 
     san_error_types = {
-        b'AddressSanitizer': OrderedDict([
-            (b'attempting free on address which was not malloc()-ed', b'invalid-free'),
-            (b'attempting double-free', b'double-free'),
-            (b'double-free on ', b'double-free'),
-            (b'FPE', b'floating-point-exception'),
+        'AddressSanitizer': OrderedDict([
+            ('attempting free on address which was not malloc()-ed', 'invalid-free'),
+            ('attempting double-free', 'double-free'),
+            ('double-free on ', 'double-free'),
+            ('FPE', 'floating-point-exception'),
         ]),
 
-        b'UndefinedBehaviorSanitizer': OrderedDict([
-            (b'member access within', b'bad-cast'),
-            (b'member call on', b'bad-cast'),
-            (b'downcast of', b'bad-cast'),
-            (b'control flow integrity check', b'bad-cast'),
-            (b'control flow integrity violation', b'bad-cast'),
-            (b'division by zero', b'divide-by-zero'),
-            (b'outside the range of representable values', b'float-cast-overflow'),
-            (b'through pointer to incorrect function type', b'incorrect-function-pointer-type'),
-            (b'out of bounds for type', b'index-out-of-bounds'),
-            (b'not a valid value for type bool', b'invalid-bool-value'),
-            (b'which is not a valid argument', b'invalid-builtin-use'),
-            (b'misaligned address', b'misaligned-address'),
-            (b'reached the end of a value-returning function', b'no-return-value'),
-            (b'which is declared to never be null', b'invalid-null-argument'),
-            (b'load of null pointer', b'null-dereference READ'),
-            (b'binding to null pointer', b'null-dereference'),
-            (b'access within null pointer', b'null-dereference'),
-            (b'call on null pointer', b'null-dereference'),
-            (b'store to null pointer', b'null-dereference WRITE'),
-            (b'with insufficient space for an object of type', b'object-size'),
-            (b'addition of unsigned offset', b'pointer-overflow'),
-            (b'subtraction of unsigned offset', b'pointer-overflow'),
-            (b'pointer index expression with base ', b'pointer-overflow'),
-            (b'applying non-zero offset', b'pointer-overflow'),
-            (b'applying zero offset to null pointer', b'pointer-overflow'),
+        'UndefinedBehaviorSanitizer': OrderedDict([
+            ('member access within', 'bad-cast'),
+            ('member call on', 'bad-cast'),
+            ('downcast of', 'bad-cast'),
+            ('control flow integrity check', 'bad-cast'),
+            ('control flow integrity violation', 'bad-cast'),
+            ('division by zero', 'divide-by-zero'),
+            ('outside the range of representable values', 'float-cast-overflow'),
+            ('through pointer to incorrect function type', 'incorrect-function-pointer-type'),
+            ('out of bounds for type', 'index-out-of-bounds'),
+            ('not a valid value for type bool', 'invalid-bool-value'),
+            ('which is not a valid argument', 'invalid-builtin-use'),
+            ('misaligned address', 'misaligned-address'),
+            ('reached the end of a value-returning function', 'no-return-value'),
+            ('which is declared to never be null', 'invalid-null-argument'),
+            ('load of null pointer', 'null-dereference READ'),
+            ('binding to null pointer', 'null-dereference'),
+            ('access within null pointer', 'null-dereference'),
+            ('call on null pointer', 'null-dereference'),
+            ('store to null pointer', 'null-dereference WRITE'),
+            ('with insufficient space for an object of type', 'object-size'),
+            ('addition of unsigned offset', 'pointer-overflow'),
+            ('subtraction of unsigned offset', 'pointer-overflow'),
+            ('pointer index expression with base ', 'pointer-overflow'),
+            ('applying non-zero offset', 'pointer-overflow'),
+            ('applying zero offset to null pointer', 'pointer-overflow'),
 
-            (b'null pointer returned from function declared to never return null', b'invalid-null-return'),
-            (b'shift', b'undefined-shift'),
-            (b'execution reached an unreachable program point', b'unreachable code'),
-            (b'unsigned integer overflow', b'unsigned-integer-overflow'),
-            (b'signed integer overflow', b'signed-integer-overflow'),
-            (b'variable length array bound evaluates to non-positive value', b'non-positive-vla-bound-value'),
+            ('null pointer returned from function declared to never return null', 'invalid-null-return'),
+            ('shift', 'undefined-shift'),
+            ('execution reached an unreachable program point', 'unreachable code'),
+            ('unsigned integer overflow', 'unsigned-integer-overflow'),
+            ('signed integer overflow', 'signed-integer-overflow'),
+            ('variable length array bound evaluates to non-positive value', 'non-positive-vla-bound-value'),
 
             # The following types are supersets of other types, and should be placed
             # at the end to avoid subsuming crashes from the more specialized types.
-            (b'not a valid value for type', b'invalid-enum-value'),
-            (b'integer overflow', b'integer-overflow'),
-            (b'cannot be represented in type', b'integer-overflow'),
+            ('not a valid value for type', 'invalid-enum-value'),
+            ('integer overflow', 'integer-overflow'),
+            ('cannot be represented in type', 'integer-overflow'),
         ]),
     }
 
     severity = {
         MEDIUM: [
-            b'container-overflow',
-            b'global-buffer-overflow',
-            b'heap-buffer-overflow',
-            b'incorrect-function-pointer-type',
-            b'index-out-of-bounds',
-            b'memcpy-param-overlap',
-            b'non-positive-vla-bound-value',
-            b'object-size',
-            b'stack-buffer-overflow',
-            b'use-of-uninitialized-value',
-            b'unknown-crash',
+            'container-overflow',
+            'global-buffer-overflow',
+            'heap-buffer-overflow',
+            'incorrect-function-pointer-type',
+            'index-out-of-bounds',
+            'memcpy-param-overlap',
+            'non-positive-vla-bound-value',
+            'object-size',
+            'stack-buffer-overflow',
+            'use-of-uninitialized-value',
+            'unknown-crash',
         ],
         HIGH: [
-            b'bad-cast',
-            b'heap-double-free',
-            b'double-free',
-            b'invalid-free',
-            b'heap-use-after-free',
-            b'use-after-poison',
+            'bad-cast',
+            'heap-double-free',
+            'double-free',
+            'invalid-free',
+            'heap-use-after-free',
+            'use-after-poison',
         ],
     }
 
@@ -122,18 +122,18 @@ class SanitizerAnalyzerDecorator(CallableDecorator):
                 if not issue.get('error_type'):
                     return issue
 
-                sanitizer = b'UndefinedBehaviorSanitizer' if issue.get('ubsan') else issue.get('sanitizer')
+                sanitizer = 'UndefinedBehaviorSanitizer' if issue.get('ubsan') else issue.get('sanitizer')
 
                 for pattern, name in self.san_error_types.get(sanitizer, {}).items():
                     if pattern in issue['error_type']:
                         issue['error_type'] = name
                         break
 
-                if issue['error_type'] in [b'SEGV', b'access-violation']:
-                    if is_null_dereference(issue['address'].decode('utf-8', errors='ignore')):
-                        issue['error_type'] = b'null-dereference'
+                if issue['error_type'] in ['SEGV', 'access-violation']:
+                    if is_null_dereference(issue['address']):
+                        issue['error_type'] = 'null-dereference'
                     else:
-                        issue['error_type'] = b'unknown-crash'
+                        issue['error_type'] = 'unknown-crash'
 
                 for severity, error_types in self.severity.items():
                     if issue['error_type'] in error_types:
@@ -142,7 +142,7 @@ class SanitizerAnalyzerDecorator(CallableDecorator):
                 else:
                     issue['security'] = self.NONE
 
-                if b'WRITE' in issue.get('mem_access', b''):
+                if 'WRITE' in issue.get('mem_access', ''):
                     issue['security'] = self.HIGH
 
                 return issue

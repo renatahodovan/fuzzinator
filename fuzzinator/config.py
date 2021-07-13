@@ -17,6 +17,8 @@ from inspect import isclass
 from io import StringIO
 from math import inf
 
+import chardet
+
 from inators.imp import import_object
 
 
@@ -161,3 +163,8 @@ def as_path(s):
 
 def as_pargs(s):
     return [as_path(e) for e in shlex.split(s, posix=sys.platform != 'win32')]
+
+
+def decode(b, encoding=None):
+    encoding = encoding or chardet.detect(b)['encoding'] or 'latin-1'
+    return b.decode(encoding, errors='ignore')

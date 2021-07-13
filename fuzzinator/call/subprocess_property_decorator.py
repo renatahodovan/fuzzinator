@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -9,7 +9,7 @@ import logging
 import os
 import subprocess
 
-from ..config import as_dict, as_pargs, as_path
+from ..config import as_dict, as_pargs, as_path, decode
 from .. import Controller
 from . import CallableDecorator
 
@@ -33,6 +33,7 @@ class SubprocessPropertyDecorator(CallableDecorator):
       - ``env``: if not ``None``, a dictionary of variable names-values to
         update the environment with.
       - ``timeout``: run subprocess with timeout.
+      - ``encoding``: stdout and stderr encoding (default: autodetect).
 
     **Example configuration snippet:**
 
@@ -53,7 +54,7 @@ class SubprocessPropertyDecorator(CallableDecorator):
             env={"GIT_FLUSH": "1"}
     """
 
-    def decorator(self, property, command, cwd=None, env=None, timeout=None, **kwargs):
+    def decorator(self, property, command, cwd=None, env=None, timeout=None, encoding=None, **kwargs):
         def wrapper(fn):
             def filter(*args, **kwargs):
                 issue = fn(*args, **kwargs)
@@ -67,15 +68,16 @@ class SubprocessPropertyDecorator(CallableDecorator):
                                             stderr=subprocess.PIPE,
                                             env=dict(os.environ, **as_dict(env or '{}')))
                     stdout, stderr = proc.communicate(timeout=timeout)
+                    stdout, stderr = decode(stdout, encoding), decode(stderr, encoding)
                     if proc.returncode == 0:
                         issue[property] = stdout
                     else:
                         logger.debug('SubprocessPropertyDecorator exited with nonzero exit code while setting the \'%s\' property.\n%s\n%s',
                                      property,
-                                     stdout.decode('utf-8', errors='ignore'),
-                                     stderr.decode('utf-8', errors='ignore'))
-                except subprocess.TimeoutExpired:
-                    logger.debug('Timeout expired in the SubprocessPropertyDecorator while setting the \'%s\' property.', property)
+                                     stdout,
+                                     stderr)
+                except subprocess.TimeoutExpired as e:
+                    logger.debug('SubprocessPropertyDecorator execution timeout (%ds) expired while setting the \'%s\' property.', e.timeout, property)
                     Controller.kill_process_tree(proc.pid)
 
                 return issue

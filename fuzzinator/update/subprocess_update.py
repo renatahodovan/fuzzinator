@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -9,13 +9,13 @@ import logging
 import os
 import subprocess
 
-from ..config import as_dict, as_pargs, as_path
+from ..config import as_dict, as_pargs, as_path, decode
 from .. import Controller
 
 logger = logging.getLogger(__name__)
 
 
-def SubprocessUpdate(command, cwd=None, env=None, timeout=None):
+def SubprocessUpdate(command, cwd=None, env=None, timeout=None, encoding=None):
     """
     Subprocess invocation-based SUT update.
 
@@ -30,6 +30,7 @@ def SubprocessUpdate(command, cwd=None, env=None, timeout=None):
       - ``env``: if not ``None``, a dictionary of variable names-values to
         update the environment with.
       - ``timeout``: run subprocess with timeout.
+      - ``encoding``: stdout and stderr encoding (default: autodetect).
 
     **Example configuration snippet:**
 
@@ -53,14 +54,14 @@ def SubprocessUpdate(command, cwd=None, env=None, timeout=None):
                                 cwd=as_path(cwd) if cwd else os.getcwd(),
                                 env=dict(os.environ, **as_dict(env or '{}')))
         stdout, stderr = proc.communicate(timeout=timeout)
-        stdout_str = stdout.decode('utf-8', errors='ignore')
+        stdout, stderr = decode(stdout, encoding), decode(stderr, encoding)
         if proc.returncode != 0:
-            logger.warning('Update command returned with nonzero exit code (%d).\n%s\n%s',
+            logger.warning('SUT update command returned with nonzero exit code (%d).\n%s\n%s',
                            proc.returncode,
-                           stdout_str,
-                           stderr.decode('utf-8', errors='ignore'))
+                           stdout,
+                           stderr)
         else:
-            logger.info('Update succeeded.\n%s', stdout_str)
-    except subprocess.TimeoutExpired:
-        logger.debug('Timeout expired in the subprocess update.')
+            logger.info('Update succeeded.\n%s', stdout)
+    except subprocess.TimeoutExpired as e:
+        logger.debug('SUT update execution timeout (%ds) expired.', e.timeout)
         Controller.kill_process_tree(proc.pid)

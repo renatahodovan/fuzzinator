@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -16,16 +16,16 @@ from common_call import mock_always_fail_call, mock_never_fail_call, MockAlwaysF
 
 
 @pytest.mark.parametrize('call_init_kwargs, call_kwargs', [
-    ({'init_foo': b'init_bar'}, {'foo': b'bar', 'test': b'baz'})
+    ({'init_foo': 'init_bar'}, {'foo': 'bar', 'test': b'baz'})
 ])
 @pytest.mark.parametrize('call, dec_kwargs, exp', [
-    (mock_always_fail_call, {'filename': 'baz.txt'}, {'foo': b'bar'}),
-    (mock_always_fail_call, {'filename': 'baz{uid}.txt'}, {'foo': b'bar'}),
+    (mock_always_fail_call, {'filename': 'baz.txt'}, {'foo': 'bar'}),
+    (mock_always_fail_call, {'filename': 'baz{uid}.txt'}, {'foo': 'bar'}),
 
     (mock_never_fail_call, {'filename': 'baz{uid}.txt'}, None),
 
-    (MockAlwaysFailCall, {'filename': 'baz.txt'}, {'init_foo': b'init_bar', 'foo': b'bar'}),
-    (MockAlwaysFailCall, {'filename': 'baz{uid}.txt'}, {'init_foo': b'init_bar', 'foo': b'bar'}),
+    (MockAlwaysFailCall, {'filename': 'baz.txt'}, {'init_foo': 'init_bar', 'foo': 'bar'}),
+    (MockAlwaysFailCall, {'filename': 'baz{uid}.txt'}, {'init_foo': 'init_bar', 'foo': 'bar'}),
 
     (MockNeverFailCall, {'filename': 'baz{uid}.txt'}, None),
 ])

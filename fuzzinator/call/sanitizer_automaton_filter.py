@@ -32,7 +32,7 @@ class SanitizerAutomatonFilter(RegexAutomatonFilter):
         r'mac /(?P<mem_access>[A-Z]+ of size \d+)/',  # ASAN_READ_OR_WRITE_REGEX2
         r'mas /\s+(?P<sanitizer>.+?Sanitizer)\s*:\s+(?P<error_type>.+?) on (?P<address_type>unknown address|address|)\s*(?P<address>[xX0-9a-fA-F]+)/',
         # SAN_ADDR_REGEX
-        r'mas /((?P<file>[^: ]+):(?P<line>\d+)(?::(?P<char>\d+))?:\s+)?(?P<ubsan>runtime error): (?P<error_type>.*)/',  # UBSAN_RUNTIME_ERROR_REGEX
+        r'mas /^((?P<file>[^: ]+):(?P<line>\d+)(?::(?P<char>\d+))?:\s+)?(?P<ubsan>runtime error): (?P<error_type>.*)/',  # UBSAN_RUNTIME_ERROR_REGEX
 
         r'mac /(?P<error_type>Received signal 11 SEGV_[A-Z]+) ([0-9a-f]*)/',  # GENERIC_SEGV_HANDLER_REGEX
         # STACK_FRAME_REGEXES:

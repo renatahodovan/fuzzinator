@@ -10,7 +10,6 @@ import fcntl
 import logging
 import os
 import select
-import signal
 import subprocess
 import time
 
@@ -135,7 +134,7 @@ class StreamMonitoredSubprocessCall(object):
             except IOError as e:
                 logger.warning('Exception in stream filtering.', exc_info=e)
 
-        Controller.kill_process_tree(proc.pid, sig=signal.SIGKILL)
+        Controller.kill_process_tree(proc.pid)
 
         logger.debug('%s\n%s', streams['stdout'].decode('utf-8', errors='ignore'), streams['stderr'].decode('utf-8', errors='ignore'))
         if issue:

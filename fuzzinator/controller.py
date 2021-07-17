@@ -7,7 +7,6 @@
 
 import os
 import shutil
-import signal
 import time
 import traceback
 
@@ -486,21 +485,22 @@ class Controller(object):
         return True
 
     @staticmethod
-    def kill_process_tree(pid, kill_root=True, sig=signal.SIGTERM):
+    def kill_process_tree(pid, kill_root=True):
         try:
             root_proc = psutil.Process(pid)
             children = root_proc.children(recursive=True)
             if kill_root:
                 children.append(root_proc)
             for proc in children:
-                # Would be easier to use proc.terminate() here but psutils
-                # (up to version 5.4.0) on Windows terminates processes with
-                # the 0 signal/code, making the outcome of the terminated
-                # process indistinguishable from a successful execution.
                 try:
-                    os.kill(proc.pid, sig)
-                except OSError:
+                    proc.terminate()
+                except psutil.Error:
                     pass
-            psutil.wait_procs(children, timeout=1)
+            _, alive = psutil.wait_procs(children, timeout=1)
+            for proc in alive:
+                try:
+                    proc.kill()
+                except psutil.Error:
+                    pass
         except psutil.NoSuchProcess:
             pass

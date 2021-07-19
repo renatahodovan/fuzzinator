@@ -57,24 +57,29 @@ Requirements
 ============
 
 * Python_ >= 3.5
-* pip_
 * MongoDB_ >= 3.6 (either local installation or access to remote database)
+* Java_ SE >= 7 JRE or JDK (optional, required if the *Picireny* test case
+  reducer is used)
 
 .. _Python: https://www.python.org
-.. _pip: https://pip.pypa.io
 .. _MongoDB: https://www.mongodb.com
+.. _Java: https://www.oracle.com/java/
 
 
 Install
 =======
 
-The quick way::
+To install the latest release of *Fuzzinator* from PyPI_, use pip_::
 
     pip install fuzzinator
 
-Alternatively, by cloning the project and performing a local install::
+Alternatively, for the development version, clone the project and perform a
+local install::
 
     pip install .
+
+.. _PyPI: https://pypi.org/
+.. _pip: https://pip.pypa.io
 
 
 Usage

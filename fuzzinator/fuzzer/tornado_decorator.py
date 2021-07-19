@@ -160,7 +160,10 @@ class TornadoDecorator(object):
                                                 .format(timeout=decorator.refresh,
                                                         url=decorator.url.format(port=decorator.port,
                                                                                  index=self.wrapper.index)))
-                            self.write(str(self.wrapper.test))
+                            test = self.wrapper.test
+                            if not isinstance(test, (str, bytes, dict)):
+                                test = str(test)
+                            self.write(test)
                     except Exception as e:
                         logger.warning('Unhandled exception in TornadoDecorator.', exc_info=e)
 

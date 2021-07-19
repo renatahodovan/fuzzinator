@@ -7,6 +7,7 @@
 
 import asyncio
 import logging
+import ssl
 import threading
 
 from inspect import signature
@@ -29,6 +30,9 @@ class TornadoDecorator(object):
     response is the generated test. Accessing other paths can return static
     or dynamically rendered content.
 
+    When the certfile and possibly also the keyfile optional parameters are
+    defined, the traffic will be served through SSL.
+
     **Optional parameters of the fuzzer decorator:**
 
       - ``template_path``: Directory containing .html template files. These are
@@ -38,10 +42,13 @@ class TornadoDecorator(object):
       - ``url``: Url template with ``{port}`` and ``{index}`` placeholders, that
         will be filled in with appropriate values. This is the url that will be
         served for the SUT as the test case.
-        (Default: ``http://localhost:{port}/index={index}``)
+        (Default: ``http(s)://localhost:{port}/index={index}``)
       - ``refresh``: Integer number denoting the time interval (in seconds)
         for the document at the root path (i.e., the test case) to refresh
         itself. Setting it to 0 means no refresh. (Default: 0)
+      - ``certfile``: Path to a PEM file containing the certificate needed
+        to establish the certificate’s authenticity (Default: None).
+      - ``keyfile``: Path to a file containing the private key (Default: None).
 
     **Example configuration snippet:**
 
@@ -65,11 +72,18 @@ class TornadoDecorator(object):
             refresh=3
     """
 
-    def __init__(self, *, template_path=None, static_path=None, url=None, refresh=None, **kwargs):
+    def __init__(self, *, template_path=None, static_path=None, url=None, refresh=None, certfile=None, keyfile=None, **kwargs):
         self.template_path = template_path
         self.static_path = static_path
-        self.url = url or 'http://localhost:{port}?index={index}'
+        self.url = url or ('https' if certfile else 'http') + '://localhost:{port}?index={index}'
         self.refresh = int(refresh) if refresh else 0
+        if certfile:
+            self.ssl_ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+            self.ssl_ctx.check_hostname = False
+            self.ssl_ctx.verify_mode = ssl.CERT_NONE
+            self.ssl_ctx.load_cert_chain(certfile, keyfile=keyfile)
+        else:
+            self.ssl_ctx = None
         self.port = None
 
         # Disable all the output of the tornado server to avoid messing up with Fuzzinator's messages.
@@ -114,7 +128,7 @@ class TornadoDecorator(object):
 
                 def ioloop_thread():
                     asyncio.set_event_loop(asyncio.new_event_loop())
-                    app.listen(decorator.port)
+                    app.listen(decorator.port, ssl_options=decorator.ssl_ctx)
                     IOLoop.current().start()
 
                 logger.debug('Tornado server started.')

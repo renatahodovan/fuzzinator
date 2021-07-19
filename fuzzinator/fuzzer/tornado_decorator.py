@@ -167,6 +167,10 @@ class TornadoDecorator(object):
             class TemplateHandler(RequestHandler):
 
                 def get(self, page):
-                    self.render(page + '.html')
+                    try:
+                        self.render(page + '.html')
+                    except FileNotFoundError:
+                        logger.debug('%s not found', page)
+                        self.send_error(404)
 
         return Inherited

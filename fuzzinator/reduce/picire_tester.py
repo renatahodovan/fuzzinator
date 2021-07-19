@@ -30,7 +30,7 @@ class PicireTester(object):
 
             # Second chance for flaky tests in case of 'assert' check.
             if config_id == 'assert' and not issue:
-                issue = self._sut_call(test=test, filename=filename, **self._sut_call_kwargs)
+                issue = self._sut_call(**dict(self._sut_call_kwargs, test=test, filename=filename))
 
             if issue:
                 if self._expected == issue['id']:

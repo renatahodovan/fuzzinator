@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -23,7 +23,7 @@ import fuzzinator
     (0, '1:0:0:0', False),
 ])
 def test_timestamp_update_condition(touch, age, exp, tmpdir):
-    path = os.path.join('%s' % tmpdir, 'foo.txt')
+    path = os.path.join(str(tmpdir), 'foo.txt')
 
     if touch is not None:
         with open(path, 'w') as f:

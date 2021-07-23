@@ -31,7 +31,7 @@ from common_call import mock_always_fail_call, mock_never_fail_call, MockAlwaysF
 ])
 def test_file_writer_decorator(call, call_init_kwargs, call_kwargs, dec_kwargs, exp, tmpdir):
     tmp_dec_kwargs = dict(dec_kwargs)
-    tmp_dec_kwargs['filename'] = os.path.join('%s' % tmpdir, dec_kwargs['filename'])
+    tmp_dec_kwargs['filename'] = os.path.join(str(tmpdir), dec_kwargs['filename'])
 
     call = fuzzinator.call.FileWriterDecorator(**tmp_dec_kwargs)(call)
     if inspect.isclass(call):
@@ -41,7 +41,7 @@ def test_file_writer_decorator(call, call_init_kwargs, call_kwargs, dec_kwargs, 
 
     if out is not None:
         assert re.fullmatch(pattern=dec_kwargs['filename'].format(uid='.*'), string=out['filename']) is not None
-        assert out['test'] == os.path.join('%s' % tmpdir, out['filename'])
+        assert out['test'] == os.path.join(str(tmpdir), out['filename'])
         assert not os.path.exists(out['test'])
 
         del out['filename']

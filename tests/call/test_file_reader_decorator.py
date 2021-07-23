@@ -24,7 +24,7 @@ from common_call import resources_dir, mock_always_fail_call, mock_never_fail_ca
     (MockAlwaysFailCall, {'init_foo': 'init_bar', 'test': b'bar\n', 'filename': 'bar.txt'}),
     (MockNeverFailCall, None),
 ])
-def test_file_reader_decorator(call, call_init_kwargs, call_kwargs, exp, tmpdir):
+def test_file_reader_decorator(call, call_init_kwargs, call_kwargs, exp):
     call = fuzzinator.call.FileReaderDecorator()(call)
     if inspect.isclass(call):
         call = call(**call_init_kwargs)

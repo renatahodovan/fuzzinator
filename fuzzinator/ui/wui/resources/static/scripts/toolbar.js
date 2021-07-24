@@ -138,7 +138,7 @@ $(document).ready(function () {
     var target = $(event.currentTarget).data('target');
     var format = $(event.currentTarget).data('format');
     var ext = $(event.currentTarget).data('ext');
-    var collectionName = $('.bootstrap-table .table').attr('id').replace('-table', '');
+    var collectionName = $('.bootstrap-table table.table').attr('id').replace('-table', '');
     var href = `/api/${collectionName}?format=${format}`;
 
     if (target == 'all') {

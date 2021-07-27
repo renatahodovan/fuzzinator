@@ -9,7 +9,6 @@ import asyncio
 import logging
 import threading
 
-from inspect import isclass, isroutine
 from tornado.ioloop import IOLoop
 from tornado.testing import bind_unused_port
 from tornado.web import Application, RequestHandler
@@ -31,13 +30,13 @@ class TornadoDecorator(object):
     **Optional parameters of the fuzzer decorator:**
 
       - ``template_path``: Directory containing .html template files. These are
-        served from the path / without the .html extension.
+        served from the path ``/`` without the .html extension.
       - ``static_path``: Directory from which static files will be served.
-        These are served from the path /static/.
-      - ``url``: Url template with {port} and {index} placeholders, that will
-        be filled in with appropriate values. This is the url that will be
+        These are served from the path ``/static/``.
+      - ``url``: Url template with ``{port}`` and ``{index}`` placeholders, that
+        will be filled in with appropriate values. This is the url that will be
         served for the SUT as the test case.
-        (Default: http://localhost:{port}/index={index})
+        (Default: ``http://localhost:{port}/index={index}``)
       - ``refresh``: Integer number denoting the time interval (in seconds)
         for the document at the root path (i.e., the test case) to refresh
         itself. Setting it to 0 means no refresh. (Default: 0)
@@ -64,7 +63,7 @@ class TornadoDecorator(object):
             refresh=3
     """
 
-    def __init__(self, template_path=None, static_path=None, url=None, refresh=None, **kwargs):
+    def __init__(self, *, template_path=None, static_path=None, url=None, refresh=None, **kwargs):
         self.template_path = template_path
         self.static_path = static_path
         self.url = url or 'http://localhost:{port}?index={index}'
@@ -77,37 +76,30 @@ class TornadoDecorator(object):
         logging.getLogger('tornado.access').addHandler(hn)
         logging.getLogger('tornado.access').propagate = False
 
-    def __call__(self, callable):
-        ancestor = object if isroutine(callable) else callable
+    def __call__(self, fuzzer_class):
         decorator = self
 
-        class Inherited(ancestor):
+        class DecoratedFuzzer(fuzzer_class):
 
-            def __init__(self, *args, **kwargs):
-                if hasattr(ancestor, '__init__'):
-                    super().__init__(*args, **kwargs)
+            def __init__(self, **kwargs):
+                super().__init__(**kwargs)
                 self.index = 0
                 self.test = None
-                self.fuzzer_kwargs = dict()
                 self.t = None
 
-            def __call__(self, **kwargs):
-                # Saving fuzzer args to make them available from the RequestHandlers
-                # after passing a reference of ourselves.
-                if kwargs['index'] != 0 and self.test is None:
+            def __call__(self, *, index):
+                if index != 0 and self.test is None:
                     return None
 
-                self.fuzzer_kwargs = kwargs
                 return decorator.url.format(port=decorator.port, index=self.index)
 
-            def __enter__(self, *args, **kwargs):
-                if hasattr(ancestor, '__enter__'):
-                    super().__enter__(*args, **kwargs)
+            def __enter__(self):
+                super().__enter__()
 
                 # Get random available port.
                 _, decorator.port = bind_unused_port()
 
-                handlers = [(r'/', self.MainHandler, dict(wrapper=self, fuzzer=super().__call__ if isclass(callable) else callable))]
+                handlers = [(r'/', self.MainHandler, dict(wrapper=self, fuzzer=super().__call__))]
                 if decorator.template_path:
                     handlers += [(r'/(.+)', self.TemplateHandler, {})]
 
@@ -127,10 +119,7 @@ class TornadoDecorator(object):
                 return self
 
             def __exit__(self, *exc):
-                suppress = False
-
-                if hasattr(ancestor, '__exit__'):
-                    suppress = super().__exit__(*exc)
+                suppress = super().__exit__(*exc)
 
                 self.t._stop()
                 logger.debug('Shut down tornado server.')
@@ -148,8 +137,7 @@ class TornadoDecorator(object):
 
                 def get(self):
                     try:
-                        self.wrapper.fuzzer_kwargs['index'] = self.wrapper.index
-                        self.wrapper.test = self.fuzzer(**self.wrapper.fuzzer_kwargs)
+                        self.wrapper.test = self.fuzzer(index=self.wrapper.index)
 
                         if self.wrapper.test is not None:
                             self.wrapper.index += 1
@@ -174,4 +162,4 @@ class TornadoDecorator(object):
                         logger.debug('%s not found', page)
                         self.send_error(404)
 
-        return Inherited
+        return DecoratedFuzzer

@@ -7,13 +7,13 @@
 
 import hashlib
 import json
+import logging
 import os
 import shlex
 import sys
 
 from collections import OrderedDict
 from configparser import ConfigParser
-from inspect import isclass
 from io import StringIO
 from math import inf
 
@@ -21,44 +21,51 @@ import chardet
 
 from inators.imp import import_object
 
+logger = logging.getLogger(__name__)
+
 
 def config_get_kwargs(config, section):
     return dict(config.items(section)) if config.has_section(section) else dict()
 
 
-class CallableContextManager(object):
-    def __init__(self, callable):
-        self._callable = callable
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *exc):
-        return False
-
-    def __call__(self, *args, **kwargs):
-        return self._callable(*args, **kwargs)
-
-
-def config_get_callable(config, section, options):
+def config_get_object(config, section, options, *, init_kwargs=None):
     """
-    Return an object that can both act as a context manager and as a callable,
-    as well as a dictionary with key-value pairs to be used when calling the
-    object.
+    Create an object as defined by ``$(section:option)`` in the configuration.
+
+    1. Load the "base" class given with fully qualified name in
+        ``$(section:option)`` (for the first ``option`` that exists in
+        ``options``).
+    2. For all decorators in ``$(section:option.decorate(*))``:
+        a. Load the "decorator" class given with fully qualified name in
+            ``$(section:option.decorate(n))``.
+        b. Instantiate the "decorator" class with keyword arguments given in
+            ``$(section.option.decorate(n):*)``.
+        c. Call the "decorator" object with the "base" class and replace the
+            "base" class with the result.
+    3. Instantiate the "base" class with keyword arguments given in
+        ``$(section.option:*)`` and in ``init_kwargs``, and return the object.
+
+    :param configparser.ConfigParser config: the configuration options of the
+        fuzz session.
+    :param str section: section name.
+    :param options: list of option names that can define the object.
+    :type options: str or list[str]
+    :param init_kwargs: extra keyword arguments to use when instantiating the
+        object.
+    :return: an object defined by the first option that exists in the section,
+        or None if section contains none of the options.
     """
     options = options if isinstance(options, list) else [options]
 
-    callable_ctx, entity_kwargs = None, None
+    obj = None
     for option in options:
         if not config.has_option(section, option):
             continue
 
-        # get the python entity (function or callable context manager class) named
-        # in $(section:option) and its call arguments given in $(section.option:*)
-        entity = import_object(config.get(section, option))
-        entity_kwargs = config_get_kwargs(config, section + '.' + option)
+        # 1) get the class named in $(section:option)
+        obj_class = import_object(config.get(section, option))
 
-        # find decorator classes named in $(section:option.decorate(*)) and apply
+        # 2) find decorator classes named in $(section:option.decorate(*)) and apply
         # them with their arguments given in $(section.option.decorate(*):*)
         opt_prefix = option + '.decorate('
         opt_suffix = ')'
@@ -69,25 +76,32 @@ def config_get_callable(config, section, options):
             decorator_class = import_object(config.get(section, decopt))
             decorator_kwargs = config_get_kwargs(config, section + '.' + decopt)
             decorator = decorator_class(**decorator_kwargs)
-            entity = decorator(entity)
+            obj_class = decorator(obj_class)
 
-        # if entity is a callable context manager class, instantiate it with
-        # arguments given in $(section.option.init:*)
-        if isclass(entity):
-            init_kwargs = {}
-            if config.has_section(section + '.' + option + '.init'):
-                init_kwargs = config_get_kwargs(config, section + '.' + option + '.init')
-            callable_ctx = entity(**init_kwargs)
-        # if entity is a function, wrap it into a default callable context manager
-        # object
-        else:
-            callable_ctx = CallableContextManager(entity)
+        # 3) compute class instantiation arguments
+        obj_kwargs = dict()
+
+        # 3.a) get old-style arguments from $(section.option.init:*)
+        init_section = section + '.' + option + '.init'
+        if config.has_section(init_section):
+            logger.warning('.init sections are deprecated (%s)', init_section)
+            obj_kwargs.update(config_get_kwargs(config, init_section))
+
+        # 3.b) get arguments from $(section.option:*)
+        obj_kwargs.update(config_get_kwargs(config, section + '.' + option))
+
+        # 3.c) get arguments from init_kwargs
+        if init_kwargs:
+            obj_kwargs.update(init_kwargs)
+
+        # 3.d) instantiate class
+        obj = obj_class(**obj_kwargs)
 
         # break the loop after finding the first matching option.
         break
 
-    # return the callable context manager and its call arguments
-    return callable_ctx, entity_kwargs
+    # return the object
+    return obj
 
 
 def config_get_fuzzers(config):

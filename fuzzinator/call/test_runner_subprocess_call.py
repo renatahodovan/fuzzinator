@@ -14,19 +14,20 @@ import subprocess
 import time
 
 from ..config import as_bool, as_dict, as_list, as_pargs, as_path, decode
-from .. import Controller
+from ..controller import Controller
+from .call import Call
 
 logger = logging.getLogger(__name__)
 
 
-class TestRunnerSubprocessCall(object):
+class TestRunnerSubprocessCall(Call):
     """
     .. note::
 
        Not available on platforms without fcntl support (e.g., Windows).
     """
 
-    def __init__(self, command, cwd=None, env=None, end_texts=None, init_wait=None, timeout_per_test=None, encoding=None, **kwargs):
+    def __init__(self, *, command, cwd=None, env=None, end_texts=None, init_wait=None, timeout_per_test=None, encoding=None, **kwargs):
         self.end_texts = as_list(end_texts) if end_texts else []
         self.init_wait = as_bool(init_wait)
         self.timeout_per_test = int(timeout_per_test) if timeout_per_test else None
@@ -45,7 +46,7 @@ class TestRunnerSubprocessCall(object):
             Controller.kill_process_tree(self.proc.pid)
         return False
 
-    def __call__(self, test, **kwargs):
+    def __call__(self, *, test, **kwargs):
         if not self.proc or self.proc.poll() is not None:
             self.start(self.init_wait)
 

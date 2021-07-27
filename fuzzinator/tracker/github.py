@@ -39,6 +39,3 @@ class GithubTracker(BaseTracker):
             return {'id': new_issue.number, 'title': new_issue.title, 'url': new_issue.html_url}
         except GithubException as e:
             raise TrackerError('Issue reporting failed') from e
-
-    def __call__(self, issue):
-        pass

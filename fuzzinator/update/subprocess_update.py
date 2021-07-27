@@ -10,12 +10,13 @@ import os
 import subprocess
 
 from ..config import as_dict, as_pargs, as_path, decode
-from .. import Controller
+from ..controller import Controller
+from .update import Update
 
 logger = logging.getLogger(__name__)
 
 
-def SubprocessUpdate(command, cwd=None, env=None, timeout=None, encoding=None):
+class SubprocessUpdate(Update):
     """
     Subprocess invocation-based SUT update.
 
@@ -46,22 +47,29 @@ def SubprocessUpdate(command, cwd=None, env=None, timeout=None, encoding=None):
             env={"BAR": "1"}
     """
 
-    timeout = int(timeout) if timeout else None
-    try:
-        proc = subprocess.Popen(as_pargs(command),
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                cwd=as_path(cwd) if cwd else os.getcwd(),
-                                env=dict(os.environ, **as_dict(env or '{}')))
-        stdout, stderr = proc.communicate(timeout=timeout)
-        stdout, stderr = decode(stdout, encoding), decode(stderr, encoding)
-        if proc.returncode != 0:
-            logger.warning('SUT update command returned with nonzero exit code (%d).\n%s\n%s',
-                           proc.returncode,
-                           stdout,
-                           stderr)
-        else:
-            logger.info('Update succeeded.\n%s', stdout)
-    except subprocess.TimeoutExpired as e:
-        logger.debug('SUT update execution timeout (%ds) expired.', e.timeout)
-        Controller.kill_process_tree(proc.pid)
+    def __init__(self, *, command, cwd=None, env=None, timeout=None, encoding=None, **kwargs):
+        self.command = command
+        self.cwd = as_path(cwd) if cwd else os.getcwd()
+        self.env = dict(os.environ, **as_dict(env)) if env else None
+        self.timeout = int(timeout) if timeout else None
+        self.encoding = encoding
+
+    def __call__(self):
+        try:
+            proc = subprocess.Popen(as_pargs(self.command),
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    cwd=self.cwd,
+                                    env=self.env)
+            stdout, stderr = proc.communicate(timeout=self.timeout)
+            stdout, stderr = decode(stdout, self.encoding), decode(stderr, self.encoding)
+            if proc.returncode != 0:
+                logger.warning('SUT update command returned with nonzero exit code (%d).\n%s\n%s',
+                               proc.returncode,
+                               stdout,
+                               stderr)
+            else:
+                logger.info('Update succeeded.\n%s', stdout)
+        except subprocess.TimeoutExpired as e:
+            logger.debug('SUT update execution timeout (%ds) expired.', e.timeout)
+            Controller.kill_process_tree(proc.pid)

@@ -53,9 +53,6 @@ class BugzillaTracker(BaseTracker):
         except BugzillaError as e:
             raise TrackerError('Issue reporting failed') from e
 
-    def __call__(self, issue):
-        pass
-
     def settings(self):
         products = self.bzapi.getproducts(ptype='selectable')
         return {product['name']: dict(components=self.bzapi.getcomponents(product['name']),

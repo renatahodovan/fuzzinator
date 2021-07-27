@@ -7,27 +7,14 @@
 
 import os
 
+import fuzzinator
+
 
 blinesep = os.linesep
 resources_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'resources')
 
 
-def mock_always_fail_call(**kwargs):
-    """
-    Unconditionally return an issue dictionary composed of all the keyword
-    arguments of the function.
-    """
-    return dict(kwargs)
-
-
-def mock_never_fail_call(**kwargs):
-    """
-    Unconditionally return ``None`` signaling no issue.
-    """
-    return None
-
-
-class MockAlwaysFailCall(object):
+class MockAlwaysFailCall(fuzzinator.call.Call):
     """
     Unconditionally return an issue dictionary composed of all the keyword
     arguments of the constructor and the call.
@@ -42,7 +29,7 @@ class MockAlwaysFailCall(object):
         return issue
 
 
-class MockNeverFailCall(object):
+class MockNeverFailCall(fuzzinator.call.Call):
     """
     Unconditionally return ``None`` signaling no issue.
     """

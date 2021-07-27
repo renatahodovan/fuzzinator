@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,18 +7,25 @@
 
 import os
 
+import fuzzinator
+
 
 resources_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'resources')
 
 
-def mock_exhausted_fuzzer(**kwargs):
+class MockExhaustedFuzzer(fuzzinator.fuzzer.Fuzzer):
     """
     Always return ``None`` signaling an exhausted fuzzer.
     """
-    return None
+
+    def __init__(self, **kwargs):
+        pass
+
+    def __call__(self, **kwargs):
+        return None
 
 
-class MockRepeatingFuzzer(object):
+class MockRepeatingFuzzer(fuzzinator.fuzzer.Fuzzer):
     """
     Return the same ``test`` ``n`` times then return ``None`` that the fuzzer is
     exhausted.

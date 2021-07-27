@@ -95,3 +95,4 @@ html_show_sourcelink = False
 intersphinx_mapping = {'https://docs.python.org/3/': None}
 
 autoclass_content = 'both'
+autodoc_inherit_docstrings = False

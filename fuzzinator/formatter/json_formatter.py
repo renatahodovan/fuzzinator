@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,8 +7,10 @@
 
 import json
 
+from .formatter import Formatter
 
-def JsonFormatter(issue, format='long'):
+
+class JsonFormatter(Formatter):
     """
     A simple JSON-based issue formatter.
 
@@ -29,7 +31,11 @@ def JsonFormatter(issue, format='long'):
             formatter=fuzzinator.formatter.JsonFormatter
     """
 
-    if format == 'short':
-        issue = issue.get('id', '')
+    def __init__(self, **kwargs):
+        pass
 
-    return json.dumps(issue, indent=4, default=str, sort_keys=True)
+    def __call__(self, *, issue, format='long'):
+        if format == 'short':
+            issue = issue.get('id', '')
+
+        return json.dumps(issue, indent=4, default=str, sort_keys=True)

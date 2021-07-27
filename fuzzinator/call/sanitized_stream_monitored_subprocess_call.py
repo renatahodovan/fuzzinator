@@ -23,6 +23,6 @@ class SanitizedStreamMonitoredSubprocessCall(StreamMonitoredSubprocessCall):
        Not available on platforms without fcntl support (e.g., Windows).
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.end_patterns.extend(RegexAutomaton.split_pattern(p) for p in SanitizerAutomatonFilter.STDERR_PATTERNS)

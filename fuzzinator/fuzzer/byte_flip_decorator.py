@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -8,10 +8,8 @@
 import math
 import random
 
-from ..call import CallableDecorator
 
-
-class ByteFlipDecorator(CallableDecorator):
+class ByteFlipDecorator(object):
     """
     Decorator to add extra random byte flips to fuzzer results.
 
@@ -40,7 +38,7 @@ class ByteFlipDecorator(CallableDecorator):
             fuzzer.decorate(0)=fuzzinator.fuzzer.ByteFlipDecorator
             batch=inf
 
-            [fuzz.foo-with-flips.fuzzer.init]
+            [fuzz.foo-with-flips.fuzzer]
             outdir=/home/alice/foo-old-bugs/
 
             [fuzz.foo-with-flips.fuzzer.decorate(0)]
@@ -49,22 +47,25 @@ class ByteFlipDecorator(CallableDecorator):
             max_byte=255
     """
 
-    def decorator(self, frequency, min_byte='32', max_byte='126', **kwargs):
-        frequency = int(frequency)
-        min_byte = int(min_byte)
-        max_byte = int(max_byte)
+    def __init__(self, *, frequency, min_byte=32, max_byte=126, **kwargs):
+        self.frequency = int(frequency)
+        self.min_byte = int(min_byte)
+        self.max_byte = int(max_byte)
 
-        def wrapper(fn):
-            def filter(*args, **kwargs):
-                test = fn(*args, **kwargs)
+    def __call__(self, fuzzer_class):
+        decorator = self
+
+        class DecoratedFuzzer(fuzzer_class):
+
+            def __call__(self, *, index):
+                test = super().__call__(index=index)
                 if test is None:
                     return None
 
                 test = bytearray(test)
-                for pos in random.sample(range(len(test)), math.ceil(len(test) / frequency)):
-                    test[pos] = random.randint(min_byte, max_byte)
+                for pos in random.sample(range(len(test)), math.ceil(len(test) / decorator.frequency)):
+                    test[pos] = random.randint(decorator.min_byte, decorator.max_byte)
 
                 return bytes(test)
 
-            return filter
-        return wrapper
+        return DecoratedFuzzer

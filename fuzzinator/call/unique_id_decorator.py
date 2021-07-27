@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,10 +6,10 @@
 # according to those terms.
 
 from ..config import as_list
-from . import CallableDecorator
+from .call_decorator import CallDecorator
 
 
-class UniqueIdDecorator(CallableDecorator):
+class UniqueIdDecorator(CallDecorator):
     """
     Decorator for SUT calls to extend issues with ``'id'`` property.
 
@@ -37,18 +37,17 @@ class UniqueIdDecorator(CallableDecorator):
            properties=["msg", "file", "func"]
     """
 
-    def decorator(self, properties, **kwargs):
-        properties = as_list(properties) if properties else None
+    def __init__(self, *, properties, **kwargs):
+        self.properties = as_list(properties) if properties else None
 
-        def wrapper(fn):
-            def filter(*args, **kwargs):
-                issue = fn(*args, **kwargs)
-                if not issue:
-                    return issue
-
-                prop_lst = [issue.get(x, '') for x in properties]
-                issue['id'] = ' '.join(prop.decode('utf-8', errors='ignore') if isinstance(prop, bytes) else prop for prop in prop_lst)
+    def decorate(self, call):
+        def decorated_call(obj, *, test, **kwargs):
+            issue = call(obj, test=test, **kwargs)
+            if not issue:
                 return issue
 
-            return filter
-        return wrapper
+            prop_lst = [issue.get(prop, '') for prop in self.properties]
+            issue['id'] = ' '.join(prop.decode('utf-8', errors='ignore') if isinstance(prop, bytes) else prop for prop in prop_lst)
+            return issue
+
+        return decorated_call

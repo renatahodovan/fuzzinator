@@ -22,10 +22,12 @@ from common_call import blinesep, resources_dir
     ('%s %s --print-args --exit-code 1 42 {test}' % (sys.executable, os.path.join(resources_dir, 'mock_tool.py')), None, None, '["(?P<bar>[a-z]+)"]', 'foo', {'stdout': '42' + blinesep + 'foo' + blinesep, 'stderr': '', 'bar': 'foo'}),
     ('%s %s --print-args --to-stderr --exit-code 1 42 {test}' % (sys.executable, os.path.join(resources_dir, 'mock_tool.py')), None, None, '["(?P<bar>[a-z]+)"]', 'foo', {'stdout': '', 'stderr': '42' + blinesep + 'foo' + blinesep, 'bar': 'foo'}),
     ('%s %s --print-args --print-env FOO --exit-code 1 42 {test}' % (sys.executable, os.path.join('.', 'mock_tool.py')), resources_dir, '{"FOO": "baz"}', '["(?P<bar>[a-z]+)"]', '42', {'stdout': '42' + blinesep + '42' + blinesep + 'baz' + blinesep, 'stderr': '', 'bar': 'baz'}),
-    ('%s %s --print-args --exit-code 1 42 {test}' % (sys.executable, os.path.join(resources_dir, 'mock_tool.py')), None, None, '["(?P<bar>[a-z]+)"]', '42', None),
+    ('%s %s --print-args --exit-code 1 42 {test}' % (sys.executable, os.path.join(resources_dir, 'mock_tool.py')), None, None, '["(?P<bar>[a-z]+)"]', '42', fuzzinator.call.NonIssue({'stderr': '', 'stdout': '42' + blinesep + '42' + blinesep})),
 ])
 def test_stream_monitored_subprocess_call(command, cwd, env, end_patterns, test, exp):
-    out = fuzzinator.call.StreamMonitoredSubprocessCall(command, cwd=cwd, env=env, end_patterns=end_patterns)(test=test)
+    call = fuzzinator.call.StreamMonitoredSubprocessCall(command=command, cwd=cwd, env=env, end_patterns=end_patterns)
+    with call:
+        out = call(test=test)
 
     if out is not None:
         del out['exit_code']

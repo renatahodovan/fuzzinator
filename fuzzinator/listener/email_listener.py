@@ -14,7 +14,7 @@ from email.mime.text import MIMEText
 
 import keyring
 
-from ..config import config_get_callable
+from ..config import config_get_object
 from .event_listener import EventListener
 
 logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ class EmailListener(EventListener):
         data = dict((name, raw.decode('utf-8', 'ignore') if isinstance(raw, bytes) else raw) for name, raw in data.items())
 
         from ..formatter import JsonFormatter
-        formatter = config_get_callable(self.config, 'sut.' + data['sut'], ['email_formatter', 'formatter'])[0] or JsonFormatter
+        formatter = config_get_object(self.config, 'sut.' + data['sut'], ['email_formatter', 'formatter']) or JsonFormatter()
 
         subject = formatter(issue=data, format='short')
         content = formatter(issue=data)

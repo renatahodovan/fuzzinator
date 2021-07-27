@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,8 +6,6 @@
 # according to those terms.
 
 import os
-
-from inspect import isclass, isroutine
 
 from ..config import as_path
 
@@ -39,41 +37,34 @@ class FileWriterDecorator(object):
             filename=${fuzzinator:work_dir}/test-{uid}.txt
     """
 
-    def __init__(self, filename):
+    def __init__(self, *, filename, **kwargs):
         self.filename = filename
 
-    def __call__(self, callable):
-        ancestor = object if isroutine(callable) else callable
+    def __call__(self, fuzzer_class):
+        decorator = self
 
-        class Inherited(ancestor):
-            decorator = self
+        class DecoratedFuzzer(fuzzer_class):
 
-            def __init__(self, *args, **kwargs):
-                if hasattr(ancestor, '__init__'):
-                    super().__init__(*args, **kwargs)
-                self.file_path = as_path(self.decorator.filename.format(uid='{pid}-{id}'.format(pid=os.getpid(), id=id(self))))
+            def __init__(self, **kwargs):
+                super().__init__(**kwargs)
+                self.file_path = as_path(decorator.filename.format(uid='{pid}-{id}'.format(pid=os.getpid(), id=id(self))))
                 self.test = None
 
-            def __enter__(self, *args, **kwargs):
-                if hasattr(ancestor, '__enter__'):
-                    super().__enter__(*args, **kwargs)
+            def __enter__(self):
+                super().__enter__()
                 os.makedirs(os.path.dirname(self.file_path), exist_ok=True)
                 return self
 
             def __exit__(self, *exc):
-                suppress = False
-
-                if hasattr(ancestor, '__exit__'):
-                    suppress = super().__exit__(*exc)
+                suppress = super().__exit__(*exc)
 
                 if os.path.exists(self.file_path):
                     os.remove(self.file_path)
 
                 return suppress
 
-            def __call__(self, **kwargs):
-                call = super().__call__ if isclass(callable) else callable
-                self.test = call(**kwargs)
+            def __call__(self, *, index):
+                self.test = super().__call__(index=index)
 
                 if self.test is None:
                     return None
@@ -83,4 +74,4 @@ class FileWriterDecorator(object):
 
                 return self.file_path
 
-        return Inherited
+        return DecoratedFuzzer

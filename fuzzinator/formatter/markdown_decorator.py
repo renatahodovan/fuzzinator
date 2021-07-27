@@ -1,17 +1,17 @@
-# Copyright (c) 2018-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import json
 import markdown
 
-from ..call import CallableDecorator
+from ..config import as_list
+from .formatter_decorator import FormatterDecorator
 
 
-class MarkdownDecorator(CallableDecorator):
+class MarkdownDecorator(FormatterDecorator):
     """
     Decorator for formatters that produce their output in
     `Markdown <https://github.com/Python-Markdown/markdown>`_ format.
@@ -37,22 +37,21 @@ class MarkdownDecorator(CallableDecorator):
             formatter=fuzzinator.formatter.StringFormatter
             formatter.decorate(0)=fuzzinator.formatter.MarkdownDecorator
 
-            [sut.foo.formatter.init]
+            [sut.foo.formatter]
             long_file=/path/to/templates/foo.md
 
             [sut.foo.formatter.decorate(0)]
             extensions=["extra", "codehilite"]
     """
 
-    def decorator(self, extensions=None, **kwargs):
-        extensions = ['extra'] if extensions is None else json.loads(extensions) if isinstance(extensions, str) else extensions
+    def __init__(self, *, extensions=None, **kwargs):
+        self.extensions = as_list(extensions) if extensions else ['extra']
 
-        def wrapper(fn):
-            def render(*args, **kwargs):
-                formatted = fn(*args, **kwargs)
-                if kwargs.get('format', 'long') != 'short':
-                    formatted = markdown.markdown(formatted, extensions=extensions)
-                return formatted
+    def decorate(self, call):
+        def decorated_call(obj, *, issue, format='long'):
+            formatted = call(obj, issue=issue, format=format)
+            if format != 'short':
+                formatted = markdown.markdown(formatted, extensions=self.extensions)
+            return formatted
 
-            return render
-        return wrapper
+        return decorated_call

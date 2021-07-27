@@ -16,7 +16,9 @@ import fuzzinator
     ({'min_length': '10', 'max_length': '100'}, 10, 100),
 ])
 def test_random_content(fuzzer_kwargs, exp_min_len, exp_max_len):
-    for index in range(100):
-        out = fuzzinator.fuzzer.RandomContent(index=index, **fuzzer_kwargs)
-        out_len = len(out)
-        assert exp_min_len <= out_len <= exp_max_len
+    fuzzer = fuzzinator.fuzzer.RandomContent(**fuzzer_kwargs)
+    with fuzzer:
+        for index in range(100):
+            out = fuzzer(index=index)
+            out_len = len(out)
+            assert exp_min_len <= out_len <= exp_max_len

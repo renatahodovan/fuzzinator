@@ -5,26 +5,23 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import inspect
 import pytest
 
 import fuzzinator
 
-from common_call import mock_always_fail_call, mock_never_fail_call, MockAlwaysFailCall, MockNeverFailCall
+from common_call import MockAlwaysFailCall, MockNeverFailCall
 
 
 @pytest.mark.parametrize('call_init_kwargs, call_kwargs', [
-    ({'init_foo': 'init_bar'}, {'foo': 'bar', 'baz': 'qux'})
+    ({'init_foo': 'init_bar'}, {'test': 'bar', 'baz': 'qux'})
 ])
-@pytest.mark.parametrize('call, dec_kwargs, exp', [
-    (mock_always_fail_call, {'properties': '["foo", "baz"]'}, {'foo': 'bar', 'baz': 'qux', 'id': 'bar qux'}),
-    (mock_never_fail_call, {'properties': '["foo", "baz"]'}, None),
-    (MockAlwaysFailCall, {'properties': '["init_foo", "baz"]'}, {'init_foo': 'init_bar', 'foo': 'bar', 'baz': 'qux', 'id': 'init_bar qux'}),
+@pytest.mark.parametrize('call_class, dec_kwargs, exp', [
+    (MockAlwaysFailCall, {'properties': '["init_foo", "baz"]'}, {'init_foo': 'init_bar', 'test': 'bar', 'baz': 'qux', 'id': 'init_bar qux'}),
     (MockNeverFailCall, {'properties': '["init_foo", "baz"]'}, None),
 ])
-def test_unique_decorator(call, call_init_kwargs, call_kwargs, dec_kwargs, exp):
-    call = fuzzinator.call.UniqueIdDecorator(**dec_kwargs)(call)
-    if inspect.isclass(call):
-        call = call(**call_init_kwargs)
+def test_unique_decorator(call_class, call_init_kwargs, call_kwargs, dec_kwargs, exp):
+    call_class = fuzzinator.call.UniqueIdDecorator(**dec_kwargs)(call_class)
+    call = call_class(**call_init_kwargs)
 
-    assert call(**call_kwargs) == exp
+    with call:
+        assert call(**call_kwargs) == exp

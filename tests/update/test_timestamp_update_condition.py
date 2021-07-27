@@ -31,7 +31,7 @@ def test_timestamp_update_condition(touch, age, exp, tmpdir):
         statinfo = os.stat(path)
         os.utime(path, times=(statinfo.st_mtime + touch, statinfo.st_mtime + touch))
 
-    assert fuzzinator.update.TimestampUpdateCondition(path, age) == exp
+    assert fuzzinator.update.TimestampUpdateCondition(path=path, age=age)() == exp
 
     if touch is not None:
         os.remove(path)

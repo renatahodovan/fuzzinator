@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,10 +7,10 @@
 
 import platform
 
-from . import CallableDecorator
+from .call_decorator import CallDecorator
 
 
-class PlatformInfoDecorator(CallableDecorator):
+class PlatformInfoDecorator(CallDecorator):
     """
     Decorator for SUT calls to extend issues with ``'platform'`` and ``'node'``
     properties.
@@ -28,16 +28,17 @@ class PlatformInfoDecorator(CallableDecorator):
             call.decorate(0)=fuzzinator.call.PlatformInfoDecorator
     """
 
-    def decorator(self, **kwargs):
-        def wrapper(fn):
-            def filter(*args, **kwargs):
-                issue = fn(*args, **kwargs)
-                if not issue:
-                    return issue
+    def __init__(self, **kwargs):
+        pass
 
-                issue['platform'] = platform.platform()
-                issue['node'] = platform.node()
+    def decorate(self, call):
+        def decorated_call(obj, *, test, **kwargs):
+            issue = call(obj, test=test, **kwargs)
+            if not issue:
                 return issue
 
-            return filter
-        return wrapper
+            issue['platform'] = platform.platform()
+            issue['node'] = platform.node()
+            return issue
+
+        return decorated_call

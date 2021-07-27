@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,9 +6,10 @@
 # according to those terms.
 
 from ..config import as_path
+from .formatter import Formatter
 
 
-class TemplateFormatter(object):
+class TemplateFormatter(Formatter):
     """
     Abstract base class of template-based formatters.
 
@@ -32,7 +33,7 @@ class TemplateFormatter(object):
     the file content will be used.
     """
 
-    def __init__(self, short='', short_file=None, long='', long_file=None):
+    def __init__(self, *, short='', short_file=None, long='', long_file=None):
         if short_file:
             with open(as_path(short_file), 'r') as f:
                 short = f.read()

@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -17,7 +17,7 @@ import pyperclip
 
 from urwid import *
 
-from ...config import config_get_callable
+from ...config import config_get_object
 from ...formatter import JsonFormatter
 from .button import FormattedButton
 from .decor_widgets import PatternBox
@@ -135,7 +135,7 @@ class MainWindow(PopUpLauncher):
             if test_bytes:
                 pyperclip.copy(str(issue['test']))
             else:
-                formatter = config_get_callable(self.config, 'sut.' + issue['sut'], ['tui_formatter', 'formatter'])[0] or JsonFormatter
+                formatter = config_get_object(self.config, 'sut.' + issue['sut'], ['tui_formatter', 'formatter']) or JsonFormatter()
                 pyperclip.copy(formatter(issue=issue))
 
     def keypress(self, size, key):

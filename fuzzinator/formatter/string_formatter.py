@@ -1,13 +1,13 @@
-# Copyright (c) 2018-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-from string import Formatter
+import string
 
-from . import TemplateFormatter
+from .template_formatter import TemplateFormatter
 
 
 class StringFormatter(TemplateFormatter):
@@ -42,11 +42,11 @@ class StringFormatter(TemplateFormatter):
             # see fuzzinator.call.*
             formatter=fuzzinator.formatter.StringFormatter
 
-            [sut.foo.formatter.init]
+            [sut.foo.formatter]
             short={id}
             long_file=/path/to/templates/foo.md
     """
 
-    def __call__(self, issue, format='long'):
+    def __call__(self, *, issue, format='long'):
         template = self.templates[format]
-        return template.format_map({key: issue.get(key, '') for _, key, _, _ in Formatter().parse(template)})
+        return template.format_map({key: issue.get(key, '') for _, key, _, _ in string.Formatter().parse(template)})

@@ -17,7 +17,7 @@ from bson.json_util import default, object_hook, RELAXED_JSON_OPTIONS
 from pymongo import ASCENDING, DESCENDING
 from tornado.web import HTTPError, RequestHandler
 
-from ...config import config_get_callable
+from ...config import config_get_object
 from ...tracker import TrackerError
 
 
@@ -137,7 +137,7 @@ class IssuesAPIHandler(BaseAPIHandler):
         zipbuf = BytesIO()
         with ZipFile(zipbuf, mode='w', compression=ZIP_DEFLATED) as zf:
             for issue in issues:
-                exporter, _ = config_get_callable(self._config, 'sut.' + issue['sut'], 'exporter')
+                exporter = config_get_object(self._config, 'sut.' + issue['sut'], 'exporter')
                 if not exporter:
                     continue  # silently skip issues with no exporter
                 ext = getattr(exporter, 'extension', '')
@@ -177,7 +177,7 @@ class IssuesAPIHandler(BaseAPIHandler):
 class IssueAPIHandler(BaseAPIHandler):
 
     def send_export(self, issue):
-        exporter, _ = config_get_callable(self._config, 'sut.' + issue['sut'], 'exporter')
+        exporter = config_get_object(self._config, 'sut.' + issue['sut'], 'exporter')
         if not exporter:
             self._wui.send_notification('error', data={'title': 'Issue export failed',
                                                        'body': 'The exporter setup is missing from the configuration (sut.{sut}.exporter).'.format(sut=issue['sut'])})
@@ -231,7 +231,7 @@ class IssueReportAPIHandler(BaseAPIHandler):
                                                        'body': 'No issue with id={id}.'.format(id=issue_oid)})
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
-        tracker = config_get_callable(self._config, 'sut.' + issue['sut'], 'tracker')[0]
+        tracker = config_get_object(self._config, 'sut.' + issue['sut'], 'tracker')
         if not tracker:
             self._wui.send_notification('error', data={'title': 'Issue reporting failed',
                                                        'body': 'The tracker setup is missing from the configuration (sut.{sut}.tracker).'.format(sut=issue['sut'])})

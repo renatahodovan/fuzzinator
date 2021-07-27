@@ -14,18 +14,12 @@ import picireny
 
 from ..config import as_bool, as_int_or_inf, as_list, as_path
 from .picire_tester import PicireTester
+from .reducer import Reducer
 
 logger = logging.getLogger(__name__)
 
 
-def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
-             hddmin=None, parallel=False, combine_loops=False,
-             split_method='zeller', subset_first=True, subset_iterator='forward', complement_iterator='forward',
-             jobs=os.cpu_count(), max_utilization=100, encoding=None,
-             antlr=None, format=None, grammar=None, start=None, replacements=None, lang='python',
-             hdd_star=True, flatten_recursion=False, squeeze_tree=True, skip_unremovable=True, skip_whitespace=False,
-             build_hidden_tokens=False, granularity=2, cache_class='ContentCache', cleanup=True,
-             **kwargs):
+class Picireny(Reducer):
     """
     Test case reducer based on the Picireny Hierarchical Delta Debugging
     Framework.
@@ -66,118 +60,129 @@ def Picireny(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
             subset_iterator=skip
     """
 
-    logging.getLogger('picireny').setLevel(logger.level)
+    def __init__(self, *, parallel=False, combine_loops=False,
+                 split_method='zeller', subset_first=True, subset_iterator='forward', complement_iterator='forward',
+                 jobs=os.cpu_count(), max_utilization=100,
+                 hddmin=None, antlr=None, format=None, grammar=None, start=None, replacements=None, lang='python',
+                 hdd_star=True, flatten_recursion=False, squeeze_tree=True, skip_unremovable=True, skip_whitespace=False, build_hidden_tokens=False,
+                 encoding=None, granularity=2, cache_class='ContentCache', cleanup=True,
+                 **kwargs):
+        parallel = as_bool(parallel)
+        combine_loops = as_bool(combine_loops)
+        split_method = getattr(picire.config_splitters, split_method)
+        subset_first = as_bool(subset_first)
+        subset_iterator = getattr(picire.config_iterators, subset_iterator)
+        complement_iterator = getattr(picire.config_iterators, complement_iterator)
+        jobs = int(jobs) if parallel else 1
+        max_utilization = int(max_utilization)
 
-    antlr = picireny.process_antlr4_path(as_path(antlr) if antlr else None)
-    if antlr is None:
-        return None, []
+        self.hddmin = picireny.cli.args_hdd_choices[hddmin if hddmin else 'full']
+        self.lang = lang
+        self.hdd_star = as_bool(hdd_star)
+        self.flatten_recursion = as_bool(flatten_recursion)
+        self.squeeze_tree = as_bool(squeeze_tree)
+        self.skip_unremovable = as_bool(skip_unremovable)
+        self.skip_whitespace = as_bool(skip_whitespace)
+        self.build_hidden_tokens = as_bool(build_hidden_tokens)
 
-    input_format, start = picireny.process_antlr4_format(format=format,
-                                                         grammar=[as_path(g) for g in as_list(grammar)] if grammar else None,
-                                                         start=start,
-                                                         replacements=replacements)
+        self.antlr = picireny.process_antlr4_path(as_path(antlr) if antlr else None)
+        self.input_format, self.start = picireny.process_antlr4_format(format=format,
+                                                                       grammar=[as_path(g) for g in as_list(grammar)] if grammar else None,
+                                                                       start=start,
+                                                                       replacements=replacements)
 
-    if not (input_format and start):
-        logger.warning('Processing the arguments of picireny failed.')
-        return None, []
+        self.encoding = encoding
+        self.granularity = as_int_or_inf(granularity)
+        self.cache_class = getattr(picire, cache_class)
+        if parallel:
+            self.cache_class = picire.shared_cache_decorator(self.cache_class)
+        self.cleanup = as_bool(cleanup)
 
-    src = issue['test']
-    if isinstance(src, bytes):
-        encoding = encoding or chardet.detect(src)['encoding'] or 'latin-1'
-    else:
-        encoding = encoding or 'latin-1'
-        src = src.encode(encoding, errors='ignore')
-
-    file_name = issue.get('filename', 'test')
-
-    hddmin = picireny.cli.args_hdd_choices[hddmin if hddmin else 'full']
-    parallel = as_bool(parallel)
-    combine_loops = as_bool(combine_loops)
-    split_method = getattr(picire.config_splitters, split_method)
-    subset_first = as_bool(subset_first)
-    subset_iterator = getattr(picire.config_iterators, subset_iterator)
-    complement_iterator = getattr(picire.config_iterators, complement_iterator)
-    jobs = int(jobs) if parallel else 1
-    max_utilization = int(max_utilization)
-    hdd_star = as_bool(hdd_star)
-    flatten_recursion = as_bool(flatten_recursion)
-    squeeze_tree = as_bool(squeeze_tree)
-    skip_unremovable = as_bool(skip_unremovable)
-    skip_whitespace = as_bool(skip_whitespace)
-    build_hidden_tokens = as_bool(build_hidden_tokens)
-    granularity = as_int_or_inf(granularity)
-    cleanup = as_bool(cleanup)
-
-    cache_class = getattr(picire, cache_class)
-    if parallel:
-        cache_class = picire.shared_cache_decorator(cache_class)
-
-    # Choose the reducer class that will be used and its configuration.
-    reduce_config = {'split': split_method}
-    if not parallel:
-        reduce_class = picire.LightDD
-        reduce_config['subset_iterator'] = subset_iterator
-        reduce_config['complement_iterator'] = complement_iterator
-        reduce_config['subset_first'] = subset_first
-    else:
-        reduce_config['proc_num'] = jobs
-        reduce_config['max_utilization'] = max_utilization
-
-        if combine_loops:
-            reduce_class = picire.CombinedParallelDD
-            reduce_config['config_iterator'] = picire.CombinedIterator(subset_first, subset_iterator, complement_iterator)
+        # Choose the reducer class that will be used and its configuration.
+        self.reduce_config = {'split': split_method}
+        if not parallel:
+            self.reduce_class = picire.LightDD
+            self.reduce_config['subset_iterator'] = subset_iterator
+            self.reduce_config['complement_iterator'] = complement_iterator
+            self.reduce_config['subset_first'] = subset_first
         else:
-            reduce_class = picire.ParallelDD
-            reduce_config['subset_iterator'] = subset_iterator
-            reduce_config['complement_iterator'] = complement_iterator
-            reduce_config['subset_first'] = subset_first
+            self.reduce_config['proc_num'] = jobs
+            self.reduce_config['max_utilization'] = max_utilization
 
-    issues = dict()
-    tester_config = dict(
-        sut_call=sut_call,
-        sut_call_kwargs=sut_call_kwargs,
-        enc=encoding,
-        expected=issue['id'],
-        listener=listener,
-        ident=ident,
-        issues=issues
-    )
+            if combine_loops:
+                self.reduce_class = picire.CombinedParallelDD
+                self.reduce_config['config_iterator'] = picire.CombinedIterator(subset_first, subset_iterator, complement_iterator)
+            else:
+                self.reduce_class = picire.ParallelDD
+                self.reduce_config['subset_iterator'] = subset_iterator
+                self.reduce_config['complement_iterator'] = complement_iterator
+                self.reduce_config['subset_first'] = subset_first
 
-    try:
-        hdd_tree = picireny.build_with_antlr4(input=file_name,
-                                              src=src,
-                                              encoding=encoding,
-                                              out=work_dir,
-                                              input_format=input_format,
-                                              start=start,
-                                              antlr=antlr,
-                                              lang=lang,
-                                              build_hidden_tokens=build_hidden_tokens,
-                                              cleanup=cleanup)
+    def __call__(self, *, sut_call, issue, listener, ident, work_dir):
+        logging.getLogger('picireny').setLevel(logger.level)
 
-        reduced_file = picireny.reduce(hdd_tree=hdd_tree,
-                                       reduce_class=reduce_class,
-                                       reduce_config=reduce_config,
-                                       tester_class=PicireTester,
-                                       tester_config=tester_config,
-                                       input=file_name,
-                                       encoding=encoding,
-                                       out=work_dir,
-                                       hddmin=hddmin,
-                                       hdd_star=hdd_star,
-                                       flatten_recursion=flatten_recursion,
-                                       squeeze_tree=squeeze_tree,
-                                       skip_unremovable=skip_unremovable,
-                                       skip_whitespace=skip_whitespace,
-                                       unparse_with_whitespace=not build_hidden_tokens,
-                                       granularity=granularity,
-                                       cache_class=cache_class,
-                                       cleanup=cleanup)
-    except Exception as e:
-        logger.warning('Exception in picireny', exc_info=e)
-        return None, list(issues.values())
+        if self.antlr is None:
+            logger.warning('Processing the arguments of picireny failed (no antlr).')
+            return None, []
 
-    with open(reduced_file, 'rb') as f:
-        src = f.read()
+        if not (self.input_format and self.start):
+            logger.warning('Processing the arguments of picireny failed (no input format or start rule).')
+            return None, []
 
-    return src, list(issues.values())
+        src = issue['test']
+        if isinstance(src, bytes):
+            encoding = self.encoding or chardet.detect(src)['encoding'] or 'latin-1'
+        else:
+            encoding = self.encoding or 'latin-1'
+            src = src.encode(encoding, errors='ignore')
+
+        file_name = issue.get('filename', 'test')
+
+        new_issues = dict()
+        tester_config = dict(
+            sut_call=sut_call,
+            issue=issue,
+            listener=listener,
+            ident=ident,
+            encoding=encoding,
+            new_issues=new_issues,
+        )
+
+        try:
+            hdd_tree = picireny.build_with_antlr4(input=file_name,
+                                                  src=src,
+                                                  encoding=encoding,
+                                                  out=work_dir,
+                                                  input_format=self.input_format,
+                                                  start=self.start,
+                                                  antlr=self.antlr,
+                                                  lang=self.lang,
+                                                  build_hidden_tokens=self.build_hidden_tokens,
+                                                  cleanup=self.cleanup)
+
+            reduced_file = picireny.reduce(hdd_tree=hdd_tree,
+                                           reduce_class=self.reduce_class,
+                                           reduce_config=self.reduce_config,
+                                           tester_class=PicireTester,
+                                           tester_config=tester_config,
+                                           input=file_name,
+                                           encoding=encoding,
+                                           out=work_dir,
+                                           hddmin=self.hddmin,
+                                           hdd_star=self.hdd_star,
+                                           flatten_recursion=self.flatten_recursion,
+                                           squeeze_tree=self.squeeze_tree,
+                                           skip_unremovable=self.skip_unremovable,
+                                           skip_whitespace=self.skip_whitespace,
+                                           unparse_with_whitespace=not self.build_hidden_tokens,
+                                           granularity=self.granularity,
+                                           cache_class=self.cache_class,
+                                           cleanup=self.cleanup)
+        except Exception as e:
+            logger.warning('Exception in picireny', exc_info=e)
+            return None, list(new_issues.values())
+
+        with open(reduced_file, 'rb') as f:
+            src = f.read()
+
+        return src, list(new_issues.values())

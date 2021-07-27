@@ -8,11 +8,11 @@
 import re
 
 from ..config import as_list
-from . import CallableDecorator
-from . import NonIssue
+from .call_decorator import CallDecorator
+from .non_issue import NonIssue
 
 
-class RegexFilter(CallableDecorator):
+class RegexFilter(CallDecorator):
     """
     Decorator filter for SUT calls to recognise patterns in the returned issue dictionaries.
 
@@ -41,28 +41,25 @@ class RegexFilter(CallableDecorator):
             backtrace=["#[0-9]+ +0x[0-9a-f]+ in (?P<path>[^ ]+) .*? at (?P<file>[^:]+):(?P<line>[0-9]+)"]
     """
 
-    def decorator(self, **kwargs):
-        patterns = dict()
+    def __init__(self, **kwargs):
+        self.patterns = dict()
         for field, patterns_str in kwargs.items():
-            patterns[field] = []
-            for pattern in as_list(patterns_str):
-                patterns[field].append(re.compile(pattern, flags=re.MULTILINE | re.DOTALL))
+            self.patterns[field] = [re.compile(pattern, flags=re.MULTILINE | re.DOTALL) for pattern in as_list(patterns_str)]
 
-        def wrapper(fn):
-            def filter(*args, **kwargs):
-                issue = fn(*args, **kwargs)
-                if not issue:
-                    return issue
+    def decorate(self, call):
+        def decorated_call(obj, *, test, **kwargs):
+            issue = call(obj, test=test, **kwargs)
+            if not issue:
+                return issue
 
-                updated = False
-                for field, field_patterns in patterns.items():
-                    for pattern in field_patterns:
-                        match = pattern.search(issue.get(field, ''))
-                        if match is not None:
-                            issue.update(match.groupdict())
-                            updated = True
+            updated = False
+            for field, field_patterns in self.patterns.items():
+                for pattern in field_patterns:
+                    match = pattern.search(issue.get(field, ''))
+                    if match is not None:
+                        issue.update(match.groupdict())
+                        updated = True
 
-                return issue if updated else NonIssue(issue)
+            return issue if updated else NonIssue(issue)
 
-            return filter
-        return wrapper
+        return decorated_call

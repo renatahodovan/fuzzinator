@@ -11,35 +11,34 @@ import picire
 
 class PicireTester(object):
 
-    def __init__(self, *, test_builder, test_pattern, sut_call, sut_call_kwargs, enc, expected, listener, ident, issues):
+    def __init__(self, *, test_builder, test_pattern, sut_call, issue, listener, ident, encoding, new_issues):
         self._test_builder = test_builder
         self._test_pattern = test_pattern
         self._sut_call = sut_call
-        self._sut_call_kwargs = sut_call_kwargs
-        self._encoding = enc
-        self._expected = expected
+        self._issue = issue
         self._listener = listener
         self._ident = ident
-        self._issues = issues
+        self._encoding = encoding
+        self._new_issues = new_issues
 
     def __call__(self, config, config_id):
         test = codecs.encode(self._test_builder(config), self._encoding, 'ignore')
+        filename = self._test_pattern % '_'.join(str(i) for i in config_id)
         with self._sut_call:
-            filename = self._test_pattern % '_'.join(str(i) for i in config_id)
-            issue = self._sut_call(**dict(self._sut_call_kwargs, test=test, filename=filename))
+            issue = self._sut_call(**dict(self._issue, test=test, filename=filename))
 
             # Second chance for flaky tests in case of 'assert' check.
             if config_id == 'assert' and not issue:
-                issue = self._sut_call(**dict(self._sut_call_kwargs, test=test, filename=filename))
+                issue = self._sut_call(**dict(self._issue, test=test, filename=filename))
 
             if issue:
-                if self._expected == issue['id']:
+                if self._issue['id'] == issue['id']:
                     # self._listener.on_job_progressed(ident=self._ident, progress=len(str(test)))
                     return picire.AbstractDD.FAIL
 
                 if 'test' not in issue or not issue['test']:
                     issue['test'] = test
 
-                self._issues[issue['id']] = issue
+                self._new_issues[issue['id']] = issue
 
         return picire.AbstractDD.PASS

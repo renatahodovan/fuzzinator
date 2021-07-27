@@ -34,6 +34,3 @@ class GitlabTracker(BaseTracker):
                     'url': new_issue.attributes['web_url']}
         except (exceptions.GitlabAuthenticationError, exceptions.GitlabCreateError) as e:
             raise TrackerError('Issue reporting failed') from e
-
-    def __call__(self, issue):
-        pass

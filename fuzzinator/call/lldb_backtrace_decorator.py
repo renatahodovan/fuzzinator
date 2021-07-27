@@ -11,12 +11,12 @@ import os
 import pexpect
 
 from ..config import as_dict, as_pargs, as_path, decode
-from . import CallableDecorator
+from .call_decorator import CallDecorator
 
 logger = logging.getLogger(__name__)
 
 
-class LldbBacktraceDecorator(CallableDecorator):
+class LldbBacktraceDecorator(CallDecorator):
     """
     Decorator for subprocess-based SUT calls with file input to extend issues
     with ``'backtrace'`` property.
@@ -61,37 +61,40 @@ class LldbBacktraceDecorator(CallableDecorator):
             env={"BAR": "1", "BAZ": "1"}
     """
 
-    def decorator(self, command, cwd=None, env=None, timeout=None, encoding=None, **kwargs):
-        timeout = int(timeout) if timeout is not None else 1
+    def __init__(self, *, command, cwd=None, env=None, timeout=None, encoding=None, **kwargs):
+        self.command = command
+        self.cwd = as_path(cwd) if cwd else os.getcwd()
+        self.env = dict(os.environ, **as_dict(env)) if env else None
+        self.timeout = int(timeout) if timeout is not None else 1
+        self.encoding = encoding
 
-        def wrapper(fn):
-            def filter(*args, **kwargs):
-                issue = fn(*args, **kwargs)
-                if not issue:
-                    return issue
-
-                try:
-                    expect_patterns = [r'\(lldb\) ', pexpect.EOF, pexpect.TIMEOUT]
-                    child = pexpect.spawn('lldb', ['-X', '--'] + as_pargs(command.format(test=kwargs['test'])),
-                                          cwd=as_path(cwd) if cwd else os.getcwd(),
-                                          env=dict(os.environ, **as_dict(env or '{}')))
-                    while child.expect(expect_patterns, timeout=timeout) == 0:
-                        pass
-                    child.sendline('run')
-                    while child.expect(expect_patterns, timeout=timeout) == 0:
-                        pass
-                    child.sendline('bt')
-
-                    backtrace = b''
-                    while child.expect(expect_patterns, timeout=timeout) == 0:
-                        backtrace += child.before
-
-                    child.sendline('quit')
-                    issue['backtrace'] = decode(backtrace, encoding)
-                except Exception as e:
-                    logger.warning('Failed to obtain lldb backtrace', exc_info=e)
-
+    def decorate(self, call):
+        def decorated_call(obj, *, test, **kwargs):
+            issue = call(obj, test=test, **kwargs)
+            if not issue:
                 return issue
 
-            return filter
-        return wrapper
+            try:
+                expect_patterns = [r'\(lldb\) ', pexpect.EOF, pexpect.TIMEOUT]
+                child = pexpect.spawn('lldb', ['-X', '--'] + as_pargs(self.command.format(test=test)),
+                                      cwd=self.cwd,
+                                      env=self.env)
+                while child.expect(expect_patterns, timeout=self.timeout) == 0:
+                    pass
+                child.sendline('run')
+                while child.expect(expect_patterns, timeout=self.timeout) == 0:
+                    pass
+                child.sendline('bt')
+
+                backtrace = b''
+                while child.expect(expect_patterns, timeout=self.timeout) == 0:
+                    backtrace += child.before
+
+                child.sendline('quit')
+                issue['backtrace'] = decode(backtrace, self.encoding)
+            except Exception as e:
+                logger.warning('Failed to obtain lldb backtrace', exc_info=e)
+
+            return issue
+
+        return decorated_call

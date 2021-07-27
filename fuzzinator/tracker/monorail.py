@@ -49,6 +49,3 @@ class MonorailTracker(BaseTracker):
                     'url': self.weburl_template.format(project_id=self.project_id, ident=new_issue['id'])}
         except Exception as e:
             raise TrackerError('Issue reporting failed') from e
-
-    def __call__(self, issue):
-        pass

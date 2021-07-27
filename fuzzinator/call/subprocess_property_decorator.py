@@ -10,13 +10,13 @@ import os
 import subprocess
 
 from ..config import as_dict, as_pargs, as_path, decode
-from .. import Controller
-from . import CallableDecorator
+from ..controller import Controller
+from .call_decorator import CallDecorator
 
 logger = logging.getLogger(__name__)
 
 
-class SubprocessPropertyDecorator(CallableDecorator):
+class SubprocessPropertyDecorator(CallDecorator):
     """
     Decorator for SUT calls to extend issues with an arbitrary property where
     the value is the output of a shell subprocess.
@@ -54,33 +54,39 @@ class SubprocessPropertyDecorator(CallableDecorator):
             env={"GIT_FLUSH": "1"}
     """
 
-    def decorator(self, property, command, cwd=None, env=None, timeout=None, encoding=None, **kwargs):
-        def wrapper(fn):
-            def filter(*args, **kwargs):
-                issue = fn(*args, **kwargs)
-                if not issue:
-                    return issue
+    def __init__(self, *, property, command, cwd=None, env=None, timeout=None, encoding=None, **kwargs):
+        self.property = property
+        self.command = command
+        self.cwd = as_path(cwd) if cwd else os.getcwd()
+        self.env = dict(os.environ, **as_dict(env)) if env else None
+        self.timeout = int(timeout) if timeout else None
+        self.encoding = encoding
 
-                try:
-                    proc = subprocess.Popen(as_pargs(command),
-                                            cwd=as_path(cwd) if cwd else os.getcwd(),
-                                            stdout=subprocess.PIPE,
-                                            stderr=subprocess.PIPE,
-                                            env=dict(os.environ, **as_dict(env or '{}')))
-                    stdout, stderr = proc.communicate(timeout=timeout)
-                    stdout, stderr = decode(stdout, encoding), decode(stderr, encoding)
-                    if proc.returncode == 0:
-                        issue[property] = stdout
-                    else:
-                        logger.debug('SubprocessPropertyDecorator exited with nonzero exit code while setting the \'%s\' property.\n%s\n%s',
-                                     property,
-                                     stdout,
-                                     stderr)
-                except subprocess.TimeoutExpired as e:
-                    logger.debug('SubprocessPropertyDecorator execution timeout (%ds) expired while setting the \'%s\' property.', e.timeout, property)
-                    Controller.kill_process_tree(proc.pid)
-
+    def decorate(self, call):
+        def decorated_call(obj, *, test, **kwargs):
+            issue = call(obj, test=test, **kwargs)
+            if not issue:
                 return issue
 
-            return filter
-        return wrapper
+            try:
+                proc = subprocess.Popen(as_pargs(self.command),
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE,
+                                        cwd=self.cwd,
+                                        env=self.env)
+                stdout, stderr = proc.communicate(timeout=self.timeout)
+                stdout, stderr = decode(stdout, self.encoding), decode(stderr, self.encoding)
+                if proc.returncode == 0:
+                    issue[self.property] = stdout
+                else:
+                    logger.debug('SubprocessPropertyDecorator exited with nonzero exit code while setting the \'%s\' property.\n%s\n%s',
+                                 self.property,
+                                 stdout,
+                                 stderr)
+            except subprocess.TimeoutExpired as e:
+                logger.debug('SubprocessPropertyDecorator execution timeout (%ds) expired while setting the \'%s\' property.', e.timeout, self.property)
+                Controller.kill_process_tree(proc.pid)
+
+            return issue
+
+        return decorated_call

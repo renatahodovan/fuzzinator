@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -8,8 +8,10 @@
 import random
 import string
 
+from .fuzzer import Fuzzer
 
-def RandomContent(*, min_length='1', max_length='1', **kwargs):
+
+class RandomContent(Fuzzer):
     """
     Example fuzzer to generate strings of random length from random ASCII
     uppercase letters and decimal digits.
@@ -38,5 +40,10 @@ def RandomContent(*, min_length='1', max_length='1', **kwargs):
             max_length=1000
     """
 
-    return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits)
-                   for _ in range(random.randint(int(min_length), int(max_length)))).encode('utf-8', errors='ignore')
+    def __init__(self, *, min_length=1, max_length=1, **kwargs):
+        self.min_length = int(min_length)
+        self.max_length = int(max_length)
+
+    def __call__(self, *, index):
+        return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits)
+                       for _ in range(random.randint(self.min_length, self.max_length))).encode('utf-8', errors='ignore')

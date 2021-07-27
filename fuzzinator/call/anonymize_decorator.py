@@ -6,10 +6,10 @@
 # according to those terms.
 
 from ..config import as_list
-from . import CallableDecorator
+from .call_decorator import CallDecorator
 
 
-class AnonymizeDecorator(CallableDecorator):
+class AnonymizeDecorator(CallDecorator):
     """
     Decorator for SUT calls to anonymize issue properties.
 
@@ -40,22 +40,21 @@ class AnonymizeDecorator(CallableDecorator):
             properties=["stdout", "stderr"]
     """
 
-    def decorator(self, old_text, new_text=None, properties=None, **kwargs):
-        def wrapper(fn):
-            def filter(*args, **kwargs):
-                issue = fn(*args, **kwargs)
-                if not issue:
-                    return issue
+    def __init__(self, *, old_text, new_text=None, properties=None, **kwargs):
+        self.old_text = old_text
+        self.new_text = new_text or ''
+        self.properties = as_list(properties) if properties else None
 
-                if properties:
-                    ks = as_list(properties)
-                else:
-                    ks = list(issue.keys())
-
-                for key in ks:
-                    issue[key] = issue.get(key, '').replace(old_text, new_text or '')
-
+    def decorate(self, call):
+        def decorated_call(obj, *, test, **kwargs):
+            issue = call(obj, test=test, **kwargs)
+            if not issue:
                 return issue
 
-            return filter
-        return wrapper
+            keys = self.properties or list(issue.keys())
+            for key in keys:
+                issue[key] = issue.get(key, '').replace(self.old_text, self.new_text)
+
+            return issue
+
+        return decorated_call

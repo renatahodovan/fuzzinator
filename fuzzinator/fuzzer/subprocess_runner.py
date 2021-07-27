@@ -11,12 +11,13 @@ import shutil
 import subprocess
 
 from ..config import as_bool, as_dict, as_pargs, as_path, decode
-from .. import Controller
+from ..controller import Controller
+from .fuzzer import Fuzzer
 
 logger = logging.getLogger(__name__)
 
 
-class SubprocessRunner(object):
+class SubprocessRunner(Fuzzer):
     """
     Wrapper around a fuzzer that is available as an executable and can generate
     its test cases as file(s) in a directory. First, the external executable is
@@ -39,8 +40,8 @@ class SubprocessRunner(object):
       - ``env``: if not ``None``, a dictionary of variable names-values to
         update the environment with.
       - ``timeout``: run subprocess with timeout.
-      - ``contents``: if it's true then the content of the files will be returned
-         instead of their path (boolean value, True by default).
+      - ``contents``: if it's true then the content of the files will be
+        returned instead of their path (boolean value, True by default).
       - ``encoding``: stdout and stderr encoding (default: autodetect).
 
     **Example configuration snippet:**
@@ -55,12 +56,12 @@ class SubprocessRunner(object):
             fuzzer=fuzzinator.fuzzer.SubprocessRunner
             batch=50
 
-            [fuzz.foo-with-bar.fuzzer.init]
+            [fuzz.foo-with-bar.fuzzer]
             outdir=${fuzzinator:work_dir}/bar/{uid}
             command=barfuzzer -n ${fuzz.foo-with-bar:batch} -o ${outdir}
     """
 
-    def __init__(self, outdir, command, cwd=None, env=None, timeout=None, contents=True, encoding=None, **kwargs):
+    def __init__(self, *, outdir, command, cwd=None, env=None, timeout=None, contents=True, encoding=None, **kwargs):
         # uid is used to make sure we create unique directory for the generated test cases.
         self.uid = '{pid}-{id}'.format(pid=os.getpid(), id=id(self))
 
@@ -97,9 +98,7 @@ class SubprocessRunner(object):
         shutil.rmtree(self.outdir, ignore_errors=True)
         return False
 
-    # Although kwargs is not used here but the 'index' argument will be passed anyhow
-    # and it has to be accepted.
-    def __call__(self, **kwargs):
+    def __call__(self, *, index):
         if not self.tests:
             return None
 

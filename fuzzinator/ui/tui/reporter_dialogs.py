@@ -9,7 +9,7 @@ import logging
 
 from urwid import *
 
-from ...config import config_get_callable
+from ...config import config_get_object
 from ...formatter import JsonFormatter
 from ...tracker import BaseTracker, BugzillaTracker, TrackerError
 from .button import FormattedButton
@@ -25,13 +25,13 @@ class ReportDialog(PopUpTarget):
 
     def __init__(self, issue, config, db, side_bar=None):
         self.issue = issue
-        self.tracker = config_get_callable(config, 'sut.' + issue['sut'], 'tracker')[0] or BaseTracker()
+        self.tracker = config_get_object(config, 'sut.' + issue['sut'], 'tracker') or BaseTracker()
         self.db = db
         self.duplicate = None
 
         self.edit_dups = BugEditor()
         self.result = Text('')
-        formatter = config_get_callable(config, 'sut.' + issue['sut'], 'formatter')[0] or JsonFormatter
+        formatter = config_get_object(config, 'sut.' + issue['sut'], 'formatter') or JsonFormatter()
         self.issue_title = BugEditor(edit_text=formatter(issue=issue, format='short'))
         self.issue_desc = BugEditor(edit_text=formatter(issue=issue), multiline=True, wrap='clip')
         self.body = SimpleListWalker([Columns([('fixed', 13, Text(('dialog_secondary', 'Summary: '))),
@@ -104,7 +104,7 @@ class BugzillaReportDialog(ReportDialog):
         self.edit_cc = BugEditor(multiline=True)
         self.edit_extension = BugEditor(edit_text='html')
 
-        tracker = config_get_callable(config, 'sut.' + issue['sut'], 'tracker')[0]
+        tracker = config_get_object(config, 'sut.' + issue['sut'], 'tracker')
         assert isinstance(tracker, BugzillaTracker), 'Tracker is not a Bugzilla instance.'
         self.product_info = tracker.settings()
         self.product = None

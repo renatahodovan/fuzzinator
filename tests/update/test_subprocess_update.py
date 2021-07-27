@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -20,4 +20,4 @@ from common_update import resources_dir
     ('%s %s --print-env FOO' % (sys.executable, os.path.join('.', 'mock_tool.py')), resources_dir, '{"FOO": "baz"}'),
 ])
 def test_subprocess_update(command, cwd, env):
-    fuzzinator.update.SubprocessUpdate(command, cwd=cwd, env=env)
+    fuzzinator.update.SubprocessUpdate(command=command, cwd=cwd, env=env)()

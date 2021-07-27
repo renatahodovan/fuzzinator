@@ -23,4 +23,6 @@ from common_call import blinesep, resources_dir
     ('%s %s --print-args --exit-code 0 {test}' % (sys.executable, os.path.join(resources_dir, 'mock_tool.py')), None, None, 'True', 'foo', {'stdout': 'foo' + blinesep, 'stderr': '', 'exit_code': 0}),
 ])
 def test_subprocess_call(command, cwd, env, no_exit_code, test, exp):
-    assert fuzzinator.call.SubprocessCall(command, cwd=cwd, env=env, no_exit_code=no_exit_code, test=test) == exp
+    call = fuzzinator.call.SubprocessCall(command=command, cwd=cwd, env=env, no_exit_code=no_exit_code)
+    with call:
+        assert call(test=test) == exp

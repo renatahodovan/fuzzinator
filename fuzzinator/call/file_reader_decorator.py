@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,10 +7,10 @@
 
 import os
 
-from . import CallableDecorator
+from .call_decorator import CallDecorator
 
 
-class FileReaderDecorator(CallableDecorator):
+class FileReaderDecorator(CallDecorator):
     """
     Decorator for SUTs that take input as a file path: saves the content of
     the failing test case.
@@ -32,17 +32,18 @@ class FileReaderDecorator(CallableDecorator):
             command=/home/alice/foo/bin/foo {test}
     """
 
-    def decorator(self, **kwargs):
-        def wrapper(fn):
-            def reader(*args, **kwargs):
-                issue = fn(*args, **kwargs)
+    def __init__(self, **kwargs):
+        pass
 
-                if issue:
-                    with open(kwargs['test'], 'rb') as f:
-                        issue['test'] = f.read()
-                    issue['filename'] = os.path.basename(kwargs['test'])
+    def decorate(self, call):
+        def decorated_call(obj, *, test, **kwargs):
+            issue = call(obj, test=test, **kwargs)
 
-                return issue
+            if issue:
+                with open(test, 'rb') as f:
+                    issue['test'] = f.read()
+                issue['filename'] = os.path.basename(test)
 
-            return reader
-        return wrapper
+            return issue
+
+        return decorated_call

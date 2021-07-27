@@ -13,15 +13,12 @@ import picire
 
 from ..config import as_bool, as_int_or_inf
 from .picire_tester import PicireTester
+from .reducer import Reducer
 
 logger = logging.getLogger(__name__)
 
 
-def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
-           parallel=False, combine_loops=False,
-           split_method='zeller', subset_first=True, subset_iterator='forward', complement_iterator='forward',
-           jobs=os.cpu_count(), max_utilization=100, encoding=None, atom='both', granularity=2, cache_class='ContentCache', cleanup=True,
-           **kwargs):
+class Picire(Reducer):
     """
     Test case reducer based on the Picire Parallel Delta Debugging Framework.
 
@@ -53,84 +50,94 @@ def Picire(sut_call, sut_call_kwargs, listener, ident, issue, work_dir,
             subset_iterator=skip
     """
 
-    logging.getLogger('picire').setLevel(logger.level)
+    def __init__(self, *, parallel=False, combine_loops=False,
+                 split_method='zeller', subset_first=True, subset_iterator='forward', complement_iterator='forward',
+                 jobs=os.cpu_count(), max_utilization=100,
+                 atom='both',
+                 encoding=None, granularity=2, cache_class='ContentCache', cleanup=True,
+                 **kwargs):
+        parallel = as_bool(parallel)
+        combine_loops = as_bool(combine_loops)
+        split_method = getattr(picire.config_splitters, split_method)
+        subset_first = as_bool(subset_first)
+        subset_iterator = getattr(picire.config_iterators, subset_iterator)
+        complement_iterator = getattr(picire.config_iterators, complement_iterator)
+        jobs = int(jobs) if parallel else 1
+        max_utilization = int(max_utilization)
 
-    src = issue['test']
-    if isinstance(src, bytes):
-        encoding = encoding or chardet.detect(src)['encoding'] or 'latin-1'
-    else:
-        encoding = encoding or 'latin-1'
-        src = src.encode(encoding, errors='ignore')
+        self.atom = atom
 
-    file_name = issue.get('filename', 'test')
-    parallel = as_bool(parallel)
-    jobs = int(jobs) if parallel else 1
+        self.encoding = encoding
+        self.granularity = as_int_or_inf(granularity)
+        self.cache_class = getattr(picire, cache_class)
+        if parallel:
+            self.cache_class = picire.shared_cache_decorator(self.cache_class)
+        self.cleanup = as_bool(cleanup)
 
-    granularity = as_int_or_inf(granularity)
-    cleanup = as_bool(cleanup)
-
-    combine_loops = as_bool(combine_loops)
-    subset_first = as_bool(subset_first)
-    max_utilization = int(max_utilization)
-
-    split_method = getattr(picire.config_splitters, split_method)
-    subset_iterator = getattr(picire.config_iterators, subset_iterator)
-    complement_iterator = getattr(picire.config_iterators, complement_iterator)
-    cache_class = getattr(picire, cache_class)
-    if parallel:
-        cache_class = picire.shared_cache_decorator(cache_class)
-
-    # Choose the reducer class that will be used and its configuration.
-    reduce_config = {'split': split_method}
-    if not parallel:
-        reduce_class = picire.LightDD
-        reduce_config['subset_iterator'] = subset_iterator
-        reduce_config['complement_iterator'] = complement_iterator
-        reduce_config['subset_first'] = subset_first
-    else:
-        reduce_config['proc_num'] = jobs
-        reduce_config['max_utilization'] = max_utilization
-
-        if combine_loops:
-            reduce_class = picire.CombinedParallelDD
-            reduce_config['config_iterator'] = picire.CombinedIterator(subset_first, subset_iterator, complement_iterator)
+        # Choose the reducer class that will be used and its configuration.
+        self.reduce_config = {'split': split_method}
+        if not parallel:
+            self.reduce_class = picire.LightDD
+            self.reduce_config['subset_iterator'] = subset_iterator
+            self.reduce_config['complement_iterator'] = complement_iterator
+            self.reduce_config['subset_first'] = subset_first
         else:
-            reduce_class = picire.ParallelDD
-            reduce_config['subset_iterator'] = subset_iterator
-            reduce_config['complement_iterator'] = complement_iterator
-            reduce_config['subset_first'] = subset_first
+            self.reduce_config['proc_num'] = jobs
+            self.reduce_config['max_utilization'] = max_utilization
 
-    issues = dict()
-    tester_config = dict(
-        sut_call=sut_call,
-        sut_call_kwargs=sut_call_kwargs,
-        enc=encoding,
-        expected=issue['id'],
-        listener=listener,
-        ident=ident,
-        issues=issues
-    )
+            if combine_loops:
+                self.reduce_class = picire.CombinedParallelDD
+                self.reduce_config['config_iterator'] = picire.CombinedIterator(subset_first, subset_iterator, complement_iterator)
+            else:
+                self.reduce_class = picire.ParallelDD
+                self.reduce_config['subset_iterator'] = subset_iterator
+                self.reduce_config['complement_iterator'] = complement_iterator
+                self.reduce_config['subset_first'] = subset_first
 
-    call_config = dict(reduce_class=reduce_class,
-                       reduce_config=reduce_config,
-                       tester_class=PicireTester,
-                       tester_config=tester_config,
-                       input=file_name,
-                       src=src,
-                       encoding=encoding,
-                       out=work_dir,
-                       atom=atom,
-                       granularity=granularity,
-                       cache_class=cache_class,
-                       cleanup=cleanup)
+    def __call__(self, *, sut_call, issue, listener, ident, work_dir):
+        logging.getLogger('picire').setLevel(logger.level)
 
-    try:
-        reduced_file = picire.call(**call_config)
-    except Exception as e:
-        logger.warning('Exception in picire', exc_info=e)
-        return None, list(issues.values())
+        src = issue['test']
+        if isinstance(src, bytes):
+            encoding = self.encoding or chardet.detect(src)['encoding'] or 'latin-1'
+        else:
+            encoding = self.encoding or 'latin-1'
+            src = src.encode(encoding, errors='ignore')
 
-    with open(reduced_file, 'rb') as f:
-        src = f.read()
+        file_name = issue.get('filename', 'test')
 
-    return src, list(issues.values())
+        new_issues = dict()
+        tester_config = dict(
+            sut_call=sut_call,
+            issue=issue,
+            listener=listener,
+            ident=ident,
+            encoding=encoding,
+            new_issues=new_issues,
+        )
+
+        call_config = dict(
+            reduce_class=self.reduce_class,
+            reduce_config=self.reduce_config,
+            tester_class=PicireTester,
+            tester_config=tester_config,
+            input=file_name,
+            src=src,
+            encoding=encoding,
+            out=work_dir,
+            atom=self.atom,
+            granularity=self.granularity,
+            cache_class=self.cache_class,
+            cleanup=self.cleanup,
+        )
+
+        try:
+            reduced_file = picire.call(**call_config)
+        except Exception as e:
+            logger.warning('Exception in picire', exc_info=e)
+            return None, list(new_issues.values())
+
+        with open(reduced_file, 'rb') as f:
+            src = f.read()
+
+        return src, list(new_issues.values())

@@ -7,8 +7,10 @@
 
 import random
 
+from .fuzzer import Fuzzer
 
-class RandomInteger(object):
+
+class RandomInteger(Fuzzer):
     """
     A simple test generator to produce a single random integer number from
     a predefined interval.
@@ -32,20 +34,14 @@ class RandomInteger(object):
             fuzzer=fuzzinator.fuzzer.RandomNumber
             batch=100
 
-            [fuzz.foo-with-randint.fuzzer.init]
+            [fuzz.foo-with-randint.fuzzer]
             min_value=0
             max_value=1000
     """
 
-    def __init__(self, min_value, max_value, **kwargs):
+    def __init__(self, *, min_value, max_value, **kwargs):
         self.min_value = int(min_value)
         self.max_value = int(max_value)
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *exc):
-        return False
-
-    def __call__(self, index):
+    def __call__(self, *, index):
         return random.randint(self.min_value, self.max_value)

@@ -6,15 +6,15 @@
 # according to those terms.
 
 from ..config import as_list
-from . import CallableDecorator
-from . import NonIssue
-from . import RegexAutomaton
+from .call_decorator import CallDecorator
+from .non_issue import NonIssue
+from .regex_automaton import RegexAutomaton
 
 
-class RegexAutomatonFilter(CallableDecorator):
+class RegexAutomatonFilter(CallDecorator):
     """
     Decorator filter for SUT calls to recognise patterns in the returned issue
-    dictionaries and process them according to user-defined automata-like
+    dictionaries and process them according to user-defined automaton-like
     instructions.
 
     **Optional parameters of the decorator:**
@@ -41,35 +41,32 @@ class RegexAutomatonFilter(CallableDecorator):
             backtrace=["mas /#[0-9]+ +0x[0-9a-f]+ in (?P<path>[^ ]+) .*? at (?P<file>[^:]+):(?P<line>[0-9]+)/"]
     """
 
-    def decorator(self, **kwargs):
-        patterns = dict()
+    def __init__(self, **kwargs):
+        self.patterns = dict()
         for stream, desc in kwargs.items():
-            if stream not in patterns:
-                patterns[stream] = []
-            patterns[stream].extend(RegexAutomaton.split_pattern(p) for p in as_list(desc))
+            self.patterns[stream] = [RegexAutomaton.split_pattern(p) for p in as_list(desc)]
 
-        def wrapper(fn):
-            def filter(*args, **kwargs):
-                issue = fn(*args, **kwargs)
-                if not issue:
-                    return issue
-
-                issue_details = dict()
-                for field, instructions in patterns.items():
-                    # Process the field content line-by-line.
-                    regex_automaton = RegexAutomaton(instructions, existing_fields=set(issue.keys()))
-                    terminate, _ = regex_automaton.process(issue.get(field, '').splitlines(), issue_details)
-                    if terminate:
-                        if not issue_details:
-                            return NonIssue(issue)
-                        issue.update(issue_details)
-                        return issue
-
-                if not issue_details:
-                    return NonIssue(issue)
-
-                issue.update(issue_details)
+    def decorate(self, call):
+        def decorated_call(obj, *, test, **kwargs):
+            issue = call(obj, test=test, **kwargs)
+            if not issue:
                 return issue
 
-            return filter
-        return wrapper
+            issue_details = dict()
+            for field, instructions in self.patterns.items():
+                # Process the field content line-by-line.
+                regex_automaton = RegexAutomaton(instructions, existing_fields=set(issue.keys()))
+                terminate, _ = regex_automaton.process(issue.get(field, '').splitlines(), issue_details)
+                if terminate:
+                    if not issue_details:
+                        return NonIssue(issue)
+                    issue.update(issue_details)
+                    return issue
+
+            if not issue_details:
+                return NonIssue(issue)
+
+            issue.update(issue_details)
+            return issue
+
+        return decorated_call

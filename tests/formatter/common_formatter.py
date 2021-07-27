@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,6 +6,8 @@
 # according to those terms.
 
 from os.path import abspath, dirname, join
+
+import fuzzinator
 
 
 resources_dir = join(dirname(dirname(abspath(__file__))), 'resources')
@@ -22,14 +24,19 @@ mock_issue = {
 }
 
 
-def mock_id_formatter(issue, format='long', **kwargs):
+class MockIdFormatter(fuzzinator.formatter.Formatter):
     """
     Always return the issue id converted to its string representation.
     """
-    return str(issue['id'])
+
+    def __init__(self, **kwargs):
+        pass
+
+    def __call__(self, issue, format='long', **kwargs):
+        return str(issue['id'])
 
 
-class MockFixedFormatter(object):
+class MockFixedFormatter(fuzzinator.formatter.Formatter):
     """
     Always return fixed strings for short and long variants.
     """

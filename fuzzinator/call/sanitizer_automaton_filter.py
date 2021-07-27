@@ -6,7 +6,7 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-from ..config import as_list
+from .regex_automaton import RegexAutomaton
 from .regex_automaton_filter import RegexAutomatonFilter
 
 
@@ -45,8 +45,9 @@ class SanitizerAutomatonFilter(RegexAutomatonFilter):
     ]
 
     def __init__(self, **kwargs):
-        stderr_field = 'stderr'
-        stderr_patterns = as_list(kwargs.pop(stderr_field, '[]'))
-        stderr_patterns.extend(self.STDERR_PATTERNS)
-        kwargs[stderr_field] = stderr_patterns
         super().__init__(**kwargs)
+
+        stderr_field = 'stderr'
+        if stderr_field not in self.patterns:
+            self.patterns[stderr_field] = []
+        self.patterns[stderr_field].extend(RegexAutomaton.split_pattern(p) for p in self.STDERR_PATTERNS)

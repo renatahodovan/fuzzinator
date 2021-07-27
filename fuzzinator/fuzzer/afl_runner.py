@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -10,11 +10,12 @@ import os
 import pexpect
 
 from ..config import as_dict, as_pargs, as_path
+from .fuzzer import Fuzzer
 
 logger = logging.getLogger(__name__)
 
 
-class AFLRunner(object):
+class AFLRunner(Fuzzer):
     """
     Wrapper around AFL to be executed continuously in a subprocess. The findings
     of AFL are periodically checked and any new test cases are returned as test
@@ -71,7 +72,7 @@ class AFLRunner(object):
             batch=inf
             instances=1
 
-            [fuzz.foo-with-afl.fuzzer.init]
+            [fuzz.foo-with-afl.fuzzer]
             afl_fuzz=/home/alice/afl/afl-fuzz
             sut_command=${sut.foo.call:command}
             cwd=${sut.foo.call:cwd}
@@ -80,7 +81,7 @@ class AFLRunner(object):
             output=${fuzzinator:work_dir}/afl-output/{uid}
     """
 
-    def __init__(self, afl_fuzz, input, output, sut_command, cwd=None, env=None, timeout=None, dictionary=None,
+    def __init__(self, *, afl_fuzz, input, output, sut_command, cwd=None, env=None, timeout=None, dictionary=None,
                  master_name=None, slave_name=None, **kwargs):
         self.afl_fuzz = as_path(afl_fuzz)
         self.input = as_path(input)
@@ -105,7 +106,7 @@ class AFLRunner(object):
     def __exit__(self, *exc):
         return False
 
-    def __call__(self, **kwargs):
+    def __call__(self, *, index):
         crash_dir = os.path.join(self.output, '{name}'.format(name=self.master_name or self.slave_name or ''), 'crashes')
 
         while True:

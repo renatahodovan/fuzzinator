@@ -19,7 +19,7 @@
 needed during a fuzz session:
 
 * run your favorite `test generator`_ and feed the test cases to the
-  system-under-test,
+  software-under-test,
 * catch and save the unique issues,
 * reduce_ the failing test cases,
 * ease the reporting of issues in bug trackers (e.g., Bugzilla or GitHub),

@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -10,9 +10,10 @@ import os
 import time
 
 from ..config import as_path
+from .update_condition import UpdateCondition
 
 
-def TimestampUpdateCondition(path, age):
+class TimestampUpdateCondition(UpdateCondition):
     """
     File timestamp-based SUT update condition.
 
@@ -39,11 +40,17 @@ def TimestampUpdateCondition(path, age):
             path=/home/alice/foo/bin/foo
             age=7:00:00:00
     """
-    path = as_path(path)
-    if not os.path.exists(path):
-        return True
 
-    parts = reversed(list(map(float, age.split(':'))))
-    keys = ['seconds', 'minutes', 'hours', 'days']
-    age = datetime.timedelta(**dict(zip(keys, parts))).total_seconds()
-    return (time.time() - os.stat(path).st_mtime) > age
+    def __init__(self, *, path, age, **kwargs):
+        self.path = path
+        self.age = age
+
+    def __call__(self):
+        path = as_path(self.path)
+        if not os.path.exists(path):
+            return True
+
+        parts = reversed(list(map(float, self.age.split(':'))))
+        keys = ['seconds', 'minutes', 'hours', 'days']
+        age = datetime.timedelta(**dict(zip(keys, parts))).total_seconds()
+        return (time.time() - os.stat(path).st_mtime) > age

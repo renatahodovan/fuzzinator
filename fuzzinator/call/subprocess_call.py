@@ -10,14 +10,14 @@ import os
 import subprocess
 
 from ..config import as_bool, as_dict, as_pargs, as_path, decode
-from .. import Controller
-from . import NonIssue
+from ..controller import Controller
+from .call import Call
+from .non_issue import NonIssue
 
 logger = logging.getLogger(__name__)
 
 
-def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None,
-                   timeout=None, encoding=None, **kwargs):
+class SubprocessCall(Call):
     """
     Subprocess invocation-based call of a SUT that takes test input on its
     command line. (See :class:`fuzzinator.call.FileWriterDecorator` for SUTs
@@ -60,30 +60,37 @@ def SubprocessCall(command, cwd=None, env=None, no_exit_code=None, test=None,
             cwd=/home/alice/foo
             env={"BAR": "1"}
     """
-    env = dict(os.environ, **as_dict(env)) if env else None
-    no_exit_code = as_bool(no_exit_code)
-    timeout = int(timeout) if timeout else None
-    issue = {}
 
-    try:
-        proc = subprocess.Popen(as_pargs(command.format(test=test)),
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                cwd=as_path(cwd) if cwd else os.getcwd(),
-                                env=env)
-        stdout, stderr = proc.communicate(timeout=timeout)
-        stdout, stderr = decode(stdout, encoding), decode(stderr, encoding)
-        logger.debug('%s\n%s', stdout, stderr)
+    def __init__(self, *, command, cwd=None, env=None, no_exit_code=None, timeout=None, encoding=None, **kwargs):
+        self.command = command
+        self.cwd = as_path(cwd) if cwd else os.getcwd()
+        self.env = dict(os.environ, **as_dict(env)) if env else None
+        self.no_exit_code = as_bool(no_exit_code)
+        self.timeout = int(timeout) if timeout else None
+        self.encoding = encoding
 
-        issue = {
-            'exit_code': proc.returncode,
-            'stdout': stdout,
-            'stderr': stderr,
-        }
-        if no_exit_code or proc.returncode != 0:
-            return issue
-    except subprocess.TimeoutExpired as e:
-        logger.debug('SubprocessCall execution timeout (%ds) expired.', e.timeout)
-        Controller.kill_process_tree(proc.pid)
+    def __call__(self, *, test, **kwargs):
+        issue = {}
 
-    return NonIssue(issue) if issue else None
+        try:
+            proc = subprocess.Popen(as_pargs(self.command.format(test=test)),
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    cwd=self.cwd,
+                                    env=self.env)
+            stdout, stderr = proc.communicate(timeout=self.timeout)
+            stdout, stderr = decode(stdout, self.encoding), decode(stderr, self.encoding)
+            logger.debug('%s\n%s', stdout, stderr)
+
+            issue = {
+                'exit_code': proc.returncode,
+                'stdout': stdout,
+                'stderr': stderr,
+            }
+            if self.no_exit_code or proc.returncode != 0:
+                return issue
+        except subprocess.TimeoutExpired as e:
+            logger.debug('SubprocessCall execution timeout (%ds) expired.', e.timeout)
+            Controller.kill_process_tree(proc.pid)
+
+        return NonIssue(issue) if issue else None

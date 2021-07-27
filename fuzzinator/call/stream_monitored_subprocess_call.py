@@ -14,13 +14,15 @@ import subprocess
 import time
 
 from ..config import as_dict, as_list, as_pargs, as_path, decode
-from .. import Controller
-from . import RegexAutomaton
+from ..controller import Controller
+from .call import Call
+from .non_issue import NonIssue
+from .regex_automaton import RegexAutomaton
 
 logger = logging.getLogger(__name__)
 
 
-class StreamMonitoredSubprocessCall(object):
+class StreamMonitoredSubprocessCall(Call):
     """
     Subprocess invocation-based call of a SUT that takes test input on its
     command line. The main difference from
@@ -61,7 +63,7 @@ class StreamMonitoredSubprocessCall(object):
             [sut.foo]
             call=fuzzinator.call.StreamMonitoredSubprocessCall
 
-            [sut.foo.call.init]
+            [sut.foo.call]
             # assuming that {test} is something that can be interpreted by foo as
             # command line argument
             command=./bin/foo {test}
@@ -75,7 +77,7 @@ class StreamMonitoredSubprocessCall(object):
        Not available on platforms without fcntl support (e.g., Windows).
     """
 
-    def __init__(self, command, cwd=None, env=None, end_patterns=None, timeout=None, encoding=None, **kwargs):
+    def __init__(self, *, command, cwd=None, env=None, end_patterns=None, timeout=None, encoding=None, **kwargs):
         self.command = command
         self.cwd = as_path(cwd) if cwd else os.getcwd()
         self.end_patterns = [RegexAutomaton.split_pattern(p) for p in as_list(end_patterns)] if end_patterns else []
@@ -83,20 +85,14 @@ class StreamMonitoredSubprocessCall(object):
         self.timeout = int(timeout) if timeout else None
         self.encoding = encoding
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *exc):
-        return False
-
-    def __call__(self, test, **kwargs):
+    def __call__(self, *, test, **kwargs):
         if self.timeout:
             start_time = time.time()
 
         proc = subprocess.Popen(as_pargs(self.command.format(test=test)),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
-                                cwd=self.cwd or os.getcwd(),
+                                cwd=self.cwd,
                                 env=self.env)
 
         streams = {'stdout': '', 'stderr': ''}
@@ -138,9 +134,13 @@ class StreamMonitoredSubprocessCall(object):
 
         Controller.kill_process_tree(proc.pid)
         logger.debug('%s\n%s', streams['stdout'], streams['stderr'])
+
+        proc_details = {
+            'exit_code': proc.returncode,
+            'stderr': streams['stderr'],
+            'stdout': streams['stdout'],
+        }
         if issue:
-            issue.update(dict(exit_code=proc.returncode,
-                              stderr=streams['stderr'],
-                              stdout=streams['stdout']))
+            issue.update(proc_details)
             return issue
-        return None
+        return NonIssue(proc_details)

@@ -7,7 +7,7 @@
 
 import signal
 
-from ..config import config_get_callable
+from ..config import config_get_object
 from .call_job import CallJob
 
 
@@ -27,7 +27,7 @@ class FuzzJob(CallJob):
         self.refresh = float(config.get(fuzz_section, 'refresh', fallback=self.batch))
 
     def run(self):
-        fuzzer, fuzzer_kwargs = config_get_callable(self.config, 'fuzz.' + self.fuzzer_name, 'fuzzer')
+        fuzzer = config_get_object(self.config, 'fuzz.' + self.fuzzer_name, 'fuzzer')
 
         # Register signal handler to catch keyboard interrupts.
         def terminate(signum, frame):
@@ -44,15 +44,15 @@ class FuzzJob(CallJob):
         self.listener.on_stats_updated()
         with fuzzer:
             while index < self.batch:
-                sut_call, sut_call_kwargs = config_get_callable(self.config, 'sut.' + self.sut_name, 'call')
+                sut_call = config_get_object(self.config, 'sut.' + self.sut_name, 'call')
                 with sut_call:
                     while index < self.batch:
-                        test = fuzzer(index=index, **fuzzer_kwargs)
+                        test = fuzzer(index=index)
                         if test is None:
                             self.batch = index
                             break
 
-                        issue = sut_call(test=test, **sut_call_kwargs)
+                        issue = sut_call(test=test)
 
                         # Check if fuzzer maintains its own index.
                         if hasattr(fuzzer, 'index') and fuzzer.index > index:

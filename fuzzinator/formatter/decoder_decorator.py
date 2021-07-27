@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,10 +7,10 @@
 
 from copy import deepcopy
 
-from ..call import CallableDecorator
+from .formatter_decorator import FormatterDecorator
 
 
-class DecoderDecorator(CallableDecorator):
+class DecoderDecorator(FormatterDecorator):
     """
     Decorator for formatters to stringify the issue dictionary values.
 
@@ -32,32 +32,32 @@ class DecoderDecorator(CallableDecorator):
             formatter=fuzzinator.formatter.StringFormatter
             formatter.decorate(0)=fuzzinator.formatter.DecoderDecorator
 
-            [sut.foo.formatter.init]
+            [sut.foo.formatter]
             long_file=/path/to/templates/foo.md
 
             [sut.foo.formatter.decorate(0)]
             encoding=utf-8
     """
 
-    def decorator(self, encoding='utf-8', **kwargs):
-        def wrapper(fn):
-            def decoder(*args, **kwargs):
-                def decode(value):
-                    if isinstance(value, dict):
-                        for k, v in value.items():
-                            value[k] = decode(v)
+    def __init__(self, *, encoding='utf-8', **kwargs):
+        self.encoding = encoding
 
-                    elif isinstance(value, list):
-                        for i, v in enumerate(value):
-                            value[i] = decode(v)
+    def decode(self, value):
+        if isinstance(value, dict):
+            for k, v in value.items():
+                value[k] = self.decode(v)
 
-                    elif isinstance(value, bytes):
-                        value = value.decode(encoding, 'ignore')
+        elif isinstance(value, list):
+            for i, v in enumerate(value):
+                value[i] = self.decode(v)
 
-                    return value
+        elif isinstance(value, bytes):
+            value = value.decode(self.encoding, 'ignore')
 
-                kwargs['issue'] = decode(deepcopy(kwargs['issue']))
-                return fn(*args, **kwargs)
+        return value
 
-            return decoder
-        return wrapper
+    def decorate(self, call):
+        def decorated_call(obj, *, issue, format='long'):
+            return call(obj, issue=self.decode(deepcopy(issue)), format=format)
+
+        return decorated_call

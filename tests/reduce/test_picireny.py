@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -23,15 +23,14 @@ from common_reduce import MockFailIfContainsCall, mock_grammars_dir
     (MockFailIfContainsCall, {'strings': [b'bar\n', b'ar\n']}, {'id': b'bar\n', 'test': b'foo\nbar\nbaz\n'}, b'bar\n', [{'id': b'ar\n', 'test': b'ar\n'}]),
 ])
 def test_picireny(call, call_init_kwargs, issue, format, grammar, start, replacements, exp_test, exp_issues, tmpdir):
-    reduced_test, new_issues = fuzzinator.reduce.Picireny(sut_call=call(**call_init_kwargs),
-                                                          sut_call_kwargs={},
-                                                          listener=fuzzinator.listener.EventListener(None),
-                                                          ident=None,
-                                                          issue=issue,
-                                                          work_dir=str(tmpdir),
-                                                          format=format,
-                                                          grammar=grammar,
-                                                          start=start,
-                                                          replacements=replacements)
+    reducer = fuzzinator.reduce.Picireny(format=format,
+                                         grammar=grammar,
+                                         start=start,
+                                         replacements=replacements)
+    reduced_test, new_issues = reducer(sut_call=call(**call_init_kwargs),
+                                       listener=fuzzinator.listener.EventListener(None),
+                                       ident=None,
+                                       issue=issue,
+                                       work_dir=str(tmpdir))
     assert reduced_test == exp_test
     assert new_issues == exp_issues

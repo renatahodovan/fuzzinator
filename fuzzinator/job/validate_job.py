@@ -7,7 +7,7 @@
 
 from datetime import datetime
 
-from ..config import config_get_callable
+from ..config import config_get_object
 from .call_job import CallJob
 
 
@@ -31,11 +31,9 @@ class ValidateJob(CallJob):
         return new_issues
 
     def validate(self):
-        sut_call, sut_call_kwargs = config_get_callable(self.config, 'sut.' + self.sut_name, ['validate_call', 'reduce_call', 'call'])
-        sut_call_kwargs.update(self.issue)
-
+        sut_call = config_get_object(self.config, 'sut.' + self.sut_name, ['validate_call', 'reduce_call', 'call'])
         with sut_call:
-            issue = sut_call(**sut_call_kwargs)
+            issue = sut_call(**self.issue)
 
         new_issues = []
 

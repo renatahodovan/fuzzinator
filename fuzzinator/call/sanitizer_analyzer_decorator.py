@@ -7,10 +7,10 @@
 
 from collections import OrderedDict
 
-from . import CallableDecorator
+from .call_decorator import CallDecorator
 
 
-class SanitizerAnalyzerDecorator(CallableDecorator):
+class SanitizerAnalyzerDecorator(CallDecorator):
     """
     Decorator for SUT calls to beautify the sanitizer-specific error messages and
     extend issues with the ``'security'`` property which describes the severity
@@ -23,7 +23,7 @@ class SanitizerAnalyzerDecorator(CallableDecorator):
 
             [sut.foo]
             #call=...
-            call.decorate(0)=fuzzinator.call.SanitizerAutomataFilter
+            call.decorate(0)=fuzzinator.call.SanitizerAutomatonFilter
             call.decorate(1)=fuzzinator.call.SanitizerAnalyzerDecorator
     """
     NONE = 'None'
@@ -105,46 +105,48 @@ class SanitizerAnalyzerDecorator(CallableDecorator):
         ],
     }
 
-    def decorator(self, **kwargs):
+    def __init__(self, **kwargs):
+        pass
 
-        def is_null_dereference(address):
-            try:
-                return int(address, 16) < 0x1000
-            except ValueError:
-                return True
+    @staticmethod
+    def is_null_dereference(address):
+        try:
+            return int(address, 16) < 0x1000
+        except ValueError:
+            return True
 
-        def wrapper(fn):
-            def filter(*args, **kwargs):
-                issue = fn(*args, **kwargs)
-                if not issue:
-                    return issue
-
-                if not issue.get('error_type'):
-                    return issue
-
-                sanitizer = 'UndefinedBehaviorSanitizer' if issue.get('ubsan') else issue.get('sanitizer')
-
-                for pattern, name in self.san_error_types.get(sanitizer, {}).items():
-                    if pattern in issue['error_type']:
-                        issue['error_type'] = name
-                        break
-
-                if issue['error_type'] in ['SEGV', 'access-violation']:
-                    if is_null_dereference(issue['address']):
-                        issue['error_type'] = 'null-dereference'
-                    else:
-                        issue['error_type'] = 'unknown-crash'
-
-                for severity, error_types in self.severity.items():
-                    if issue['error_type'] in error_types:
-                        issue['security'] = severity
-                        break
-                else:
-                    issue['security'] = self.NONE
-
-                if 'WRITE' in issue.get('mem_access', ''):
-                    issue['security'] = self.HIGH
-
+    def decorate(self, call):
+        def decorated_call(obj, *, test, **kwargs):
+            issue = call(obj, test=test, **kwargs)
+            if not issue:
                 return issue
-            return filter
-        return wrapper
+
+            if not issue.get('error_type'):
+                return issue
+
+            sanitizer = 'UndefinedBehaviorSanitizer' if issue.get('ubsan') else issue.get('sanitizer')
+
+            for pattern, name in self.san_error_types.get(sanitizer, {}).items():
+                if pattern in issue['error_type']:
+                    issue['error_type'] = name
+                    break
+
+            if issue['error_type'] in ['SEGV', 'access-violation']:
+                if self.is_null_dereference(issue['address']):
+                    issue['error_type'] = 'null-dereference'
+                else:
+                    issue['error_type'] = 'unknown-crash'
+
+            for severity, error_types in self.severity.items():
+                if issue['error_type'] in error_types:
+                    issue['security'] = severity
+                    break
+            else:
+                issue['security'] = self.NONE
+
+            if 'WRITE' in issue.get('mem_access', ''):
+                issue['security'] = self.HIGH
+
+            return issue
+
+        return decorated_call

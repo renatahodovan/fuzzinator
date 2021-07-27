@@ -23,4 +23,6 @@ from common_call import blinesep, resources_dir
     ('%s %s --echo-stdin --exit-code 0' % (sys.executable, os.path.join(resources_dir, 'mock_tool.py')), None, None, 'True', b'foo', {'stdout': 'foo', 'stderr': '', 'exit_code': 0}),
     ])
 def test_stdin_subprocess_call(command, cwd, env, no_exit_code, test, exp):
-    assert fuzzinator.call.StdinSubprocessCall(command, cwd=cwd, env=env, no_exit_code=no_exit_code, test=test) == exp
+    call = fuzzinator.call.StdinSubprocessCall(command=command, cwd=cwd, env=env, no_exit_code=no_exit_code)
+    with call:
+        assert call(test=test) == exp

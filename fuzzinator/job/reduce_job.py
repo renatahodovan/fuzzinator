@@ -7,7 +7,7 @@
 
 import os
 
-from ..config import as_path, config_get_callable
+from ..config import as_path, config_get_object
 from .call_job import CallJob
 from .validate_job import ValidateJob
 
@@ -40,18 +40,14 @@ class ReduceJob(CallJob):
             return issues
 
         sut_section = 'sut.' + self.sut_name
-        sut_call, sut_call_kwargs = config_get_callable(self.config, sut_section, ['reduce_call', 'call'])
-        sut_call_kwargs.update(self.issue)
-        reduce, reduce_kwargs = config_get_callable(self.config, sut_section, 'reduce')
+        sut_call = config_get_object(self.config, sut_section, ['reduce_call', 'call'])
+        reduce = config_get_object(self.config, sut_section, 'reduce')
 
-        with reduce:
-            reduced_src, new_issues = reduce(sut_call=sut_call,
-                                             sut_call_kwargs=sut_call_kwargs,
-                                             listener=self.listener,
-                                             ident=self.id,
-                                             issue=self.issue,
-                                             work_dir=os.path.join(self.work_dir, str(self.id)),
-                                             **reduce_kwargs)
+        reduced_src, new_issues = reduce(sut_call=sut_call,
+                                         issue=self.issue,
+                                         listener=self.listener,
+                                         ident=self.id,
+                                         work_dir=os.path.join(self.work_dir, str(self.id)))
 
         if reduced_src is None:
             self.listener.warning(ident=self.id, msg='Reduce of {ident} failed.'.format(ident=self.issue['id']))

@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -8,10 +8,10 @@
 import os
 
 from ..config import as_path
-from . import CallableDecorator
+from .call_decorator import CallDecorator
 
 
-class FileWriterDecorator(CallableDecorator):
+class FileWriterDecorator(CallDecorator):
     """
     Decorator for SUTs that take input from a file: writes the test input to a
     temporary file and replaces the test input with the name of that file.
@@ -42,27 +42,26 @@ class FileWriterDecorator(CallableDecorator):
             filename=${fuzzinator:work_dir}/test-{uid}.txt
     """
 
-    def decorator(self, filename, **kwargs):
-        def wrapper(fn):
-            def writer(*args, **kwargs):
-                file_content = kwargs['test']
-                file_path = as_path(filename.format(uid='{pid}-{id}'.format(pid=os.getpid(), id=id(self))))
-                if 'filename' in kwargs:
-                    # Ensure that the test case will be saved to the directory defined by the
-                    # config file and its name will be what is expected by the kwargs.
-                    file_path = os.path.join(os.path.dirname(file_path), kwargs['filename'])
+    def __init__(self, *, filename, **kwargs):
+        self.filename = filename
 
-                os.makedirs(os.path.dirname(file_path), exist_ok=True)
-                with open(file_path, 'w' if not isinstance(file_content, bytes) else 'wb') as f:
-                    f.write(file_content)
+    def decorate(self, call):
+        def decorated_call(obj, *, test, **kwargs):
+            file_path = as_path(self.filename.format(uid='{pid}-{id}'.format(pid=os.getpid(), id=id(self))))
+            if 'filename' in kwargs:
+                # Ensure that the test case will be saved to the directory defined by the
+                # config file and its name will be what is expected by the kwargs.
+                file_path = os.path.join(os.path.dirname(file_path), kwargs['filename'])
 
-                kwargs['test'] = file_path
-                issue = fn(*args, **kwargs)
-                if issue:
-                    issue['filename'] = os.path.basename(file_path)
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            with open(file_path, 'w' if not isinstance(test, bytes) else 'wb') as f:
+                f.write(test)
 
-                os.remove(file_path)
-                return issue
+            issue = call(obj, test=file_path, **kwargs)
+            if issue:
+                issue['filename'] = os.path.basename(file_path)
 
-            return writer
-        return wrapper
+            os.remove(file_path)
+            return issue
+
+        return decorated_call

@@ -1,12 +1,14 @@
-# Copyright (c) 2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2020-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+from .exporter import Exporter
 
-class TestExporter(object):
+
+class TestExporter(Exporter):
     """
     A simple exporter that extracts the test input (or the reduced test input,
     if it exists) from the issue.
@@ -30,14 +32,14 @@ class TestExporter(object):
             # see fuzzinator.call.*
             exporter=fuzzinator.exporter.TestExporter
 
-            [sut.foo.exporter.init]
+            [sut.foo.exporter]
             extension=.txt
             type=text/plain
     """
 
-    def __init__(self, extension=None, type=None):
+    def __init__(self, *, extension=None, type=None, **kwargs):
         self.extension = extension
         self.type = type
 
-    def __call__(self, issue):
+    def __call__(self, *, issue):
         return issue.get('reduced') or issue['test']

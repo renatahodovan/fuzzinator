@@ -11,7 +11,7 @@ import re
 class RegexAutomaton(object):
     """
     Auxiliary class to recognize patterns in textual data and process them with
-    user-defined automata-like instructions.
+    user-defined automaton-like instructions.
 
     Two kinds of instructions can be assigned to every pattern which are
     encoded as a prefix to the regex pattern in the form of:

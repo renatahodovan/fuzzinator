@@ -5,29 +5,26 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import inspect
 import pytest
 
 import fuzzinator
 
-from common_call import mock_always_fail_call, mock_never_fail_call, MockAlwaysFailCall, MockNeverFailCall
+from common_call import MockAlwaysFailCall, MockNeverFailCall
 
 
 @pytest.mark.parametrize('call_init_kwargs, call_kwargs', [
-    ({'init_foo': 'init_bar'}, {'foo': 'bar'})
+    ({'init_foo': 'init_bar'}, {'test': 'bar'})
 ])
-@pytest.mark.parametrize('call, exp', [
-    (mock_always_fail_call, {'foo': 'bar'}),
-    (mock_never_fail_call, None),
-    (MockAlwaysFailCall, {'init_foo': 'init_bar', 'foo': 'bar'}),
+@pytest.mark.parametrize('call_class, exp', [
+    (MockAlwaysFailCall, {'init_foo': 'init_bar', 'test': 'bar'}),
     (MockNeverFailCall,  None),
 ])
-def test_platform_info_decorator(call, call_init_kwargs, call_kwargs, exp):
-    call = fuzzinator.call.PlatformInfoDecorator()(call)
-    if inspect.isclass(call):
-        call = call(**call_init_kwargs)
+def test_platform_info_decorator(call_class, call_init_kwargs, call_kwargs, exp):
+    call_class = fuzzinator.call.PlatformInfoDecorator()(call_class)
+    call = call_class(**call_init_kwargs)
 
-    out = call(**call_kwargs)
+    with call:
+        out = call(**call_kwargs)
 
     if out is not None:
         assert out['platform'] is not None

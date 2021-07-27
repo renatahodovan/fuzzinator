@@ -15,9 +15,7 @@ from multiprocessing import Lock, Process, Queue
 
 import psutil
 
-from inators.imp import import_object
-
-from .config import as_bool, as_int_or_inf, as_path, config_get_callable, config_get_fuzzers, config_get_kwargs
+from .config import as_bool, as_int_or_inf, as_path, config_get_fuzzers, config_get_kwargs, config_get_object
 from .job import FuzzJob, ReduceJob, UpdateJob, ValidateJob
 from .listener import ListenerManager
 from .mongo_driver import MongoDriver
@@ -56,61 +54,62 @@ class Controller(object):
 
       - Sections ``sut.NAME``: Definitions of a SUT named *NAME*
 
-        - Option ``call``: Fully qualified name of a python callable that must
-          accept a ``test`` keyword argument representing the input to the SUT
-          and must return a dictionary object if the input triggered an issue
-          in the SUT, or a value considered false otherwise (which can be a
-          simple ``None``, but can also be a ``NonIssue`` in complex cases).
-          The returned issue dictionary (if any) *should* contain an ``'id'``
-          field that equals for issues that are not considered unique.
-          (Mandatory)
+        - Option ``call``: Fully qualified name of a callable context manager
+          class. When an instance of the class is called, it must accept a
+          ``test`` keyword argument representing the input to the SUT and must
+          return a dictionary object if the input triggered an issue in the SUT,
+          or a value considered false otherwise (which can be a simple ``None``,
+          but can also be a ``NonIssue`` in complex cases). The returned issue
+          dictionary (if any) *should* contain an ``'id'`` field that equals for
+          issues that are not considered unique. (Mandatory)
 
-          See package :mod:`fuzzinator.call` for potential callables.
+          See package :mod:`fuzzinator.call` for potential SUT calls.
 
         - Option ``cost``: (Optional, default: 1)
 
-        - Option ``reduce``: Fully qualified name of a python callable that must
-          accept ``issue``, ``sut_call``, ``sut_call_kwargs``, ``listener``,
-          ``ident``, ``work_dir`` keyword arguments representing an issue to be
-          reduced (and various other potentially needed objects), and must
-          return a tuple consisting of a reduced test case for the issue (or
-          ``None`` if the issue's current test case could not be reduced) and a
-          (potentially empty) list of new issues that were discovered during
-          test case reduction (if any). (Optional, no reduction for this SUT if
-          option is missing.)
+        - Option ``reduce``: Fully qualified name of a callable class. When an
+          instance of the class is called, it must accept ``issue``,
+          ``sut_call``, ``listener``, ``ident``, ``work_dir`` keyword arguments
+          representing an issue to be reduced, and must return a tuple
+          consisting of a reduced test case for the issue (or ``None`` if the
+          issue's current test case could not be reduced) and a (potentially
+          empty) list of new issues that were discovered during test case
+          reduction (if any). (Optional, no reduction for this SUT if option is
+          missing.)
 
-          See package :mod:`fuzzinator.reduce` for potential callables.
+          See package :mod:`fuzzinator.reduce` for potential reducers.
 
-        - Option ``reduce_call``: Fully qualified name of a python callable that
-          acts as the SUT's ``call`` option during test case reduction.
-          (Optional, default: the value of option ``call``)
+        - Option ``reduce_call``: Fully qualified name of a callable context
+          manager class that acts as the SUT's ``call`` option during test case
+          reduction. (Optional, default: the value of option ``call``)
 
-          See package :mod:`fuzzinator.call` for potential callables.
+          See package :mod:`fuzzinator.call` for potential SUT calls.
 
         - Option ``reduce_cost``: (Optional, default: the value of option
           ``cost``)
 
-        - Option ``validate_call``: Fully qualified name of a python callable
-          that acts as the SUT's ``call`` option during test case validation.
-          (Optional, default: the value of option ``reduce_call`` if defined,
-          otherwise the value of option ``call``)
+        - Option ``validate_call``: Fully qualified name of a callable context
+          manager class that acts as the SUT's ``call`` option during test case
+          validation. (Optional, default: the value of option ``reduce_call`` if
+          defined, otherwise the value of option ``call``)
 
-          See package :mod:`fuzzinator.call` for potential callables.
+          See package :mod:`fuzzinator.call` for potential SUT calls.
 
         - Option ``validate_cost``: (Optional, default: the value of option
           ``cost``)
 
-        - Option ``update_condition``: Fully qualified name of a python callable
-          that must return ``True`` if and only if the SUT should be updated.
-          (Optional, SUT is never updated automatically if option is missing.)
+        - Option ``update_condition``: Fully qualified name of a callable class.
+          When an instance of the class is called, it must return ``True`` if
+          and only if the SUT should be updated. (Optional, SUT is never updated
+          automatically if option is missing.)
 
-          See package :mod:`fuzzinator.update` for potential callables.
+          See package :mod:`fuzzinator.update` for potential update conditions.
 
-        - Option ``update``: Fully qualified name of a python callable that
-          should perform the update of the SUT. (Optional, SUT is never updated
-          if option is missing.)
+        - Option ``update``: Fully qualified name of a callable class. When an
+          instance of the class is called, it should perform the update of the
+          SUT. (Optional, SUT is never updated if option is missing.)
 
-          See package :mod:`fuzzinator.update` for potential callables.
+          See package :mod:`fuzzinator.update` for potential updaters.
 
         - Option ``update_cost``: (Optional, default: the value of option
           ``fuzzinator:cost_budget``)
@@ -119,62 +118,63 @@ class Controller(object):
           of the valid issues of the SUT after its update. (Optional, default:
           the value of option ``fuzzinator:validate_after_update``)
 
-        - Option ``formatter``: Fully qualified name of a python callable that
-          formats the issue dictionary of the SUT and returns a custom string
-          representation. It must accept ``issue`` and ``format`` keyword
-          arguments representing an issue to be formatted and a formatting
-          instruction. If ``format`` is ``'long'`` or not specified, the issue
-          should be formatted in full, while if ``'short'`` is given, a
-          summary description (preferably a single line of text) should be
-          returned.
-          (Optional, default: :func:`fuzzinator.formatter.JsonFormatter`.)
+        - Option ``formatter``: Fully qualified name of a callable class. When
+          an instance of the class is called, it must format the issue
+          dictionary of the SUT by returning a custom string representation. It
+          must accept ``issue`` and ``format`` keyword arguments representing an
+          issue to be formatted and a formatting instruction. If ``format`` is
+          ``'long'`` or not specified, the issue should be formatted in full,
+          while if ``'short'`` is given, a summary description (preferably a
+          single line of text) should be returned. (Optional, default:
+          :func:`fuzzinator.formatter.JsonFormatter`.)
 
           See package :mod:`fuzzinator.formatter` for further potential
-          callables.
+          formatters.
 
-        - Option ``tui_formatter``: Fully qualified name of a python
-          callable that formats the issue dictionary of the SUT to display
-          it in the TUI issue viewer interface.
-          (Optional, default: the value of option ``formatter``)
-
-          See package :mod:`fuzzinator.formatter` for further potential
-          callables.
-
-        - Option ``email_formatter``: Fully qualified name of a python
-          callable that formats the issue dictionary of the SUT to insert
-          it into an e-mail notification.
-          (Optional, default: the value of option ``formatter``)
+        - Option ``tui_formatter``: Fully qualified name of a callable class
+          that formats the issue dictionary of the SUT to display it in the TUI
+          issue viewer interface. (Optional, default: the value of option
+          ``formatter``)
 
           See package :mod:`fuzzinator.formatter` for further potential
-          callables.
+          formatters.
 
-        - Option ``exporter``: Fully qualified name of a python callable that
-          exports the issue dictionary in a custom SUT-specific format. It must
-          accept an ``issue`` keyword argument representing the issue to be
-          exported and its result must be writable to a file, i.e., it must be
-          either a string or a byte array. The export format does not
-          necessarily have to contain all elements of the issue dictionary
-          (e.g., it is often useful to only extract the test input that
-          triggered the issue). (Optional, no custom export for this SUT if
-          option is missing.)
+        - Option ``email_formatter``: Fully qualified name of a callable class
+          that formats the issue dictionary of the SUT to insert it into an
+          e-mail notification. (Optional, default: the value of option
+          ``formatter``)
 
-          See package :mod:`fuzzinator.exporter` for potential callables.
+          See package :mod:`fuzzinator.formatter` for further potential
+          formatters.
+
+        - Option ``exporter``: Fully qualified name of a callable class. When an
+          instance of the class is called, it must export the issue dictionary
+          in a custom SUT-specific format. It must accept an ``issue`` keyword
+          argument representing the issue to be exported and its result must be
+          writable to a file, i.e., it must be either a string or a byte array.
+          The export format does not necessarily have to contain all elements of
+          the issue dictionary (e.g., it is often useful to only extract the
+          test input that triggered the issue). (Optional, no custom export for
+          this SUT if option is missing.)
+
+          See package :mod:`fuzzinator.exporter` for potential exporters.
 
       - Sections ``fuzz.NAME``: Definitions of a fuzz job named *NAME*
 
         - Option ``sut``: Name of the SUT that describes the subject of
           this fuzz job. (Mandatory)
 
-        - Option ``fuzzer``: Fully qualified name of a python callable that must
-          accept an ``index`` keyword argument representing a running counter
-          in the fuzz job and must return a test input (or ``None``, which
-          signals that the fuzzer is "exhausted" and cannot generate more test
-          cases in this fuzz job). The semantics of the generated test input is
-          not restricted by the framework, it is up to the configuration to
-          ensure that the SUT of the fuzz job can deal with the tests generated
-          by the fuzzer of the fuzz job. (Mandatory)
+        - Option ``fuzzer``: Fully qualified name of a callable context manager
+          class. When an instance of the class is called, it must accept an
+          ``index`` keyword argument representing a running counter in the fuzz
+          job and must return a test input (or ``None``, which signals that the
+          fuzzer is "exhausted" and cannot generate more test cases in this fuzz
+          job). The semantics of the generated test input is not restricted by
+          the framework, it is up to the configuration to ensure that the SUT of
+          the fuzz job can deal with the tests generated by the fuzzer of the
+          fuzz job. (Mandatory)
 
-          See package :mod:`fuzzinator.fuzzer` for potential callables.
+          See package :mod:`fuzzinator.fuzzer` for potential fuzzers.
 
         - Option ``batch``: Number of times the fuzzer is requested to generate
           a new test for the SUT. (Optional, default: 1)
@@ -188,25 +188,21 @@ class Controller(object):
       - Section ``listeners``: Definitions of custom event listeners.
         This section is optional.
 
-        - Options ``OPT``: Fully qualified name of a python class that
-          executes custom actions for selected events.
+        - Options ``OPT``: Fully qualified name of a class that executes custom
+          actions for selected events.
 
-        See package :mod:`fuzzinator.listeners` for potential listeners.
+        See package :mod:`fuzzinator.listener` for potential listeners.
 
-      - Callable options can be implemented as functions or classes with
-        ``__call__`` method (the latter are instantiated first to get a callable
-        object). Both constructor calls (if any) and the "real" calls can be
-        given keyword arguments. These arguments have to be specified in
-        sections ``(sut|fuzz).NAME.OPT[.init]`` with appropriate names (where
-        the ``.init`` sections stand for the constructor arguments).
+      - For classes referenced in options with their fully qualified name,
+        constructor keyword arguments can be given. These arguments have to be
+        specified in sections ``(sut|fuzz).NAME.OPT`` with appropriate names.
 
-      - All callables can be decorated according to python semantics. The
-        decorators must be callable classes themselves and have to be specified
-        in options ``OPT.decorate(N)`` with fully qualified name. Multiple
-        decorators can be applied to a callable ``OPT``, their order is
-        specified by an integer index in parentheses. Keyword arguments to be
-        passed to the decorators have to be listed in sections
-        ``(sut|fuzz).NAME.OPT.decorate(N)``.
+      - All classes can be decorated according to python semantics. The
+        decorators must be callable classes and have to be specified in options
+        ``OPT.decorate(N)`` with fully qualified name. Multiple decorators can
+        be applied to a class ``OPT``, their order is specified by an integer
+        index in parentheses. Keyword arguments to be passed to the decorators
+        have to be listed in sections ``(sut|fuzz).NAME.OPT.decorate(N)``.
 
         See packages :mod:`fuzzinator.call` and :mod:`fuzzinator.fuzzer` for
         potential decorators.
@@ -214,11 +210,11 @@ class Controller(object):
 
     def __init__(self, config):
         """
-        :param configparser.ConfigParser config: the configuration options of the
-            fuzz session.
+        :param ~configparser.ConfigParser config: the configuration options of
+            the fuzz session.
 
-        :ivar fuzzinator.ListenerManager listener: a listener manager object that is
-            called on various events during the fuzz session.
+        :ivar ListenerManager listener: a listener manager object that is called
+            on various events during the fuzz session.
         """
         self.config = config
 
@@ -239,8 +235,7 @@ class Controller(object):
 
         self.listener = ListenerManager()
         for name in config_get_kwargs(self.config, 'listeners'):
-            entity = import_object(self.config.get('listeners', name))
-            self.listener += entity(config=config, **config_get_kwargs(config, 'listeners.' + name + '.init'))
+            self.listener += config_get_object(self.config, 'listeners', name, init_kwargs=dict(config=config))
 
         self._shared_queue = Queue()
         self._shared_lock = Lock()
@@ -380,11 +375,9 @@ class Controller(object):
                     # with the latest version of the SUT and queue an update if
                     # needed.
                     sut_name = self.config.get(fuzz_section, 'sut')
-                    update_condition, update_condition_kwargs = config_get_callable(self.config, 'sut.' + sut_name, 'update_condition')
-                    if update_condition:
-                        with update_condition:
-                            if update_condition(**update_condition_kwargs):
-                                self.add_update_job(sut_name)
+                    update_condition = config_get_object(self.config, 'sut.' + sut_name, 'update_condition')
+                    if update_condition and update_condition():
+                        self.add_update_job(sut_name)
 
                     self.add_fuzz_job(fuzzer_name)
 

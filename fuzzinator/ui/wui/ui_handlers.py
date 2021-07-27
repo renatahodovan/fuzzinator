@@ -16,7 +16,7 @@ from markdown import markdown
 from tornado.web import RequestHandler
 from tornado.websocket import WebSocketHandler
 
-from ...config import config_get_callable
+from ...config import config_get_object
 from ...formatter import JsonFormatter
 from ...pkgdata import __version__
 from ...tracker import TrackerError
@@ -92,8 +92,8 @@ class IssueUIHandler(BaseUIHandler):
             self.send_error(404)
             return
 
-        formatter = config_get_callable(self._config, 'sut.' + issue['sut'], ['wui_formatter', 'formatter'])[0] or JsonFormatter
-        exporter, _ = config_get_callable(self._config, 'sut.' + issue['sut'], 'exporter')
+        formatter = config_get_object(self._config, 'sut.' + issue['sut'], ['wui_formatter', 'formatter']) or JsonFormatter()
+        exporter = config_get_object(self._config, 'sut.' + issue['sut'], 'exporter')
 
         self.render('issue.html',
                     issue=issue,
@@ -111,12 +111,12 @@ class IssueReportUIHandler(BaseUIHandler):
             self.send_error(404)
             return
 
-        tracker = config_get_callable(self._config, 'sut.' + issue['sut'], 'tracker')[0]
+        tracker = config_get_object(self._config, 'sut.' + issue['sut'], 'tracker')
         if not tracker:
             self.send_error(404)
             return
 
-        formatter = config_get_callable(self._config, 'sut.' + issue['sut'], ['formatter'])[0] or JsonFormatter
+        formatter = config_get_object(self._config, 'sut.' + issue['sut'], ['formatter']) or JsonFormatter()
 
         duplicates = []
         try:

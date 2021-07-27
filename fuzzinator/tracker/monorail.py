@@ -10,6 +10,7 @@ import httplib2
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
+from ..config import as_list
 from .base import BaseTracker, TrackerError
 
 
@@ -19,16 +20,20 @@ class MonorailTracker(BaseTracker):
     discovery_url = 'https://monorail-prod.appspot.com/_ah/api/discovery/v1/apis/{api}/{apiVersion}/rest'
     weburl_template = 'https://bugs.chromium.org/p/{project_id}/issues/detail?id={issue_id}'
 
-    def __init__(self, project_id):
+    def __init__(self, project_id, issue_labels, issue_status):
         self.project_id = project_id
+        self.labels = as_list(issue_labels)
+        self.status = issue_status
+
         credentials = GoogleCredentials.get_application_default()
         credentials = credentials.create_scoped(['https://www.googleapis.com/auth/userinfo.email'])
+        credentials.authorize(httplib2.Http())
 
-        http = credentials.authorize(httplib2.Http())
         self.monorail = discovery.build('monorail',
+                                        'v1',
                                         discoveryServiceUrl=(self.discovery_url),
-                                        http=http,
-                                        version='v1')
+                                        credentials=credentials,
+                                        cache_discovery=False)
 
     def find_issue(self, query):
         try:
@@ -43,6 +48,9 @@ class MonorailTracker(BaseTracker):
         try:
             new_issue = self.monorail.issues().insert(projectId=self.project_id,
                                                       body=dict(summary=title,
+                                                                labels=self.labels,
+                                                                status=self.status,
+                                                                projectId=self.project_id,
                                                                 description=body)).execute()
             return {'id': new_issue['id'],
                     'title': new_issue['summary'],

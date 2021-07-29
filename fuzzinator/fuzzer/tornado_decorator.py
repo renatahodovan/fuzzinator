@@ -7,11 +7,11 @@
 
 import asyncio
 import logging
-import socket
 import threading
 
 from inspect import isclass, isroutine
 from tornado.ioloop import IOLoop
+from tornado.testing import bind_unused_port
 from tornado.web import Application, RequestHandler
 
 logger = logging.getLogger(__name__)
@@ -105,9 +105,7 @@ class TornadoDecorator(object):
                     super().__enter__(*args, **kwargs)
 
                 # Get random available port.
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:  # pylint: disable=no-member
-                    s.bind(('', 0))
-                    decorator.port = s.getsockname()[1]
+                _, decorator.port = bind_unused_port()
 
                 handlers = [(r'/', self.MainHandler, dict(wrapper=self, fuzzer=super().__call__ if isclass(callable) else callable))]
                 if decorator.template_path:

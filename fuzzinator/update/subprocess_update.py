@@ -64,7 +64,7 @@ class SubprocessUpdate(Update):
                                     check=True)
             logger.info('Update succeeded.\n%s', decode(result.stdout, self.encoding))
         except subprocess.TimeoutExpired as e:
-            logger.debug('SUT update execution timeout (%ds) expired.', e.timeout)
+            logger.warning('SUT update execution timeout (%ds) expired.', e.timeout)
         except subprocess.CalledProcessError as e:
             logger.warning('SUT update command returned with nonzero exit code (%d).\n%s\n%s',
                            e.returncode,

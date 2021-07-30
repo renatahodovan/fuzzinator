@@ -86,7 +86,7 @@ class SubprocessRunner(Fuzzer):
                            timeout=self.timeout,
                            check=True)
         except subprocess.TimeoutExpired as e:
-            logger.debug('Fuzzer execution timeout (%ds) expired.', e.timeout)
+            logger.warning('Fuzzer execution timeout (%ds) expired.', e.timeout)
         except subprocess.CalledProcessError as e:
             logger.warning('Fuzzer command returned with nonzero exit code (%d).\n%s\n%s', e.returncode,
                            decode(e.stdout, self.encoding),

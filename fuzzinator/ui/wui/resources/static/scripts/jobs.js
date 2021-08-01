@@ -27,6 +27,9 @@ $(document).ready(function () {
     if ('issue_id' in data) {
       $(job).find('.job-issue').text(data.issue_id);
     }
+    if ('issue_oid' in data) {
+      $(job).find('.job-issue').attr('href', `/issues/${data.issue_oid}`);
+    }
     var maxValue = data.batch || data.size || 0;
     var progress = $(job).find('.progress-bar');
     progress.attr('data-maxvalue', maxValue);

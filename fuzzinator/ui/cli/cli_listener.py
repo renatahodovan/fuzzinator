@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -23,10 +23,10 @@ class CliListener(EventListener):
     def on_update_job_added(self, ident, cost, sut):
         logger.debug('#%s: New update job for %s.', ident, sut)
 
-    def on_reduce_job_added(self, ident, cost, sut, issue_id, size):
+    def on_reduce_job_added(self, ident, cost, sut, issue_oid, issue_id, size):
         logger.debug('#%s: New reduce job for %r in %s (%s bytes).', ident, issue_id, sut, size)
 
-    def on_validate_job_added(self, ident, cost, sut, issue_id):
+    def on_validate_job_added(self, ident, cost, sut, issue_oid, issue_id):
         logger.debug('#%s: New validate job for %r in %s.', ident, issue_id, sut)
 
     def on_job_activated(self, ident):

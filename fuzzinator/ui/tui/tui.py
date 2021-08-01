@@ -66,13 +66,13 @@ class Tui(object):
     def on_fuzz_job_added(self, ident, cost, sut, fuzzer, batch):
         self.view.job_table.on_fuzz_job_added(ident, fuzzer, sut, cost, batch)
 
-    def on_reduce_job_added(self, ident, cost, sut, issue_id, size):
+    def on_reduce_job_added(self, ident, cost, sut, issue_oid, issue_id, size):
         self.view.job_table.on_reduce_job_added(ident, sut, cost, issue_id, size)
 
     def on_update_job_added(self, ident, cost, sut):
         self.view.job_table.on_update_job_added(ident, sut)
 
-    def on_validate_job_added(self, ident, cost, sut, issue_id):
+    def on_validate_job_added(self, ident, cost, sut, issue_oid, issue_id):
         self.view.job_table.on_validate_job_added(ident, sut, issue_id)
 
     def on_job_removed(self, ident):

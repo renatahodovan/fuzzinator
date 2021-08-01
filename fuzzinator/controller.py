@@ -313,11 +313,13 @@ class Controller(object):
                 lambda: self.listener.on_validate_job_added(ident=next_job.id,
                                                             cost=next_job.cost,
                                                             sut=next_job.sut_name,
+                                                            issue_oid=next_job.issue['_id'],
                                                             issue_id=next_job.issue['id']),
                 ReduceJob:
                 lambda: self.listener.on_reduce_job_added(ident=next_job.id,
                                                           cost=next_job.cost,
                                                           sut=next_job.sut_name,
+                                                          issue_oid=next_job.issue['_id'],
                                                           issue_id=next_job.issue['id'],
                                                           size=len(str(next_job.issue['test']))),
                 UpdateJob:

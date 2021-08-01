@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -47,7 +47,7 @@ class EventListener(object):
         """
         pass
 
-    def on_reduce_job_added(self, ident, cost, sut, issue_id, size):
+    def on_reduce_job_added(self, ident, cost, sut, issue_oid, issue_id, size):
         """
         Invoked when a new (still inactive) reduce job is instantiated.
 
@@ -55,6 +55,7 @@ class EventListener(object):
         :param int cost: cost associated with the new reduce job.
         :param str sut: short name of the SUT used in the new reduce job (name
             of the corresponding config section without the "sut." prefix).
+        :param str issue_oid: ``'_id'`` property of the issue to be reduced.
         :param Any issue_id: ``'id'`` property of the issue to be reduced.
         :param int size: size of the test case associated with the issue to be
             reduced.
@@ -72,7 +73,7 @@ class EventListener(object):
         """
         pass
 
-    def on_validate_job_added(self, ident, cost, sut, issue_id):
+    def on_validate_job_added(self, ident, cost, sut, issue_oid, issue_id):
         """
         Invoked when a new (still inactive) validate job is instantiated.
 
@@ -80,6 +81,7 @@ class EventListener(object):
         :param int cost: cost associated with the new validate job.
         :param str sut: short name of the SUT used in the new validate job (name
             of the corresponding config section without the "sut." prefix).
+        :param str issue_oid: ``'_id'`` property of the issue to be validated.
         :param Any issue_id: ``'id'`` property of the issue to be validated.
         """
         pass

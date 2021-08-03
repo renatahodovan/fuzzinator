@@ -11,7 +11,7 @@ class Reducer(object):
     Abstract base class to represent test case reducers.
     """
 
-    def __call__(self, *, sut_call, issue, listener, job_id):
+    def __call__(self, *, sut_call, issue, on_job_progressed):
         """
         Reduce the test case of ``issue`` while ensuring that the reduced test
         case still triggers the original issue. Return a tuple consisting of a
@@ -24,10 +24,10 @@ class Reducer(object):
         :param Call sut_call: The SUT call that reported the original issue.
         :param dict[str, Any] issue: The original issue, the test case of which
             should be reduced.
-        :param EventListener listener: A listener object that may be notified
-            about the progress of the reduction.
-        :param job_id: The job ID of the reduction, to be used when notifying
-            ``listener``.
+        :param on_job_progressed: A bound
+            :meth:`~fuzzinator.listener.EventListener.on_job_progressed` method
+            with frozen ``job_id`` argument that may be notified about the
+            progress of the reduction.
         :return: The reduced test case (if reduction was successful) and the
             list of new issues detected during reduction (if any).
         :rtype: tuple[Any or None, list[dict[str, Any]]]

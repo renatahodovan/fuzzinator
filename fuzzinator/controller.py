@@ -69,7 +69,7 @@ class Controller(object):
 
         - Option ``reduce``: Fully qualified name of a callable class. When an
           instance of the class is called, it must accept ``issue``,
-          ``sut_call``, ``listener``, ``job_id`` keyword arguments representing
+          ``sut_call``, ``on_job_progressed`` keyword arguments representing
           an issue to be reduced, and must return a tuple consisting of a
           reduced test case for the issue (or ``None`` if the issue's current
           test case could not be reduced) and a (potentially empty) list of new

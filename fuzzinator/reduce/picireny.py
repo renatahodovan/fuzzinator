@@ -120,7 +120,7 @@ class Picireny(Reducer):
 
         self.work_dir = work_dir
 
-    def __call__(self, *, sut_call, issue, listener, job_id):
+    def __call__(self, *, sut_call, issue, on_job_progressed):
         logging.getLogger('picireny').setLevel(logger.level)
 
         if self.antlr is None:
@@ -144,8 +144,7 @@ class Picireny(Reducer):
         tester_config = dict(
             sut_call=sut_call,
             issue=issue,
-            listener=listener,
-            job_id=job_id,
+            on_job_progressed=on_job_progressed,
             encoding=encoding,
             new_issues=new_issues,
         )

@@ -9,6 +9,8 @@ import json
 import os
 import pytest
 
+from functools import partial
+
 import fuzzinator
 
 from common_reduce import MockFailIfContainsCall, mock_grammars_dir
@@ -29,8 +31,7 @@ def test_picireny(call, call_init_kwargs, issue, format, grammar, start, replace
                                          replacements=replacements,
                                          work_dir=str(tmpdir))
     reduced_test, new_issues = reducer(sut_call=call(**call_init_kwargs),
-                                       listener=fuzzinator.listener.EventListener(None),
-                                       job_id=None,
-                                       issue=issue)
+                                       issue=issue,
+                                       on_job_progressed=partial(fuzzinator.listener.EventListener(None).on_job_progressed, job_id=None))
     assert reduced_test == exp_test
     assert new_issues == exp_issues

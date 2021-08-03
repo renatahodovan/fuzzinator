@@ -5,6 +5,8 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+from functools import partial
+
 from ..config import config_get_object
 from .call_job import CallJob
 from .validate_job import ValidateJob
@@ -42,8 +44,7 @@ class ReduceJob(CallJob):
 
         reduced_src, new_issues = reduce(sut_call=sut_call,
                                          issue=self.issue,
-                                         listener=self.listener,
-                                         job_id=self.id)
+                                         on_job_progressed=partial(self.listener.on_job_progressed, job_id=self.id))
 
         if reduced_src is None:
             self.listener.warning(job_id=self.id, msg='Reduce of {issue_id} failed.'.format(issue_id=self.issue['id']))

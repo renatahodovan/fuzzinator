@@ -11,7 +11,7 @@ class Reducer(object):
     Abstract base class to represent test case reducers.
     """
 
-    def __call__(self, *, sut_call, issue, listener, ident):
+    def __call__(self, *, sut_call, issue, listener, job_id):
         """
         Reduce the test case of ``issue`` while ensuring that the reduced test
         case still triggers the original issue. Return a tuple consisting of a
@@ -26,7 +26,7 @@ class Reducer(object):
             should be reduced.
         :param EventListener listener: A listener object that may be notified
             about the progress of the reduction.
-        :param ident: The job ID of the reduction, to be used when notifying
+        :param job_id: The job ID of the reduction, to be used when notifying
             ``listener``.
         :return: The reduced test case (if reduction was successful) and the
             list of new issues detected during reduction (if any).

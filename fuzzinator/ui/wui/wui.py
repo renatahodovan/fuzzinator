@@ -87,7 +87,7 @@ class Wui(object):
     def on_job_added(self, type, **kwargs):
         job = kwargs
         job.update(type=type, status='inactive')
-        self.jobs[job['ident']] = job
+        self.jobs[job['job_id']] = job
         self.send_notification('job_added', job)
 
     def on_fuzz_job_added(self, **kwargs):
@@ -103,19 +103,19 @@ class Wui(object):
         self.on_job_added('validate', **kwargs)
 
     def on_job_removed(self, **kwargs):
-        del self.jobs[kwargs['ident']]
+        del self.jobs[kwargs['job_id']]
         self.send_notification('job_removed', kwargs)
 
     def on_job_activated(self, **kwargs):
-        job = self.jobs[kwargs['ident']]
+        job = self.jobs[kwargs['job_id']]
         job.update(status='active')
-        self.jobs[kwargs['ident']] = job
+        self.jobs[kwargs['job_id']] = job
         self.send_notification('job_activated', kwargs)
 
     def on_job_progressed(self, **kwargs):
-        job = self.jobs[kwargs['ident']]
+        job = self.jobs[kwargs['job_id']]
         job.update(progress=kwargs['progress'])
-        self.jobs[kwargs['ident']] = job
+        self.jobs[kwargs['job_id']] = job
         self.send_notification('job_progressed', kwargs)
 
     def on_issue_added(self, **kwargs):
@@ -134,7 +134,7 @@ class Wui(object):
     def on_stats_updated(self, **kwargs):
         self.send_notification('refresh_stats')
 
-    def warning(self, ident, msg):
+    def warning(self, job_id, msg):
         logger.warning(msg)
 
 

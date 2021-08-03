@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -526,21 +526,21 @@ class Table(WidgetWrap):
             self.walker.insert(position, row)
         self.update_header()
 
-    def update_row_style(self, ident, attr_map, focus_map):
+    def update_row_style(self, row_id, attr_map, focus_map):
         if not self.attr_map:
-            self.row_dict[ident].attr_map = attr_map
+            self.row_dict[row_id].attr_map = attr_map
         else:
-            self.row_dict[ident].attr_map = self.attr_map
-            self.row_dict[ident].attr_map.update(attr_map)
+            self.row_dict[row_id].attr_map = self.attr_map
+            self.row_dict[row_id].attr_map.update(attr_map)
 
         if not self.focus_map:
-            self.row_dict[ident].focus_map = focus_map
+            self.row_dict[row_id].focus_map = focus_map
         else:
-            self.row_dict[ident].focus_map = self.focus_map
-            self.row_dict[ident].focus_map.update(self.focus_map)
+            self.row_dict[row_id].focus_map = self.focus_map
+            self.row_dict[row_id].focus_map.update(self.focus_map)
 
-        self.row_dict[ident]._wrapped_widget.set_attr_map(self.row_dict[ident].attr_map)
-        self.row_dict[ident]._wrapped_widget.set_focus_map(self.row_dict[ident].focus_map)
+        self.row_dict[row_id]._wrapped_widget.set_attr_map(self.row_dict[row_id].attr_map)
+        self.row_dict[row_id]._wrapped_widget.set_focus_map(self.row_dict[row_id].focus_map)
 
     def clear(self):
         self.listbox.body.clear()

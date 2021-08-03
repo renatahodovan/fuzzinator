@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -86,8 +86,8 @@ class ReportButton(FullScreenPopupLauncher):
 
         connect_signal(self.original_widget, 'click', lambda btn: self.open_pop_up())
 
-    def update_entry(self, ident):
-        self.issues_table.update_row(ident)
+    def update_entry(self, issue_oid):
+        self.issues_table.update_row(issue_oid)
         self.close_pop_up()
 
     def create_pop_up(self):

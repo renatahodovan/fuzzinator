@@ -43,13 +43,13 @@ class ReduceJob(CallJob):
         reduced_src, new_issues = reduce(sut_call=sut_call,
                                          issue=self.issue,
                                          listener=self.listener,
-                                         ident=self.id)
+                                         job_id=self.id)
 
         if reduced_src is None:
-            self.listener.warning(ident=self.id, msg='Reduce of {ident} failed.'.format(ident=self.issue['id']))
+            self.listener.warning(job_id=self.id, msg='Reduce of {issue_id} failed.'.format(issue_id=self.issue['id']))
         else:
             self.db.update_issue_by_oid(self.issue['_id'], {'reduced': reduced_src})
-            self.listener.on_issue_reduced(ident=self.id, issue=self.issue)
+            self.listener.on_issue_reduced(job_id=self.id, issue=self.issue)
 
         for issue in new_issues:
             self.add_issue(issue, new_issues=issues)

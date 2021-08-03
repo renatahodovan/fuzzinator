@@ -66,7 +66,7 @@ class FuzzJob(CallJob):
 
                         if issue and test is None:
                             self.batch = index
-                            self.listener.warning(ident=self.id, msg='{sut} crashed before the first test.'.format(sut=self.sut_name))
+                            self.listener.warning(job_id=self.id, msg='{sut} crashed before the first test.'.format(sut=self.sut_name))
                             break
 
                         if issue is not None and ('test' not in issue or not issue['test']):
@@ -79,7 +79,7 @@ class FuzzJob(CallJob):
                             issue_count += 1
 
                         if index - stat_updated >= self.refresh:
-                            self.listener.on_job_progressed(ident=self.id, progress=index)
+                            self.listener.on_job_progressed(job_id=self.id, progress=index)
                             self.db.update_stat(self.sut_name, self.fuzzer_name, self.subconfig_id, index - stat_updated, issue_count)
                             self.listener.on_stats_updated()
                             issue_count = 0

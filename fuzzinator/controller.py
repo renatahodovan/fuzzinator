@@ -69,7 +69,7 @@ class Controller(object):
 
         - Option ``reduce``: Fully qualified name of a callable class. When an
           instance of the class is called, it must accept ``issue``,
-          ``sut_call``, ``listener``, ``ident`` keyword arguments representing
+          ``sut_call``, ``listener``, ``job_id`` keyword arguments representing
           an issue to be reduced, and must return a tuple consisting of a
           reduced test case for the issue (or ``None`` if the issue's current
           test case could not be reduced) and a (potentially empty) list of new
@@ -268,12 +268,12 @@ class Controller(object):
 
         def _update_load():
             current_load = 0
-            for ident in list(running_jobs):
-                if not running_jobs[ident]['proc'].is_alive() or not psutil.pid_exists(running_jobs[ident]['proc'].pid):
-                    self.listener.on_job_removed(ident=ident)
-                    del running_jobs[ident]
+            for job_id in list(running_jobs):
+                if not running_jobs[job_id]['proc'].is_alive() or not psutil.pid_exists(running_jobs[job_id]['proc'].pid):
+                    self.listener.on_job_removed(job_id=job_id)
+                    del running_jobs[job_id]
                 else:
-                    current_load += running_jobs[ident]['job'].cost
+                    current_load += running_jobs[job_id]['job'].cost
 
             nonlocal load
             if load != current_load:
@@ -303,40 +303,40 @@ class Controller(object):
 
             {
                 FuzzJob:
-                lambda: self.listener.on_fuzz_job_added(ident=next_job.id,
+                lambda: self.listener.on_fuzz_job_added(job_id=next_job.id,
                                                         cost=next_job.cost,
                                                         sut=next_job.sut_name,
                                                         fuzzer=next_job.fuzzer_name,
                                                         batch=next_job.batch),
                 ValidateJob:
-                lambda: self.listener.on_validate_job_added(ident=next_job.id,
+                lambda: self.listener.on_validate_job_added(job_id=next_job.id,
                                                             cost=next_job.cost,
                                                             sut=next_job.sut_name,
                                                             issue_oid=next_job.issue['_id'],
                                                             issue_id=next_job.issue['id']),
                 ReduceJob:
-                lambda: self.listener.on_reduce_job_added(ident=next_job.id,
+                lambda: self.listener.on_reduce_job_added(job_id=next_job.id,
                                                           cost=next_job.cost,
                                                           sut=next_job.sut_name,
                                                           issue_oid=next_job.issue['_id'],
                                                           issue_id=next_job.issue['id'],
                                                           size=len(str(next_job.issue['test']))),
                 UpdateJob:
-                lambda: self.listener.on_update_job_added(ident=next_job.id,
+                lambda: self.listener.on_update_job_added(job_id=next_job.id,
                                                           cost=next_job.cost,
                                                           sut=next_job.sut_name),
             }[job_class]()
 
             job_queue.insert(0 if priority else len(job_queue), next_job)
 
-        def _cancel_job(ident):
-            if ident in running_jobs:
-                Controller.kill_process_tree(running_jobs[ident]['proc'].pid)
+        def _cancel_job(job_id):
+            if job_id in running_jobs:
+                Controller.kill_process_tree(running_jobs[job_id]['proc'].pid)
             else:
-                ident_idx = [job_idx for job_idx, job in enumerate(job_queue) if job.id == ident]
-                if ident_idx:
-                    self.listener.on_job_removed(ident=ident)
-                    del job_queue[ident_idx[0]]
+                job_idx = [job_idx for job_idx, job in enumerate(job_queue) if job.id == job_id]
+                if job_idx:
+                    self.listener.on_job_removed(job_id=job_id)
+                    del job_queue[job_idx[0]]
 
         if validate is not None:
             self.validate_all(sut_name=validate)
@@ -407,13 +407,13 @@ class Controller(object):
 
                 proc = Process(target=self._run_job, args=(next_job,))
                 running_jobs[next_job.id] = dict(job=next_job, proc=proc)
-                self.listener.on_job_activated(ident=next_job.id)
+                self.listener.on_job_activated(job_id=next_job.id)
                 proc.start()
 
         except KeyboardInterrupt:
             pass
         except Exception as e:
-            self.listener.warning(ident=None, msg='Exception in the main controller loop: {exception}\n{trace}'.format(exception=e, trace=traceback.format_exc()))
+            self.listener.warning(job_id=None, msg='Exception in the main controller loop: {exception}\n{trace}'.format(exception=e, trace=traceback.format_exc()))
         finally:
             Controller.kill_process_tree(os.getpid(), kill_root=False)
             if os.path.exists(self.work_dir):
@@ -426,7 +426,7 @@ class Controller(object):
                 if not self.add_reduce_job(issue=issue):
                     self.add_validate_job(issue=issue)
         except Exception as e:
-            self.listener.warning(ident=job.id, msg='Exception in {job}: {exception}\n{trace}'.format(
+            self.listener.warning(job_id=job.id, msg='Exception in {job}: {exception}\n{trace}'.format(
                 job=repr(job),
                 exception=e,
                 trace=traceback.format_exc()))
@@ -478,9 +478,9 @@ class Controller(object):
             if not issue.get('reported') and not issue.get('reduced') and not issue.get('invalid'):
                 self.add_reduce_job(issue)
 
-    def cancel_job(self, ident):
+    def cancel_job(self, job_id):
         with self._shared_lock:
-            self._shared_queue.put((None, dict(ident=ident), None))
+            self._shared_queue.put((None, dict(job_id=job_id), None))
         return True
 
     @staticmethod

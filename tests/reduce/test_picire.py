@@ -20,7 +20,7 @@ def test_picire(call, call_init_kwargs, issue, exp_test, exp_issues, tmpdir):
     reducer = fuzzinator.reduce.Picire(work_dir=str(tmpdir))
     reduced_test, new_issues = reducer(sut_call=call(**call_init_kwargs),
                                        listener=fuzzinator.listener.EventListener(None),
-                                       ident=None,
+                                       job_id=None,
                                        issue=issue)
     assert reduced_test == exp_test
     assert new_issues == exp_issues

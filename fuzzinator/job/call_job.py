@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -39,9 +39,9 @@ class CallJob(object):
         # Save new issues.
         if self.db.add_issue(issue):
             new_issues.append(issue)
-            self.listener.on_issue_added(ident=self.id, issue=issue)
+            self.listener.on_issue_added(job_id=self.id, issue=issue)
         else:
-            self.listener.on_issue_updated(ident=self.id, issue=issue)
+            self.listener.on_issue_updated(job_id=self.id, issue=issue)
 
     # Ensure that issue has an id, and if not, adds one
     def ensure_id(self, issue):

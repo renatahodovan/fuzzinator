@@ -14,10 +14,10 @@ $(document).ready(function () {
 
    var jobAdded = function (data) {
     var job = $(`#${data.type}-job-template`).prop('content').cloneNode(true);
-    $(job).find('.card').attr('id', `job-${data.ident}`);
+    $(job).find('.card').attr('id', `job-${data.job_id}`);
     $(job).find('.card').addClass(data.status === 'active' ? 'bg-success' : 'bg-secondary');
-    $(job).find('.close').attr('onclick', `fz.api.cancelJob('${data.ident}')`);
-    $(job).find('.job-id').text(data.ident);
+    $(job).find('.close').attr('onclick', `fz.api.cancelJob('${data.job_id}')`);
+    $(job).find('.job-id').text(data.job_id);
     if ('fuzzer' in data) {
       $(job).find('.job-fuzzer').text(data.fuzzer);
     }
@@ -47,7 +47,7 @@ $(document).ready(function () {
   fz.notifications.onmessage['job_added'] = jobAdded;
 
   var jobProgressed = function (data) {
-    var jobCard = $(`#job-${data.ident}`);
+    var jobCard = $(`#job-${data.job_id}`);
     if (jobCard.length !== 0) {
       var progress = jobCard.find('.progress-bar');
       if ($(progress).data('maxvalue') < Infinity) {
@@ -68,7 +68,7 @@ $(document).ready(function () {
   fz.notifications.onmessage['job_progressed'] = jobProgressed;
 
   fz.notifications.onmessage['job_activated'] = function (data) {
-    var jobCard = $(`#job-${data.ident}`);
+    var jobCard = $(`#job-${data.job_id}`);
     if (jobCard.length !== 0 && jobCard.hasClass('bg-secondary')) {
       jobCard.removeClass('bg-secondary').addClass('bg-success');
     }
@@ -82,7 +82,7 @@ $(document).ready(function () {
   };
 
   fz.notifications.onmessage['job_removed'] = function (data) {
-    $(`#job-${data.ident}`).remove();
+    $(`#job-${data.job_id}`).remove();
   };
 
   fz.api.getJobs(function (data) {

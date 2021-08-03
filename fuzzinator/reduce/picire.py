@@ -96,7 +96,7 @@ class Picire(Reducer):
 
         self.work_dir = work_dir
 
-    def __call__(self, *, sut_call, issue, listener, ident):
+    def __call__(self, *, sut_call, issue, listener, job_id):
         logging.getLogger('picire').setLevel(logger.level)
 
         src = issue['test']
@@ -113,7 +113,7 @@ class Picire(Reducer):
             sut_call=sut_call,
             issue=issue,
             listener=listener,
-            ident=ident,
+            job_id=job_id,
             encoding=encoding,
             new_issues=new_issues,
         )

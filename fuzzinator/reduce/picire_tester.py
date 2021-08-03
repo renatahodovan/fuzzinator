@@ -11,13 +11,13 @@ import picire
 
 class PicireTester(object):
 
-    def __init__(self, *, test_builder, test_pattern, sut_call, issue, listener, ident, encoding, new_issues):
+    def __init__(self, *, test_builder, test_pattern, sut_call, issue, listener, job_id, encoding, new_issues):
         self._test_builder = test_builder
         self._test_pattern = test_pattern
         self._sut_call = sut_call
         self._issue = issue
         self._listener = listener
-        self._ident = ident
+        self._job_id = job_id
         self._encoding = encoding
         self._new_issues = new_issues
 
@@ -33,7 +33,7 @@ class PicireTester(object):
 
             if issue:
                 if self._issue['id'] == issue['id']:
-                    # self._listener.on_job_progressed(ident=self._ident, progress=len(str(test)))
+                    # self._listener.on_job_progressed(job_id=self._job_id, progress=len(str(test)))
                     return picire.AbstractDD.FAIL
 
                 if 'test' not in issue or not issue['test']:

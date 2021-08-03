@@ -17,7 +17,7 @@ from .base import BaseTracker, TrackerError
 class MonorailTracker(BaseTracker):
 
     discovery_url = 'https://monorail-prod.appspot.com/_ah/api/discovery/v1/apis/{api}/{apiVersion}/rest'
-    weburl_template = 'https://bugs.chromium.org/p/{project_id}/issues/detail?id={ident}'
+    weburl_template = 'https://bugs.chromium.org/p/{project_id}/issues/detail?id={issue_id}'
 
     def __init__(self, project_id):
         self.project_id = project_id
@@ -35,7 +35,7 @@ class MonorailTracker(BaseTracker):
             issues = self.monorail.issues().list(projectId=self.project_id, can='open', q=query).execute().get('items', [])
             return [{'id': issue['id'],
                      'title': issue['summary'],
-                     'url': self.weburl_template.format(project_id=self.project_id, ident=issue['id'])} for issue in issues]
+                     'url': self.weburl_template.format(project_id=self.project_id, issue_id=issue['id'])} for issue in issues]
         except Exception as e:
             raise TrackerError('Finding possible duplicates failed') from e
 
@@ -46,6 +46,6 @@ class MonorailTracker(BaseTracker):
                                                                 description=body)).execute()
             return {'id': new_issue['id'],
                     'title': new_issue['summary'],
-                    'url': self.weburl_template.format(project_id=self.project_id, ident=new_issue['id'])}
+                    'url': self.weburl_template.format(project_id=self.project_id, issue_id=new_issue['id'])}
         except Exception as e:
             raise TrackerError('Issue reporting failed') from e

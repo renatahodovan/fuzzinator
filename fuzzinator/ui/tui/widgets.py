@@ -93,17 +93,17 @@ class MainWindow(PopUpLauncher):
         self.init_popup(msg)
 
     def remove_issue_popup(self):
-        ident = self.issues_table.selection.data['_id']
+        issue_oid = self.issues_table.selection.data['_id']
         msg = 'Are you sure you want to delete this issue?'
         self.pop_up = YesNoDialog(msg)
-        connect_signal(self.pop_up, 'yes', lambda button: self.remove_issue(ident))
+        connect_signal(self.pop_up, 'yes', lambda button: self.remove_issue(issue_oid))
         connect_signal(self.pop_up, 'no', lambda button: self.close_pop_up())
         self.init_popup(msg)
 
-    def remove_issue(self, ident):
-        self.db.remove_issue_by_oid(ident)
-        if ident in self.issues_table.row_dict:
-            del self.issues_table[self.issues_table.body.rows.index(self.issues_table.row_dict[ident])]
+    def remove_issue(self, issue_oid):
+        self.db.remove_issue_by_oid(issue_oid)
+        if issue_oid in self.issues_table.row_dict:
+            del self.issues_table[self.issues_table.body.rows.index(self.issues_table.row_dict[issue_oid])]
         self.close_pop_up()
 
     def get_pop_up_parameters(self):
@@ -231,9 +231,9 @@ class IssuesTable(Table):
             return None
         if key in ['delete', 'd']:
             if self:    # len(self) != 0
-                ident = self[self.focus_position].data['_id']
-                self.db.update_issue_by_oid(ident, {'invalid': datetime.utcnow()})
-                self.invalidate_row(ident)
+                issue_oid = self[self.focus_position].data['_id']
+                self.db.update_issue_by_oid(issue_oid, {'invalid': datetime.utcnow()})
+                self.invalidate_row(issue_oid)
             return None
         if key in ['shift delete', 'D']:
             if self:    # len(self) != 0
@@ -244,11 +244,11 @@ class IssuesTable(Table):
             return None
         return super().keypress(size, key)
 
-    def invalidate_row(self, ident):
+    def invalidate_row(self, issue_oid):
         if self.show_invalid:
-            self.update_row(ident=ident)
+            self.update_row(issue_oid=issue_oid)
         else:
-            del self[self.body.rows.index(self.row_dict[ident])]
+            del self[self.body.rows.index(self.row_dict[issue_oid])]
 
     def invert_invalid(self):
         self.show_invalid = not self.show_invalid
@@ -260,10 +260,10 @@ class IssuesTable(Table):
         self.requery(self.query_data)
         self.walker._modified()
 
-    def update_row(self, ident):
-        issue = self.db.find_issue_by_oid(ident)
+    def update_row(self, issue_oid):
+        issue = self.db.find_issue_by_oid(issue_oid)
         attr_map, focus_map = self.get_attr(issue)
-        super().update_row_style(ident, attr_map, focus_map)
+        super().update_row_style(issue_oid, attr_map, focus_map)
 
     def get_attr(self, data):
         if data.get('invalid'):
@@ -349,38 +349,38 @@ class JobsTable(WidgetWrap):
     def active_jobs(self):
         return len(list(filter(lambda job: job.active, self.walker)))
 
-    def insert_widget(self, ident, widget):
-        self.jobs[ident] = widget
-        self.walker.insert(0, self.jobs[ident])
+    def insert_widget(self, job_id, widget):
+        self.jobs[job_id] = widget
+        self.walker.insert(0, self.jobs[job_id])
         self.title = self.active_jobs
 
         if len(self.walker) == 1:
             self.listbox.focus_position = 0
 
-    def on_fuzz_job_added(self, ident, fuzzer, sut, cost, batch):
-        self.insert_widget(ident, FuzzerJobWidget(dict(fuzzer=fuzzer, sut=sut, cost=cost), pb_done=batch))
+    def on_fuzz_job_added(self, job_id, fuzzer, sut, cost, batch):
+        self.insert_widget(job_id, FuzzerJobWidget(dict(fuzzer=fuzzer, sut=sut, cost=cost), pb_done=batch))
 
-    def on_reduce_job_added(self, ident, sut, cost, issue_id, size):
-        self.insert_widget(ident, ReduceJobWidget(dict(sut=sut, cost=cost, issue=issue_id), pb_done=size))
+    def on_reduce_job_added(self, job_id, sut, cost, issue_id, size):
+        self.insert_widget(job_id, ReduceJobWidget(dict(sut=sut, cost=cost, issue=issue_id), pb_done=size))
 
-    def on_update_job_added(self, ident, sut):
-        self.insert_widget(ident, UpdateJobWidget(dict(sut=sut)))
+    def on_update_job_added(self, job_id, sut):
+        self.insert_widget(job_id, UpdateJobWidget(dict(sut=sut)))
 
-    def on_validate_job_added(self, ident, sut, issue_id):
-        self.insert_widget(ident, ValidateJobWidget(dict(sut=sut, issue=issue_id)))
+    def on_validate_job_added(self, job_id, sut, issue_id):
+        self.insert_widget(job_id, ValidateJobWidget(dict(sut=sut, issue=issue_id)))
 
-    def on_job_activated(self, ident):
-        idx = self.walker.index(self.jobs[ident])
+    def on_job_activated(self, job_id):
+        idx = self.walker.index(self.jobs[job_id])
         self.walker[idx].activate()
         self.title = self.active_jobs
 
-    def on_job_removed(self, ident):
-        self.walker.remove(self.jobs[ident])
-        del self.jobs[ident]
+    def on_job_removed(self, job_id):
+        self.walker.remove(self.jobs[job_id])
+        del self.jobs[job_id]
         self.title = self.active_jobs
 
-    def on_job_progressed(self, ident, progress):
-        idx = self.walker.index(self.jobs[ident])
+    def on_job_progressed(self, job_id, progress):
+        idx = self.walker.index(self.jobs[job_id])
         self.walker[idx].update_progress(progress)
 
     def keypress(self, size, key):

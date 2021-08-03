@@ -55,7 +55,7 @@ class Picire(Reducer):
                  jobs=os.cpu_count(), max_utilization=100,
                  atom='both',
                  encoding=None, granularity=2, cache_class='ContentCache', cleanup=True,
-                 **kwargs):
+                 work_dir, **kwargs):
         parallel = as_bool(parallel)
         combine_loops = as_bool(combine_loops)
         split_method = getattr(picire.config_splitters, split_method)
@@ -94,7 +94,9 @@ class Picire(Reducer):
                 self.reduce_config['complement_iterator'] = complement_iterator
                 self.reduce_config['subset_first'] = subset_first
 
-    def __call__(self, *, sut_call, issue, listener, ident, work_dir):
+        self.work_dir = work_dir
+
+    def __call__(self, *, sut_call, issue, listener, ident):
         logging.getLogger('picire').setLevel(logger.level)
 
         src = issue['test']
@@ -124,7 +126,7 @@ class Picire(Reducer):
             input=file_name,
             src=src,
             encoding=encoding,
-            out=work_dir,
+            out=self.work_dir,
             atom=self.atom,
             granularity=self.granularity,
             cache_class=self.cache_class,

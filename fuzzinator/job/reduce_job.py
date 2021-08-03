@@ -5,9 +5,7 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import os
-
-from ..config import as_path, config_get_object
+from ..config import config_get_object
 from .call_job import CallJob
 from .validate_job import ValidateJob
 
@@ -28,7 +26,6 @@ class ReduceJob(CallJob):
         self.issue = issue
         capacity = int(config.get('fuzzinator', 'cost_budget'))
         self.cost = min(int(config.get(sut_section, 'reduce_cost', fallback=config.get(sut_section, 'cost', fallback=1))), capacity)
-        self.work_dir = as_path(config.get('fuzzinator', 'work_dir'))
 
     def run(self):
         valid, issues = ValidateJob(id=self.id,
@@ -46,8 +43,7 @@ class ReduceJob(CallJob):
         reduced_src, new_issues = reduce(sut_call=sut_call,
                                          issue=self.issue,
                                          listener=self.listener,
-                                         ident=self.id,
-                                         work_dir=os.path.join(self.work_dir, str(self.id)))
+                                         ident=self.id)
 
         if reduced_src is None:
             self.listener.warning(ident=self.id, msg='Reduce of {ident} failed.'.format(ident=self.issue['id']))

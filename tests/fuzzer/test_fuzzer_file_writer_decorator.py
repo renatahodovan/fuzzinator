@@ -23,7 +23,7 @@ from common_fuzzer import MockExhaustedFuzzer, MockRepeatingFuzzer
 ])
 def test_file_writer_decorator(fuzzer_class, fuzzer_init_kwargs, dec_kwargs, exp, tmpdir):
     tmp_dec_kwargs = dict(dec_kwargs)
-    tmp_dec_kwargs['filename'] = os.path.join(str(tmpdir), dec_kwargs['filename'])
+    tmp_dec_kwargs['work_dir'] = str(tmpdir)
 
     fuzzer_class = fuzzinator.fuzzer.FileWriterDecorator(**tmp_dec_kwargs)(fuzzer_class)
     fuzzer = fuzzer_class(**fuzzer_init_kwargs)

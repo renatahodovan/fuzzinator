@@ -5,19 +5,24 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+import logging
 import os
+import shutil
 
-from ..config import as_path
+from inspect import signature
+
+logger = logging.getLogger(__name__)
 
 
 class FileWriterDecorator(object):
     """
-    Decorator for fuzzers that create str or bytes-like output. The decorator writes
-    the test input to a temporary file and replaces the output with the name of that file.
+    Decorator for fuzzers that create str or bytes-like output. The decorator
+    writes the test input to a temporary file (relative to an implicit temporary
+    working directory) and replaces the output with the name of that file.
 
     **Mandatory parameter of the decorator:**
 
-      - ``filename``: path pattern for the temporary file, which may contain the
+      - ``filename``: name pattern for the temporary file, which may contain the
         substring ``{uid}`` as a placeholder for a unique string (replaced by
         the decorator).
 
@@ -31,14 +36,21 @@ class FileWriterDecorator(object):
             [fuzz.foo-with-random]
             sut=foo
             fuzzer=fuzzinator.fuzzer.RandomContent
-            fuzzer.decorate(0)=fuzzionator.fuzzer.FileWriterDecorator
+            fuzzer.decorate(0)=fuzzinator.fuzzer.FileWriterDecorator
 
             [fuzz.foo-with-random.fuzzer.decorate(0)]
-            filename=${fuzzinator:work_dir}/test-{uid}.txt
+            filename=test-{uid}.txt
     """
 
-    def __init__(self, *, filename, **kwargs):
+    def __init__(self, *, filename, work_dir, **kwargs):
+        if os.path.basename(filename) != filename:
+            logger.warning('specifying directories in filename parameter of fuzzinator.fuzzer.FileWriterDecorator is deprecated (%s) (explicit use of ${fuzzinator:work_dir}?)', filename)
+            filename = os.path.basename(filename)
+
         self.filename = filename
+
+        self.work_dir = work_dir
+        self.uid = 0
 
     def __call__(self, fuzzer_class):
         decorator = self
@@ -46,21 +58,19 @@ class FileWriterDecorator(object):
         class DecoratedFuzzer(fuzzer_class):
 
             def __init__(self, **kwargs):
+                signature(self.__init__).bind(**kwargs)
                 super().__init__(**kwargs)
-                self.file_path = as_path(decorator.filename.format(uid='{pid}-{id}'.format(pid=os.getpid(), id=id(self))))
                 self.test = None
+            __init__.__signature__ = signature(fuzzer_class.__init__)
 
             def __enter__(self):
                 super().__enter__()
-                os.makedirs(os.path.dirname(self.file_path), exist_ok=True)
+                os.makedirs(decorator.work_dir, exist_ok=True)
                 return self
 
             def __exit__(self, *exc):
                 suppress = super().__exit__(*exc)
-
-                if os.path.exists(self.file_path):
-                    os.remove(self.file_path)
-
+                shutil.rmtree(decorator.work_dir, ignore_errors=True)
                 return suppress
 
             def __call__(self, *, index):
@@ -69,9 +79,12 @@ class FileWriterDecorator(object):
                 if self.test is None:
                     return None
 
-                with open(self.file_path, 'w' if not isinstance(self.test, bytes) else 'wb') as f:
+                file_path = os.path.join(decorator.work_dir, decorator.filename.format(uid=decorator.uid))
+                decorator.uid += 1
+
+                with open(file_path, 'w' if not isinstance(self.test, bytes) else 'wb') as f:
                     f.write(self.test)
 
-                return self.file_path
+                return file_path
 
         return DecoratedFuzzer

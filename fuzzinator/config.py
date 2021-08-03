@@ -15,7 +15,9 @@ import sys
 from collections import OrderedDict
 from configparser import ConfigParser
 from io import StringIO
+from inspect import signature
 from math import inf
+from uuid import uuid4
 
 import chardet
 
@@ -26,6 +28,13 @@ logger = logging.getLogger(__name__)
 
 def config_get_kwargs(config, section):
     return dict(config.items(section)) if config.has_section(section) else dict()
+
+
+def config_init_object(config, cls, kwargs):
+    if any(param == 'work_dir' for param in signature(cls.__init__).parameters):
+        kwargs['work_dir'] = os.path.join(as_path(config.get('fuzzinator', 'work_dir')),
+                                          '{pid}-{cls}-{uid}'.format(pid=os.getpid(), cls=cls.__name__, uid=uuid4().hex))
+    return cls(**kwargs)
 
 
 def config_get_object(config, section, options, *, init_kwargs=None):
@@ -75,7 +84,7 @@ def config_get_object(config, section, options, *, init_kwargs=None):
         for decopt in decorator_options:
             decorator_class = import_object(config.get(section, decopt))
             decorator_kwargs = config_get_kwargs(config, section + '.' + decopt)
-            decorator = decorator_class(**decorator_kwargs)
+            decorator = config_init_object(config, decorator_class, decorator_kwargs)
             obj_class = decorator(obj_class)
 
         # 3) compute class instantiation arguments
@@ -95,7 +104,7 @@ def config_get_object(config, section, options, *, init_kwargs=None):
             obj_kwargs.update(init_kwargs)
 
         # 3.d) instantiate class
-        obj = obj_class(**obj_kwargs)
+        obj = config_init_object(config, obj_class, obj_kwargs)
 
         # break the loop after finding the first matching option.
         break

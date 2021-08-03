@@ -69,13 +69,12 @@ class Controller(object):
 
         - Option ``reduce``: Fully qualified name of a callable class. When an
           instance of the class is called, it must accept ``issue``,
-          ``sut_call``, ``listener``, ``ident``, ``work_dir`` keyword arguments
-          representing an issue to be reduced, and must return a tuple
-          consisting of a reduced test case for the issue (or ``None`` if the
-          issue's current test case could not be reduced) and a (potentially
-          empty) list of new issues that were discovered during test case
-          reduction (if any). (Optional, no reduction for this SUT if option is
-          missing.)
+          ``sut_call``, ``listener``, ``ident`` keyword arguments representing
+          an issue to be reduced, and must return a tuple consisting of a
+          reduced test case for the issue (or ``None`` if the issue's current
+          test case could not be reduced) and a (potentially empty) list of new
+          issues that were discovered during test case reduction (if any).
+          (Optional, no reduction for this SUT if option is missing.)
 
           See package :mod:`fuzzinator.reduce` for potential reducers.
 
@@ -206,6 +205,11 @@ class Controller(object):
 
         See packages :mod:`fuzzinator.call` and :mod:`fuzzinator.fuzzer` for
         potential decorators.
+
+      - The contructors of all classes (including decorators) can have a
+        ``work_dir`` keyword argument. If present, its value is not filled in
+        from the corresponding section but provided by the framework with a
+        unique path under ``fuzzinator:work_dir``.
     """
 
     def __init__(self, config):

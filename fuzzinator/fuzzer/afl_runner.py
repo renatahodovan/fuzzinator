@@ -33,9 +33,6 @@ class AFLRunner(Fuzzer):
         ``{test}`` substring is automatically replaced with the ``@@`` input
         file placeholder used by AFL).
       - ``input``: the directory of initial test cases for AFL.
-      - ``output``: the directory that will store the findings of AFL (all
-        occurrences of ``{uid}`` in the string are replaced by an identifier
-        unique to this fuzz job).
 
     **Optional parameters of the fuzzer:**
 
@@ -78,14 +75,15 @@ class AFLRunner(Fuzzer):
             cwd=${sut.foo.call:cwd}
             env=${sut.foo.call:env}
             input=/home/alice/foo-inputs
-            output=${fuzzinator:work_dir}/afl-output/{uid}
     """
 
     def __init__(self, *, afl_fuzz, input, output, sut_command, cwd=None, env=None, timeout=None, dictionary=None,
-                 master_name=None, slave_name=None, **kwargs):
+                 master_name=None, slave_name=None, work_dir, **kwargs):
+        if 'output' in kwargs:
+            logger.warning('output parameter of fuzzinator.fuzzer.AFLRunner is deprecated')
+
         self.afl_fuzz = as_path(afl_fuzz)
         self.input = as_path(input)
-        self.output = as_path(output.format(uid=str(id(self))))
         self.sut_command = as_pargs(sut_command.format(test='@@'))
         self.cwd = as_path(cwd) if cwd else None
         self.env = as_dict(env) if env else dict()
@@ -95,19 +93,20 @@ class AFLRunner(Fuzzer):
         self.master_name = master_name
         self.slave_name = slave_name
 
+        self.work_dir = work_dir
         self.iteration = 1
         self.checked = set()
         self.tests = list()
 
     def __enter__(self):
-        os.makedirs(self.output, exist_ok=True)
+        os.makedirs(self.work_dir, exist_ok=True)
         return self
 
     def __exit__(self, *exc):
         return False
 
     def __call__(self, *, index):
-        crash_dir = os.path.join(self.output, '{name}'.format(name=self.master_name or self.slave_name or ''), 'crashes')
+        crash_dir = os.path.join(self.work_dir, self.master_name or self.slave_name or '', 'crashes')
 
         while True:
             if self.tests:
@@ -118,7 +117,7 @@ class AFLRunner(Fuzzer):
 
             command = \
                 (['-i', self.input] if self.iteration == 1 else ['-i-']) + \
-                ['-o', self.output] + \
+                ['-o', self.work_dir] + \
                 (['-t', self.timeout] if self.timeout else []) + \
                 (['-x', self.dictionary] if self.dictionary else []) + \
                 (['-M', self.master_name] if self.master_name else []) + \

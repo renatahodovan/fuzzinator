@@ -11,7 +11,7 @@ class Reducer(object):
     Abstract base class to represent test case reducers.
     """
 
-    def __call__(self, *, sut_call, issue, listener, ident, work_dir):
+    def __call__(self, *, sut_call, issue, listener, ident):
         """
         Reduce the test case of ``issue`` while ensuring that the reduced test
         case still triggers the original issue. Return a tuple consisting of a
@@ -28,8 +28,6 @@ class Reducer(object):
             about the progress of the reduction.
         :param ident: The job ID of the reduction, to be used when notifying
             ``listener``.
-        :param work_dir: A temporary working directory that may be used during
-            test case reduction.
         :return: The reduced test case (if reduction was successful) and the
             list of new issues detected during reduction (if any).
         :rtype: tuple[Any or None, list[dict[str, Any]]]

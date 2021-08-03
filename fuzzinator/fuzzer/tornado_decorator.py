@@ -9,6 +9,8 @@ import asyncio
 import logging
 import threading
 
+from inspect import signature
+
 from tornado.ioloop import IOLoop
 from tornado.testing import bind_unused_port
 from tornado.web import Application, RequestHandler
@@ -82,10 +84,12 @@ class TornadoDecorator(object):
         class DecoratedFuzzer(fuzzer_class):
 
             def __init__(self, **kwargs):
+                signature(self.__init__).bind(**kwargs)
                 super().__init__(**kwargs)
                 self.index = 0
                 self.test = None
                 self.t = None
+            __init__.__signature__ = signature(fuzzer_class.__init__)
 
             def __call__(self, *, index):
                 if index != 0 and self.test is None:

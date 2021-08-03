@@ -66,7 +66,7 @@ class Picireny(Reducer):
                  hddmin=None, antlr=None, format=None, grammar=None, start=None, replacements=None, lang='python',
                  hdd_star=True, flatten_recursion=False, squeeze_tree=True, skip_unremovable=True, skip_whitespace=False, build_hidden_tokens=False,
                  encoding=None, granularity=2, cache_class='ContentCache', cleanup=True,
-                 **kwargs):
+                 work_dir, **kwargs):
         parallel = as_bool(parallel)
         combine_loops = as_bool(combine_loops)
         split_method = getattr(picire.config_splitters, split_method)
@@ -118,7 +118,9 @@ class Picireny(Reducer):
                 self.reduce_config['complement_iterator'] = complement_iterator
                 self.reduce_config['subset_first'] = subset_first
 
-    def __call__(self, *, sut_call, issue, listener, ident, work_dir):
+        self.work_dir = work_dir
+
+    def __call__(self, *, sut_call, issue, listener, ident):
         logging.getLogger('picireny').setLevel(logger.level)
 
         if self.antlr is None:
@@ -152,7 +154,7 @@ class Picireny(Reducer):
             hdd_tree = picireny.build_with_antlr4(input=file_name,
                                                   src=src,
                                                   encoding=encoding,
-                                                  out=work_dir,
+                                                  out=self.work_dir,
                                                   input_format=self.input_format,
                                                   start=self.start,
                                                   antlr=self.antlr,
@@ -167,7 +169,7 @@ class Picireny(Reducer):
                                            tester_config=tester_config,
                                            input=file_name,
                                            encoding=encoding,
-                                           out=work_dir,
+                                           out=self.work_dir,
                                            hddmin=self.hddmin,
                                            hdd_star=self.hdd_star,
                                            flatten_recursion=self.flatten_recursion,

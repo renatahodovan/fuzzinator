@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -15,15 +15,16 @@ import fuzzinator
 from common_fuzzer import resources_dir
 
 
-@pytest.mark.parametrize('outdir', [join('{tmpdir}', 'tests-{{uid}}')])
 @pytest.mark.parametrize('command, cwd, env, contents, exp', [
-    ('%s %s -i %s -o %s' % (sys.executable, join(resources_dir, 'mock_fuzzer.py'), join(resources_dir, 'mock_tests'), join('{tmpdir}', 'tests-{{uid}}')), None, None, True, {b'foo\n', b'bar\n', b'baz\n'}),
-    ('%s %s -i %s -o %s' % (sys.executable, join('.', 'mock_fuzzer.py'), 'mock_tests', join('{tmpdir}', 'tests-{{uid}}')), resources_dir, None, True, {b'foo\n', b'bar\n', b'baz\n'}),
-    ('%s %s -o %s' % (sys.executable, join('.', 'mock_fuzzer.py'), join('{tmpdir}', 'tests-{{uid}}')), resources_dir, '{"IDIR": "mock_tests"}', True, {b'foo\n', b'bar\n', b'baz\n'}),
-    ('%s %s -i %s -o %s' % (sys.executable, join('.', 'mock_fuzzer.py'), 'mock_tests', join('{tmpdir}', 'tests-{{uid}}')), resources_dir, None, False, {join('{tmpdir}', 'tests-{uid}', 'foo.txt'), join('{tmpdir}', 'tests-{uid}', 'bar.txt'), join('{tmpdir}', 'tests-{uid}', 'baz.txt')}),
+    ('%s %s -i %s -o {work_dir}' % (sys.executable, join(resources_dir, 'mock_fuzzer.py'), join(resources_dir, 'mock_tests')), None, None, True, {b'foo\n', b'bar\n', b'baz\n'}),
+    ('%s %s -i %s -o .' % (sys.executable, join(resources_dir, 'mock_fuzzer.py'), join(resources_dir, 'mock_tests')), '{work_dir}', None, True, {b'foo\n', b'bar\n', b'baz\n'}),
+    ('%s %s -i %s -o {work_dir}' % (sys.executable, join('.', 'mock_fuzzer.py'), 'mock_tests'), resources_dir, None, True, {b'foo\n', b'bar\n', b'baz\n'}),
+    ('%s %s -i %s' % (sys.executable, join('.', 'mock_fuzzer.py'), 'mock_tests'), resources_dir, '{"ODIR": "{work_dir}"}', True, {b'foo\n', b'bar\n', b'baz\n'}),
+    ('%s %s -o {work_dir}' % (sys.executable, join('.', 'mock_fuzzer.py')), resources_dir, '{"IDIR": "mock_tests"}', True, {b'foo\n', b'bar\n', b'baz\n'}),
+    ('%s %s -i %s -o {work_dir}' % (sys.executable, join('.', 'mock_fuzzer.py'), 'mock_tests'), resources_dir, None, False, {join('{tmpdir}', 'foo.txt'), join('{tmpdir}', 'bar.txt'), join('{tmpdir}', 'baz.txt')}),
 ])
-def test_subprocess_runner(outdir, command, cwd, env, contents, exp, tmpdir):
-    fuzzer = fuzzinator.fuzzer.SubprocessRunner(outdir=outdir.format(tmpdir=tmpdir), command=command.format(tmpdir=tmpdir), cwd=cwd, env=env, contents=contents)
+def test_subprocess_runner(command, cwd, env, contents, exp, tmpdir):
+    fuzzer = fuzzinator.fuzzer.SubprocessRunner(command=command, cwd=cwd, env=env, contents=contents, work_dir=str(tmpdir))
     with fuzzer:
         tests = set()
         index = 0
@@ -36,6 +37,6 @@ def test_subprocess_runner(outdir, command, cwd, env, contents, exp, tmpdir):
             index += 1
 
     if not contents:
-        exp = {e.format(tmpdir=tmpdir, uid=fuzzer.uid) for e in exp}
+        exp = {e.format(tmpdir=tmpdir) for e in exp}
 
     assert tests == exp

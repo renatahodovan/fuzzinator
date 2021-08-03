@@ -25,7 +25,7 @@ from common_call import MockAlwaysFailCall, MockNeverFailCall
 ])
 def test_file_writer_decorator(call_class, call_init_kwargs, call_kwargs, dec_kwargs, exp, tmpdir):
     tmp_dec_kwargs = dict(dec_kwargs)
-    tmp_dec_kwargs['filename'] = os.path.join(str(tmpdir), dec_kwargs['filename'])
+    tmp_dec_kwargs['work_dir'] = str(tmpdir)
 
     call_class = fuzzinator.call.FileWriterDecorator(**tmp_dec_kwargs)(call_class)
     call = call_class(**call_init_kwargs)

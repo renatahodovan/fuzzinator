@@ -26,11 +26,11 @@ def test_picireny(call, call_init_kwargs, issue, format, grammar, start, replace
     reducer = fuzzinator.reduce.Picireny(format=format,
                                          grammar=grammar,
                                          start=start,
-                                         replacements=replacements)
+                                         replacements=replacements,
+                                         work_dir=str(tmpdir))
     reduced_test, new_issues = reducer(sut_call=call(**call_init_kwargs),
                                        listener=fuzzinator.listener.EventListener(None),
                                        ident=None,
-                                       issue=issue,
-                                       work_dir=str(tmpdir))
+                                       issue=issue)
     assert reduced_test == exp_test
     assert new_issues == exp_issues

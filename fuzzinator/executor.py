@@ -106,7 +106,7 @@ def execute():
                         help='show complete config')
     inators.arg.add_log_level_argument(parser)
     inators.arg.add_sys_recursion_limit_argument(parser)
-    inators.arg.add_version_argument(parser, __version__)
+    inators.arg.add_version_argument(parser, version=__version__)
     ui.add_arguments(parser)
     args = parser.parse_args(more_args)
 

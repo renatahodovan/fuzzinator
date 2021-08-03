@@ -7,5 +7,5 @@
 
 from .picire import Picire
 from .picireny import Picireny
-from .picire_tester import PicireTester
+from .picire_common import PicireReducer, PicireTester
 from .reducer import Reducer

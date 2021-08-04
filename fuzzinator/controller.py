@@ -206,7 +206,7 @@ class Controller(object):
         See packages :mod:`fuzzinator.call` and :mod:`fuzzinator.fuzzer` for
         potential decorators.
 
-      - The contructors of all classes (including decorators) can have a
+      - The constructors of all classes (including decorators) can have a
         ``work_dir`` keyword argument. If present, its value is not filled in
         from the corresponding section but provided by the framework with a
         unique path under ``fuzzinator:work_dir``.

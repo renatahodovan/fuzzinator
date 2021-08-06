@@ -21,10 +21,9 @@ class Picire(PicireReducer):
 
     **Optional parameters of the reducer:**
 
-      - ``parallel``, ``combine_loops``, ``split_method``, ``subset_first``,
-        ``subset_iterator``, ``complement_iterator``, ``jobs``,
-        ``max_utilization``, ``encoding``, ``atom``, ``granularity``,
-        ``cache_class``, ``cleanup``
+      - ``split_class``, ``granularity``, ``subset_first``, ``subset_iterator``,
+        ``complement_iterator``, ``parallel``, ``combine_loops``, ``jobs``,
+        ``max_utilization``, ``atom``, ``encoding``, ``cache_class``
 
     Refer to https://github.com/renatahodovan/picire for configuring Picire.
 
@@ -47,46 +46,35 @@ class Picire(PicireReducer):
             subset_iterator=skip
     """
 
-    def __init__(self, *, parallel=False, combine_loops=False,
-                 split_method='zeller', subset_first=True, subset_iterator='forward', complement_iterator='forward',
-                 jobs=os.cpu_count(), max_utilization=100,
+    def __init__(self, *,
+                 split_class='zeller', granularity=2, subset_first=True, subset_iterator='forward', complement_iterator='forward',
+                 parallel=False, combine_loops=False, jobs=os.cpu_count(), max_utilization=100,
                  atom='both',
-                 encoding=None, granularity=2, cache_class='ContentCache', cleanup=True,
-                 work_dir, **kwargs):
+                 encoding=None, cache_class='ContentCache',
+                 **kwargs):
 
-        super().__init__(parallel=parallel, combine_loops=combine_loops,
-                         split_method=split_method, subset_first=subset_first, subset_iterator=subset_iterator, complement_iterator=complement_iterator,
-                         jobs=jobs, max_utilization=max_utilization,
-                         encoding=encoding, granularity=granularity, cache_class=cache_class, cleanup=cleanup,
-                         work_dir=work_dir)
+        super().__init__(split_class=split_class, granularity=granularity, subset_first=subset_first, subset_iterator=subset_iterator, complement_iterator=complement_iterator,
+                         parallel=parallel, combine_loops=combine_loops, jobs=jobs, max_utilization=max_utilization,
+                         encoding=encoding, cache_class=cache_class)
 
         self.atom = atom
 
     def __call__(self, *, sut_call, issue, on_job_progressed):
         logging.getLogger('picire').setLevel(logger.level)
 
-        test, tester = self._prepare_call(sut_call=sut_call,
-                                          issue=issue,
-                                          on_job_progressed=on_job_progressed)
-
         try:
-            reduced_file = picire.call(reduce_class=self.reduce_class,
-                                       reduce_config=self.reduce_config,
-                                       tester_class=tester.tester_class,
-                                       tester_config=tester.tester_config,
-                                       input=test.file_name,
-                                       src=test.src,
-                                       encoding=test.encoding,
-                                       out=self.work_dir,
-                                       atom=self.atom,
-                                       granularity=self.granularity,
-                                       cache_class=self.cache_class,
-                                       cleanup=self.cleanup)
+            test, tester = self._prepare_call(sut_call=sut_call,
+                                              issue=issue,
+                                              on_job_progressed=on_job_progressed)
+
+            out_src = picire.reduce(test.src,
+                                    reduce_class=self.reduce_class, reduce_config=self.reduce_config,
+                                    tester_class=tester.tester_class, tester_config=tester.tester_config,
+                                    atom=self.atom,
+                                    cache_class=self.cache_class)
+
+            out_src = out_src.encode(test.encoding, errors='ignore')
+            return out_src, list(tester.new_issues.values())
         except Exception as e:
             logger.warning('Exception in picire', exc_info=e)
             return None, list(tester.new_issues.values())
-
-        with open(reduced_file, 'rb') as f:
-            src = f.read()
-
-        return src, list(tester.new_issues.values())

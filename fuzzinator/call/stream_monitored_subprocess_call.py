@@ -53,8 +53,8 @@ class StreamMonitoredSubprocessCall(Call):
       - If processing stdout and stderr with ``end_patterns`` doesn't produce
         any result, no issue is returned.
       - Otherwise, an issue with keys from the matching patterns of
-        ``end_pattern`` extended with the ``'exit_code'``, ``'stdout'``, and
-        ``'stderr'`` properties is returned.
+        ``end_pattern`` extended with the ``'exit_code'``, ``'stdout'``,
+        ``'stderr'`` and ``'time'`` properties is returned.
 
     **Example configuration snippet:**
 
@@ -85,9 +85,9 @@ class StreamMonitoredSubprocessCall(Call):
         self.timeout = int(timeout) if timeout else None
         self.encoding = encoding
 
-    def __call__(self, *, test, **kwargs):
-        if self.timeout:
-            start_time = time.time()
+    def __call__(self, *, test, timeout=None, **kwargs):
+        timeout = timeout or self.timeout
+        start_time = time.time()
 
         proc = subprocess.Popen(as_pargs(self.command.format(test=test)),
                                 stdout=subprocess.PIPE,
@@ -127,11 +127,12 @@ class StreamMonitoredSubprocessCall(Call):
                         if new_details or terminate:
                             end_loop = True
 
-                if proc.poll() is not None or (self.timeout and time.time() - start_time > self.timeout):
+                if proc.poll() is not None or (timeout and time.time() - start_time > timeout):
                     break
             except IOError as e:
                 logger.warning('Exception in stream filtering.', exc_info=e)
 
+        end_time = time.time()
         Controller.kill_process_tree(proc.pid)
         logger.debug('%s\n%s', streams['stdout'], streams['stderr'])
 
@@ -139,6 +140,7 @@ class StreamMonitoredSubprocessCall(Call):
             'exit_code': proc.returncode,
             'stderr': streams['stderr'],
             'stdout': streams['stdout'],
+            'time': end_time - start_time,
         }
         if issue:
             issue.update(proc_details)

@@ -8,6 +8,7 @@
 import logging
 import os
 import subprocess
+import time
 
 from ..config import as_bool, as_dict, as_pargs, as_path, decode
 from .call import Call
@@ -39,8 +40,8 @@ class StdinSubprocessCall(Call):
     **Result of the SUT call:**
 
       - If the child process exits with 0 exit code, no issue is returned.
-      - Otherwise, an issue with ``'exit_code'``, ``'stdout'``, and ``'stderr'``
-        properties is returned.
+      - Otherwise, an issue with ``'exit_code'``, ``'stdout'``, ``'stderr'``
+        and ``'time'`` properties is returned.
 
     **Example configuration snippet:**
 
@@ -63,18 +64,20 @@ class StdinSubprocessCall(Call):
         self.timeout = int(timeout) if timeout else None
         self.encoding = encoding
 
-    def __call__(self, *, test, **kwargs):
+    def __call__(self, *, test, timeout=None, **kwargs):
         issue = {}
 
         try:
+            start_time = time.time()
             result = subprocess.run(as_pargs(self.command),
                                     input=test,
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE,
                                     cwd=self.cwd,
                                     env=self.env,
-                                    timeout=self.timeout,
+                                    timeout=timeout or self.timeout,
                                     check=False)
+            end_time = time.time()
             stdout, stderr = decode(result.stdout, self.encoding), decode(result.stderr, self.encoding)
             logger.debug('%s\n%s', stdout, stderr)
 
@@ -82,6 +85,7 @@ class StdinSubprocessCall(Call):
                 'exit_code': result.returncode,
                 'stdout': stdout,
                 'stderr': stderr,
+                'time': end_time - start_time,
             }
             if self.no_exit_code or result.returncode != 0:
                 return issue

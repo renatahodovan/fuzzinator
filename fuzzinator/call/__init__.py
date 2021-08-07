@@ -5,6 +5,7 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
+from .adaptive_timeout_decorator import AdaptiveTimeoutDecorator
 from .anonymize_decorator import AnonymizeDecorator
 from .call import Call
 from .call_decorator import CallDecorator

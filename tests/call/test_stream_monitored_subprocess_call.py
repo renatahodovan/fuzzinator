@@ -31,5 +31,5 @@ def test_stream_monitored_subprocess_call(command, cwd, env, end_patterns, test,
 
     if out is not None:
         del out['exit_code']
-
+        assert out.pop('time')
     assert out == exp

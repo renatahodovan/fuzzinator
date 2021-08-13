@@ -83,7 +83,8 @@ class SubprocessPropertyDecorator(CallDecorator):
                                decode(e.stdout, self.encoding),
                                decode(e.stderr, self.encoding))
             except subprocess.CalledProcessError as e:
-                logger.warning('SubprocessPropertyDecorator exited with nonzero exit code while setting the \'%s\' property.\n%s\n%s',
+                logger.warning('SubprocessPropertyDecorator exited with nonzero exit code (%d) while setting the \'%s\' property.\n%s\n%s',
+                               e.returncode,
                                self.property,
                                decode(e.stdout, self.encoding),
                                decode(e.stderr, self.encoding))

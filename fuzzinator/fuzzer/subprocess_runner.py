@@ -91,7 +91,8 @@ class SubprocessRunner(Fuzzer):
                            decode(e.stdout, self.encoding),
                            decode(e.stderr, self.encoding))
         except subprocess.CalledProcessError as e:
-            logger.warning('Fuzzer command returned with nonzero exit code (%d).\n%s\n%s', e.returncode,
+            logger.warning('Fuzzer command returned with nonzero exit code (%d).\n%s\n%s',
+                           e.returncode,
                            decode(e.stdout, self.encoding),
                            decode(e.stderr, self.encoding))
         self.tests = [os.path.join(self.work_dir, test) for test in os.listdir(self.work_dir)]

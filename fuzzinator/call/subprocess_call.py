@@ -94,6 +94,9 @@ class SubprocessCall(Call):
             if self.no_exit_code or result.returncode != 0:
                 return issue
         except subprocess.TimeoutExpired as e:
-            logger.debug('SubprocessCall execution timeout (%ds) expired.', e.timeout)
+            logger.debug('SubprocessCall execution timeout (%ds) expired.\n%s\n%s',
+                         e.timeout,
+                         decode(e.stdout, self.encoding),
+                         decode(e.stderr, self.encoding))
 
         return NonIssue(issue) if issue else None

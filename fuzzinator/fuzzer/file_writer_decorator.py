@@ -83,7 +83,7 @@ class FileWriterDecorator(object):
                 decorator.uid += 1
 
                 with open(file_path, 'w' if not isinstance(self.test, bytes) else 'wb') as f:
-                    f.write(self.test)
+                    f.write(self.test if isinstance(self.test, (str, bytes)) else str(self.test))
 
                 return file_path
 

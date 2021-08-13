@@ -68,7 +68,7 @@ class FileWriterDecorator(CallDecorator):
 
             os.makedirs(self.work_dir, exist_ok=True)
             with open(file_path, 'w' if not isinstance(test, bytes) else 'wb') as f:
-                f.write(test)
+                f.write(test if isinstance(test, (str, bytes)) else str(test))
 
             issue = call(obj, test=file_path, **kwargs)
             if issue:

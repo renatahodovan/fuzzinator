@@ -71,6 +71,8 @@ class BaseAPIHandler(RequestHandler):
 
     def get_pagination_query(self, columns):
         search = self.get_query_argument('search', None)
+        if search:
+            search = search.strip()
         sort = self.get_query_argument('sort', None)
         order = self.get_query_argument('order', None)
         offset = self.get_query_argument('offset', None)

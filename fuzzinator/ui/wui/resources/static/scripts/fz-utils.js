@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+ * Copyright (c) 2019-2021 Renata Hodovan, Akos Kiss.
  *
  * Licensed under the BSD 3-Clause License
  * <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -31,6 +31,7 @@
       rememberOrder: true,
       sortName: options.sortName,
       sortOrder: options.sortOrder,
+      trimOnSearch: false,
       buttonsClass: 'outline-secondary',
 
       detailView: options.detailFormatter !== null,

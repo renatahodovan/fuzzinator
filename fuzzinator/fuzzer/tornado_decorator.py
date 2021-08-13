@@ -179,5 +179,8 @@ class TornadoDecorator(object):
                     except FileNotFoundError:
                         logger.debug('%s not found', page)
                         self.send_error(404)
+                    except Exception as e:
+                        logger.debug('Exception while rendering %s', page, exc_info=e)
+                        self.send_error(500)
 
         return DecoratedFuzzer

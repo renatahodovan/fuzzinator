@@ -46,27 +46,24 @@ class RegexAutomatonFilter(CallDecorator):
         for stream, desc in kwargs.items():
             self.patterns[stream] = [RegexAutomaton.split_pattern(p) for p in as_list(desc)]
 
-    def decorate(self, call):
-        def decorated_call(obj, *, test, **kwargs):
-            issue = call(obj, test=test, **kwargs)
-            if not issue:
-                return issue
-
-            issue_details = dict()
-            for field, instructions in self.patterns.items():
-                # Process the field content line-by-line.
-                regex_automaton = RegexAutomaton(instructions, existing_fields=set(issue.keys()))
-                terminate, _ = regex_automaton.process(issue.get(field, '').splitlines(), issue_details)
-                if terminate:
-                    if not issue_details:
-                        return NonIssue(issue)
-                    issue.update(issue_details)
-                    return issue
-
-            if not issue_details:
-                return NonIssue(issue)
-
-            issue.update(issue_details)
+    def call(self, cls, obj, *, test, **kwargs):
+        issue = super(cls, obj).__call__(test=test, **kwargs)
+        if not issue:
             return issue
 
-        return decorated_call
+        issue_details = dict()
+        for field, instructions in self.patterns.items():
+            # Process the field content line-by-line.
+            regex_automaton = RegexAutomaton(instructions, existing_fields=set(issue.keys()))
+            terminate, _ = regex_automaton.process(issue.get(field, '').splitlines(), issue_details)
+            if terminate:
+                if not issue_details:
+                    return NonIssue(issue)
+                issue.update(issue_details)
+                return issue
+
+        if not issue_details:
+            return NonIssue(issue)
+
+        issue.update(issue_details)
+        return issue

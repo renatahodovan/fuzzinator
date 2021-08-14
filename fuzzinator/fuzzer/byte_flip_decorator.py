@@ -8,8 +8,10 @@
 import math
 import random
 
+from .fuzzer_decorator import FuzzerDecorator
 
-class ByteFlipDecorator(object):
+
+class ByteFlipDecorator(FuzzerDecorator):
     """
     Decorator to add extra random byte flips to fuzzer results.
 
@@ -52,20 +54,13 @@ class ByteFlipDecorator(object):
         self.min_byte = int(min_byte)
         self.max_byte = int(max_byte)
 
-    def __call__(self, fuzzer_class):
-        decorator = self
+    def call(self, cls, obj, *, index):
+        test = super(cls, obj).__call__(index=index)
+        if test is None:
+            return None
 
-        class DecoratedFuzzer(fuzzer_class):
+        test = bytearray(test)
+        for pos in random.sample(range(len(test)), math.ceil(len(test) / self.frequency)):
+            test[pos] = random.randint(self.min_byte, self.max_byte)
 
-            def __call__(self, *, index):
-                test = super().__call__(index=index)
-                if test is None:
-                    return None
-
-                test = bytearray(test)
-                for pos in random.sample(range(len(test)), math.ceil(len(test) / decorator.frequency)):
-                    test[pos] = random.randint(decorator.min_byte, decorator.max_byte)
-
-                return bytes(test)
-
-        return DecoratedFuzzer
+        return bytes(test)

@@ -49,17 +49,14 @@ class ExitCodeFilter(CallDecorator):
         self.exit_codes = as_list(exit_codes)
         self.invert = as_bool(invert)
 
-    def decorate(self, call):
-        def decorated_call(obj, *, test, **kwargs):
-            issue = call(obj, test=test, **kwargs)
-            if not issue:
-                return issue
+    def call(self, cls, obj, *, test, **kwargs):
+        issue = super(cls, obj).__call__(test=test, **kwargs)
+        if not issue:
+            return issue
 
-            if not self.invert:
-                if issue['exit_code'] in self.exit_codes:
-                    return issue
-            elif issue['exit_code'] not in self.exit_codes:
+        if not self.invert:
+            if issue['exit_code'] in self.exit_codes:
                 return issue
-            return NonIssue(issue)
-
-        return decorated_call
+        elif issue['exit_code'] not in self.exit_codes:
+            return issue
+        return NonIssue(issue)

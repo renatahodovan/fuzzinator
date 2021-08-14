@@ -9,6 +9,7 @@ from .afl_runner import AFLRunner
 from .byte_flip_decorator import ByteFlipDecorator
 from .file_writer_decorator import FileWriterDecorator
 from .fuzzer import Fuzzer
+from .fuzzer_decorator import FuzzerDecorator
 from .list_directory import ListDirectory
 from .random_content import RandomContent
 from .random_integer import RandomInteger

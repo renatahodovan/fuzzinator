@@ -14,16 +14,17 @@ try:
     from asyncio import all_tasks as asyncio_all_tasks  # from py39, asyncio.Task.all_tasks is deprecated
 except ImportError:
     asyncio_all_tasks = asyncio.Task.all_tasks  # pylint: disable=no-member
-from inspect import signature
 
 from tornado.ioloop import IOLoop
 from tornado.testing import bind_unused_port
 from tornado.web import Application, RequestHandler
 
+from .fuzzer_decorator import FuzzerDecorator
+
 logger = logging.getLogger(__name__)
 
 
-class TornadoDecorator(object):
+class TornadoDecorator(FuzzerDecorator):
     """
     Decorator for fuzzers to transport generated content through http. It is
     useful for transporting fuzz tests to browser SUTs.
@@ -95,125 +96,111 @@ class TornadoDecorator(object):
         logging.getLogger('tornado.access').addHandler(hn)
         logging.getLogger('tornado.access').propagate = False
 
-    def __call__(self, fuzzer_class):
+    def init(self, cls, obj, **kwargs):
+        super(cls, obj).__init__(**kwargs)
+        obj.index = 0
+        obj.test = None
+        obj._port = None
+        obj._thread = None
+        obj._asyncio_loop = None
+        obj._ioloop = None
+
+    def _url(self, obj):
+        return self.url.format(port=obj._port, index=obj.index)
+
+    def _service(self, obj):
+        return '{scheme}://localhost:{port}'.format(scheme='https' if self.ssl_ctx else 'http', port=obj._port)
+
+    def call(self, cls, obj, *, index):
+        if index != 0 and obj.test is None:
+            return None
+
+        return self._url(obj)
+
+    def enter(self, cls, obj):
         decorator = self
 
-        class DecoratedFuzzer(fuzzer_class):
+        class MainHandler(RequestHandler):
 
-            def __init__(self, **kwargs):
-                signature(self.__init__).bind(**kwargs)
-                super().__init__(**kwargs)
-                self.index = 0
-                self.test = None
-                self.__port = None
-                self.__thread = None
-                self.__asyncio_loop = None
-                self.__ioloop = None
-            __init__.__signature__ = signature(fuzzer_class.__init__)
+            def data_received(self, chunk):
+                pass
 
-            def _url(self):
-                return decorator.url.format(port=self.__port, index=self.index)
+            def get(self):
+                try:
+                    obj.test = super(cls, obj).__call__(index=obj.index)
 
-            def _service(self):
-                return '{scheme}://localhost:{port}'.format(scheme='https' if decorator.ssl_ctx else 'http', port=self.__port)
+                    if obj.test is not None:
+                        obj.index += 1
+                        if decorator.refresh > 0:
+                            self.set_header('Refresh', '{timeout}; url={url}'
+                                            .format(timeout=decorator.refresh,
+                                                    url=decorator._url(obj)))
+                        test = obj.test
+                        if not isinstance(test, (str, bytes, dict)):
+                            test = str(test)
+                        self.write(test)
+                except Exception as e:
+                    logger.warning('Unhandled exception in TornadoDecorator.', exc_info=e)
 
-            def __call__(self, *, index):
-                if index != 0 and self.test is None:
-                    return None
+        class TemplateHandler(RequestHandler):
 
-                return self._url()
+            def get(self, page):
+                try:
+                    self.render(page + '.html')
+                except FileNotFoundError:
+                    logger.debug('%s not found', page)
+                    self.send_error(404)
+                except Exception as e:
+                    logger.debug('Exception while rendering %s', page, exc_info=e)
+                    self.send_error(500)
 
-            def __enter__(self):
-                fuzzer = super().__call__
+        def start_tornado():
+            # Create a new asyncio event loop, set it as current, and wrap it in Tornado's IOLoop.
+            obj._asyncio_loop = asyncio.new_event_loop()  # save asyncio event loop so that we can cancel its tasks when shutting down
+            asyncio.set_event_loop(obj._asyncio_loop)
+            obj._ioloop = IOLoop.current()  # save the Tornado-wrapped event loop so that we can stop it when shutting down
 
-                def start_tornado():
-                    # Create a new asyncio event loop, set it as current, and wrap it in Tornado's IOLoop.
-                    self.__asyncio_loop = asyncio.new_event_loop()  # save asyncio event loop so that we can cancel its tasks when shutting down
-                    asyncio.set_event_loop(self.__asyncio_loop)
-                    self.__ioloop = IOLoop.current()  # save the Tornado-wrapped event loop so that we can stop it when shutting down
+            # Set up the web service (application).
+            handlers = [(r'/', MainHandler)]
+            if self.template_path:
+                handlers += [(r'/(.+)', TemplateHandler)]
 
-                    # Set up the web service (application).
-                    handlers = [(r'/', self.MainHandler, dict(wrapper=self, fuzzer=fuzzer))]
-                    if decorator.template_path:
-                        handlers += [(r'/(.+)', self.TemplateHandler, {})]
+            app = Application(handlers,
+                              template_path=self.template_path,
+                              static_path=self.static_path,
+                              debug=True)
+            app.listen(obj._port, ssl_options=self.ssl_ctx)
 
-                    app = Application(handlers,
-                                      template_path=decorator.template_path,
-                                      static_path=decorator.static_path,
-                                      debug=True)
-                    app.listen(self.__port, ssl_options=decorator.ssl_ctx)
+            # Run the event loop and the application within.
+            logger.debug('Starting Tornado server at %s', self._service(obj))
+            obj._ioloop.start()  # block here until even loop is stopped
+            obj._ioloop.close(all_fds=True)  # release port after event loop is stopped
+            logger.debug('Stopped Tornado server at %s', self._service(obj))
 
-                    # Run the event loop and the application within.
-                    logger.debug('Starting Tornado server at %s', self._service())
-                    self.__ioloop.start()  # block here until even loop is stopped
-                    self.__ioloop.close(all_fds=True)  # release port after event loop is stopped
-                    logger.debug('Stopped Tornado server at %s', self._service())
+        # Call decorated fuzzer's __enter__.
+        super(cls, obj).__enter__()
 
-                # Call decorated fuzzer's __enter__.
-                super().__enter__()
+        # Start Tornado in a separate thread.
+        _, obj._port = bind_unused_port()  # get random available port before starting the thread, because we cannot be sure when the thread will actually start and __call__ may need it sooner
+        obj._thread = threading.Thread(target=start_tornado)  # save the thread so that we can join it when shutting down
+        obj._thread.start()
 
-                # Start Tornado in a separate thread.
-                _, self.__port = bind_unused_port()  # get random available port before starting the thread, because we cannot be sure when the thread will actually start and __call__ may need it sooner
-                self.__thread = threading.Thread(target=start_tornado)  # save the thread so that we can join it when shutting down
-                self.__thread.start()
+        return obj
 
-                return self
+    def exit(self, cls, obj, *exc):
+        def stop_tornado():
+            # (Ask to) cancel all pending tasks of the underlying asyncio event loop. Cancellation actually happens in a next iteration of the loop.
+            for task in asyncio_all_tasks(obj._asyncio_loop):  # this is to avoid harmless(?) "ERROR:asyncio:Task was destroyed but it is pending!" messages
+                task.cancel()
+            # Ask to stop the event loop (after the cancellations happen).
+            obj._ioloop.add_callback(obj._ioloop.stop)
 
-            def __exit__(self, *exc):
-                def stop_tornado():
-                    # (Ask to) cancel all pending tasks of the underlying asyncio event loop. Cancellation actually happens in a next iteration of the loop.
-                    for task in asyncio_all_tasks(self.__asyncio_loop):  # this is to avoid harmless(?) "ERROR:asyncio:Task was destroyed but it is pending!" messages
-                        task.cancel()
-                    # Ask to stop the event loop (after the cancellations happen).
-                    self.__ioloop.add_callback(self.__ioloop.stop)
+        # Call decorated fuzzer's __exit__.
+        suppress = super(cls, obj).__exit__(*exc)
 
-                # Call decorated fuzzer's __exit__.
-                suppress = super().__exit__(*exc)
+        # Stop the thread of Tornado and wait until it terminates.
+        logger.debug('Stopping Tornado server at %s', self._service(obj))
+        obj._ioloop.add_callback(stop_tornado)
+        obj._thread.join()
 
-                # Stop the thread of Tornado and wait until it terminates.
-                logger.debug('Stopping Tornado server at %s', self._service())
-                self.__ioloop.add_callback(stop_tornado)
-                self.__thread.join()
-
-                return suppress
-
-            class MainHandler(RequestHandler):
-
-                def __init__(self, application, request, wrapper, fuzzer):
-                    super().__init__(application, request)
-                    self.wrapper = wrapper
-                    self.fuzzer = fuzzer
-
-                def data_received(self, chunk):
-                    pass
-
-                def get(self):
-                    try:
-                        self.wrapper.test = self.fuzzer(index=self.wrapper.index)
-
-                        if self.wrapper.test is not None:
-                            self.wrapper.index += 1
-                            if decorator.refresh > 0:
-                                self.set_header('Refresh', '{timeout}; url={url}'
-                                                .format(timeout=decorator.refresh,
-                                                        url=self.wrapper._url()))
-                            test = self.wrapper.test
-                            if not isinstance(test, (str, bytes, dict)):
-                                test = str(test)
-                            self.write(test)
-                    except Exception as e:
-                        logger.warning('Unhandled exception in TornadoDecorator.', exc_info=e)
-
-            class TemplateHandler(RequestHandler):
-
-                def get(self, page):
-                    try:
-                        self.render(page + '.html')
-                    except FileNotFoundError:
-                        logger.debug('%s not found', page)
-                        self.send_error(404)
-                    except Exception as e:
-                        logger.debug('Exception while rendering %s', page, exc_info=e)
-                        self.send_error(500)
-
-        return DecoratedFuzzer
+        return suppress

@@ -115,38 +115,35 @@ class SanitizerAnalyzerDecorator(CallDecorator):
         except ValueError:
             return True
 
-    def decorate(self, call):
-        def decorated_call(obj, *, test, **kwargs):
-            issue = call(obj, test=test, **kwargs)
-            if not issue:
-                return issue
-
-            if not issue.get('error_type'):
-                return issue
-
-            sanitizer = 'UndefinedBehaviorSanitizer' if issue.get('ubsan') else issue.get('sanitizer')
-
-            for pattern, name in self.san_error_types.get(sanitizer, {}).items():
-                if pattern in issue['error_type']:
-                    issue['error_type'] = name
-                    break
-
-            if issue['error_type'] in ['SEGV', 'access-violation']:
-                if self.is_null_dereference(issue['address']):
-                    issue['error_type'] = 'null-dereference'
-                else:
-                    issue['error_type'] = 'unknown-crash'
-
-            for severity, error_types in self.severity.items():
-                if issue['error_type'] in error_types:
-                    issue['security'] = severity
-                    break
-            else:
-                issue['security'] = self.NONE
-
-            if 'WRITE' in issue.get('mem_access', ''):
-                issue['security'] = self.HIGH
-
+    def call(self, cls, obj, *, test, **kwargs):
+        issue = super(cls, obj).__call__(test=test, **kwargs)
+        if not issue:
             return issue
 
-        return decorated_call
+        if not issue.get('error_type'):
+            return issue
+
+        sanitizer = 'UndefinedBehaviorSanitizer' if issue.get('ubsan') else issue.get('sanitizer')
+
+        for pattern, name in self.san_error_types.get(sanitizer, {}).items():
+            if pattern in issue['error_type']:
+                issue['error_type'] = name
+                break
+
+        if issue['error_type'] in ['SEGV', 'access-violation']:
+            if self.is_null_dereference(issue['address']):
+                issue['error_type'] = 'null-dereference'
+            else:
+                issue['error_type'] = 'unknown-crash'
+
+        for severity, error_types in self.severity.items():
+            if issue['error_type'] in error_types:
+                issue['security'] = severity
+                break
+        else:
+            issue['security'] = self.NONE
+
+        if 'WRITE' in issue.get('mem_access', ''):
+            issue['security'] = self.HIGH
+
+        return issue

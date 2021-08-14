@@ -28,7 +28,7 @@ disable=
     import-outside-toplevel, consider-using-with, deprecated-module,
     consider-using-dict-items, too-many-boolean-expressions,
     unspecified-encoding, use-dict-literal, use-list-literal,
-    redundant-u-string-prefix
+    redundant-u-string-prefix, bad-super-call
 
 [TYPECHECK]
 

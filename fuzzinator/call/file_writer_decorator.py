@@ -7,6 +7,7 @@
 
 import logging
 import os
+import shutil
 
 from .call_decorator import CallDecorator
 
@@ -55,26 +56,28 @@ class FileWriterDecorator(CallDecorator):
         self.work_dir = work_dir
         self.uid = 0
 
-    def decorate(self, call):
-        def decorated_call(obj, *, test, **kwargs):
-            if 'filename' in kwargs:
-                # Ensure that the test case will be saved to the directory defined by the
-                # config file and its name will be what is expected by the kwargs.
-                filename = kwargs['filename']
-            else:
-                filename = self.filename.format(uid=self.uid)
-                self.uid += 1
-            file_path = os.path.join(self.work_dir, filename)
+    def exit(self, cls, obj, *exc):
+        suppress = super(cls, obj).__exit__(*exc)
+        shutil.rmtree(self.work_dir, ignore_errors=True)
+        return suppress
 
-            os.makedirs(self.work_dir, exist_ok=True)
-            with open(file_path, 'w' if not isinstance(test, bytes) else 'wb') as f:
-                f.write(test if isinstance(test, (str, bytes)) else str(test))
+    def call(self, cls, obj, *, test, **kwargs):
+        if 'filename' in kwargs:
+            # Ensure that the test case will be saved to the directory defined by the
+            # config file and its name will be what is expected by the kwargs.
+            filename = kwargs['filename']
+        else:
+            filename = self.filename.format(uid=self.uid)
+            self.uid += 1
+        file_path = os.path.join(self.work_dir, filename)
 
-            issue = call(obj, test=file_path, **kwargs)
-            if issue:
-                issue['filename'] = filename
+        os.makedirs(self.work_dir, exist_ok=True)
+        with open(file_path, 'w' if not isinstance(test, bytes) else 'wb') as f:
+            f.write(test if isinstance(test, (str, bytes)) else str(test))
 
-            os.remove(file_path)
-            return issue
+        issue = super(cls, obj).__call__(test=file_path, **kwargs)
+        if issue:
+            issue['filename'] = filename
 
-        return decorated_call
+        os.remove(file_path)
+        return issue

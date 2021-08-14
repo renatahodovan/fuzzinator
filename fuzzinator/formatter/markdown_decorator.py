@@ -47,11 +47,8 @@ class MarkdownDecorator(FormatterDecorator):
     def __init__(self, *, extensions=None, **kwargs):
         self.extensions = as_list(extensions) if extensions else ['extra']
 
-    def decorate(self, call):
-        def decorated_call(obj, *, issue, format='long'):
-            formatted = call(obj, issue=issue, format=format)
-            if format != 'short':
-                formatted = markdown.markdown(formatted, extensions=self.extensions)
-            return formatted
-
-        return decorated_call
+    def call(self, cls, obj, *, issue, format='long'):
+        formatted = super(cls, obj).__call__(issue=issue, format=format)
+        if format != 'short':
+            formatted = markdown.markdown(formatted, extensions=self.extensions)
+        return formatted

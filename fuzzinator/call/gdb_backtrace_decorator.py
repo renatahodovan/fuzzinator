@@ -65,27 +65,24 @@ class GdbBacktraceDecorator(CallDecorator):
         self.env = dict(os.environ, **as_dict(env)) if env else None
         self.encoding = encoding
 
-    def decorate(self, call):
-        def decorated_call(obj, *, test, **kwargs):
-            issue = call(obj, test=test, **kwargs)
-            if not issue:
-                return issue
-
-            try:
-                child = pexpect.spawn('gdb', ['-ex', 'set width unlimited', '-ex', 'set pagination off', '--args'] + as_pargs(self.command.format(test=test)),
-                                      cwd=self.cwd,
-                                      env=self.env)
-                child.expect_exact('(gdb) ')
-                child.sendline('run')
-                child.expect_exact('(gdb) ')
-                child.sendline('bt')
-                child.expect_exact('(gdb) ')
-                backtrace = child.before
-                child.terminate(force=True)
-                issue['backtrace'] = decode(backtrace, self.encoding)
-            except Exception as e:
-                logger.warning('Failed to obtain gdb backtrace', exc_info=e)
-
+    def call(self, cls, obj, *, test, **kwargs):
+        issue = super(cls, obj).__call__(test=test, **kwargs)
+        if not issue:
             return issue
 
-        return decorated_call
+        try:
+            child = pexpect.spawn('gdb', ['-ex', 'set width unlimited', '-ex', 'set pagination off', '--args'] + as_pargs(self.command.format(test=test)),
+                                  cwd=self.cwd,
+                                  env=self.env)
+            child.expect_exact('(gdb) ')
+            child.sendline('run')
+            child.expect_exact('(gdb) ')
+            child.sendline('bt')
+            child.expect_exact('(gdb) ')
+            backtrace = child.before
+            child.terminate(force=True)
+            issue['backtrace'] = decode(backtrace, self.encoding)
+        except Exception as e:
+            logger.warning('Failed to obtain gdb backtrace', exc_info=e)
+
+        return issue

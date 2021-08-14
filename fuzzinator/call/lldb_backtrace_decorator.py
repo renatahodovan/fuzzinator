@@ -68,33 +68,30 @@ class LldbBacktraceDecorator(CallDecorator):
         self.timeout = int(timeout) if timeout is not None else 1
         self.encoding = encoding
 
-    def decorate(self, call):
-        def decorated_call(obj, *, test, **kwargs):
-            issue = call(obj, test=test, **kwargs)
-            if not issue:
-                return issue
-
-            try:
-                expect_patterns = [r'\(lldb\) ', pexpect.EOF, pexpect.TIMEOUT]
-                child = pexpect.spawn('lldb', ['-X', '--'] + as_pargs(self.command.format(test=test)),
-                                      cwd=self.cwd,
-                                      env=self.env)
-                while child.expect(expect_patterns, timeout=self.timeout) == 0:
-                    pass
-                child.sendline('run')
-                while child.expect(expect_patterns, timeout=self.timeout) == 0:
-                    pass
-                child.sendline('bt')
-
-                backtrace = b''
-                while child.expect(expect_patterns, timeout=self.timeout) == 0:
-                    backtrace += child.before
-
-                child.sendline('quit')
-                issue['backtrace'] = decode(backtrace, self.encoding)
-            except Exception as e:
-                logger.warning('Failed to obtain lldb backtrace', exc_info=e)
-
+    def call(self, cls, obj, *, test, **kwargs):
+        issue = super(cls, obj).__call__(test=test, **kwargs)
+        if not issue:
             return issue
 
-        return decorated_call
+        try:
+            expect_patterns = [r'\(lldb\) ', pexpect.EOF, pexpect.TIMEOUT]
+            child = pexpect.spawn('lldb', ['-X', '--'] + as_pargs(self.command.format(test=test)),
+                                  cwd=self.cwd,
+                                  env=self.env)
+            while child.expect(expect_patterns, timeout=self.timeout) == 0:
+                pass
+            child.sendline('run')
+            while child.expect(expect_patterns, timeout=self.timeout) == 0:
+                pass
+            child.sendline('bt')
+
+            backtrace = b''
+            while child.expect(expect_patterns, timeout=self.timeout) == 0:
+                backtrace += child.before
+
+            child.sendline('quit')
+            issue['backtrace'] = decode(backtrace, self.encoding)
+        except Exception as e:
+            logger.warning('Failed to obtain lldb backtrace', exc_info=e)
+
+        return issue

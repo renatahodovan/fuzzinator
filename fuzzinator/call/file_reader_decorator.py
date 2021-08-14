@@ -35,15 +35,12 @@ class FileReaderDecorator(CallDecorator):
     def __init__(self, **kwargs):
         pass
 
-    def decorate(self, call):
-        def decorated_call(obj, *, test, **kwargs):
-            issue = call(obj, test=test, **kwargs)
+    def call(self, cls, obj, *, test, **kwargs):
+        issue = super(cls, obj).__call__(test=test, **kwargs)
 
-            if issue:
-                with open(test, 'rb') as f:
-                    issue['test'] = f.read()
-                issue['filename'] = os.path.basename(test)
+        if issue:
+            with open(test, 'rb') as f:
+                issue['test'] = f.read()
+            issue['filename'] = os.path.basename(test)
 
-            return issue
-
-        return decorated_call
+        return issue

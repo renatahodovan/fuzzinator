@@ -56,8 +56,5 @@ class DecoderDecorator(FormatterDecorator):
 
         return value
 
-    def decorate(self, call):
-        def decorated_call(obj, *, issue, format='long'):
-            return call(obj, issue=self.decode(deepcopy(issue)), format=format)
-
-        return decorated_call
+    def call(self, cls, obj, *, issue, format='long'):
+        return super(cls, obj).__call__(issue=self.decode(deepcopy(issue)), format=format)

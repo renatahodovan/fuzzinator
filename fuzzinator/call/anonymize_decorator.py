@@ -45,16 +45,13 @@ class AnonymizeDecorator(CallDecorator):
         self.new_text = new_text or ''
         self.properties = as_list(properties) if properties else None
 
-    def decorate(self, call):
-        def decorated_call(obj, *, test, **kwargs):
-            issue = call(obj, test=test, **kwargs)
-            if not issue:
-                return issue
-
-            keys = self.properties or list(issue.keys())
-            for key in keys:
-                issue[key] = issue.get(key, '').replace(self.old_text, self.new_text)
-
+    def call(self, cls, obj, *, test, **kwargs):
+        issue = super(cls, obj).__call__(test=test, **kwargs)
+        if not issue:
             return issue
 
-        return decorated_call
+        keys = self.properties or list(issue.keys())
+        for key in keys:
+            issue[key] = issue.get(key, '').replace(self.old_text, self.new_text)
+
+        return issue

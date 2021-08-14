@@ -9,12 +9,12 @@ import logging
 import os
 import shutil
 
-from inspect import signature
+from .fuzzer_decorator import FuzzerDecorator
 
 logger = logging.getLogger(__name__)
 
 
-class FileWriterDecorator(object):
+class FileWriterDecorator(FuzzerDecorator):
     """
     Decorator for fuzzers that create str or bytes-like output. The decorator
     writes the test input to a temporary file (relative to an implicit temporary
@@ -52,39 +52,29 @@ class FileWriterDecorator(object):
         self.work_dir = work_dir
         self.uid = 0
 
-    def __call__(self, fuzzer_class):
-        decorator = self
+    def init(self, cls, obj, **kwargs):
+        super(cls, obj).__init__(**kwargs)
+        obj.test = None
 
-        class DecoratedFuzzer(fuzzer_class):
+    def enter(self, cls, obj):
+        super(cls, obj).__enter__()
+        os.makedirs(self.work_dir, exist_ok=True)
+        return self
 
-            def __init__(self, **kwargs):
-                signature(self.__init__).bind(**kwargs)
-                super().__init__(**kwargs)
-                self.test = None
-            __init__.__signature__ = signature(fuzzer_class.__init__)
+    def exit(self, cls, obj, *exc):
+        suppress = super(cls, obj).__exit__(*exc)
+        shutil.rmtree(self.work_dir, ignore_errors=True)
+        return suppress
 
-            def __enter__(self):
-                super().__enter__()
-                os.makedirs(decorator.work_dir, exist_ok=True)
-                return self
+    def call(self, cls, obj, *, index):
+        obj.test = super(cls, obj).__call__(index=index)
+        if obj.test is None:
+            return None
 
-            def __exit__(self, *exc):
-                suppress = super().__exit__(*exc)
-                shutil.rmtree(decorator.work_dir, ignore_errors=True)
-                return suppress
+        file_path = os.path.join(self.work_dir, self.filename.format(uid=self.uid))
+        self.uid += 1
 
-            def __call__(self, *, index):
-                self.test = super().__call__(index=index)
+        with open(file_path, 'w' if not isinstance(obj.test, bytes) else 'wb') as f:
+            f.write(obj.test if isinstance(obj.test, (str, bytes)) else str(obj.test))
 
-                if self.test is None:
-                    return None
-
-                file_path = os.path.join(decorator.work_dir, decorator.filename.format(uid=decorator.uid))
-                decorator.uid += 1
-
-                with open(file_path, 'w' if not isinstance(self.test, bytes) else 'wb') as f:
-                    f.write(self.test if isinstance(self.test, (str, bytes)) else str(self.test))
-
-                return file_path
-
-        return DecoratedFuzzer
+        return file_path

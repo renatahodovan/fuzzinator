@@ -40,14 +40,11 @@ class UniqueIdDecorator(CallDecorator):
     def __init__(self, *, properties, **kwargs):
         self.properties = as_list(properties) if properties else None
 
-    def decorate(self, call):
-        def decorated_call(obj, *, test, **kwargs):
-            issue = call(obj, test=test, **kwargs)
-            if not issue:
-                return issue
-
-            prop_lst = [issue.get(prop, '') for prop in self.properties]
-            issue['id'] = ' '.join(prop.decode('utf-8', errors='ignore') if isinstance(prop, bytes) else prop for prop in prop_lst)
+    def call(self, cls, obj, *, test, **kwargs):
+        issue = super(cls, obj).__call__(test=test, **kwargs)
+        if not issue:
             return issue
 
-        return decorated_call
+        prop_lst = [issue.get(prop, '') for prop in self.properties]
+        issue['id'] = ' '.join(prop.decode('utf-8', errors='ignore') if isinstance(prop, bytes) else prop for prop in prop_lst)
+        return issue

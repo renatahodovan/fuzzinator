@@ -46,20 +46,17 @@ class RegexFilter(CallDecorator):
         for field, patterns_str in kwargs.items():
             self.patterns[field] = [re.compile(pattern, flags=re.MULTILINE | re.DOTALL) for pattern in as_list(patterns_str)]
 
-    def decorate(self, call):
-        def decorated_call(obj, *, test, **kwargs):
-            issue = call(obj, test=test, **kwargs)
-            if not issue:
-                return issue
+    def call(self, cls, obj, *, test, **kwargs):
+        issue = super(cls, obj).__call__(test=test, **kwargs)
+        if not issue:
+            return issue
 
-            updated = False
-            for field, field_patterns in self.patterns.items():
-                for pattern in field_patterns:
-                    match = pattern.search(issue.get(field, ''))
-                    if match is not None:
-                        issue.update(match.groupdict())
-                        updated = True
+        updated = False
+        for field, field_patterns in self.patterns.items():
+            for pattern in field_patterns:
+                match = pattern.search(issue.get(field, ''))
+                if match is not None:
+                    issue.update(match.groupdict())
+                    updated = True
 
-            return issue if updated else NonIssue(issue)
-
-        return decorated_call
+        return issue if updated else NonIssue(issue)

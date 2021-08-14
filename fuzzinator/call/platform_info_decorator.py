@@ -31,14 +31,11 @@ class PlatformInfoDecorator(CallDecorator):
     def __init__(self, **kwargs):
         pass
 
-    def decorate(self, call):
-        def decorated_call(obj, *, test, **kwargs):
-            issue = call(obj, test=test, **kwargs)
-            if not issue:
-                return issue
-
-            issue['platform'] = platform.platform()
-            issue['node'] = platform.node()
+    def call(self, cls, obj, *, test, **kwargs):
+        issue = super(cls, obj).__call__(test=test, **kwargs)
+        if not issue:
             return issue
 
-        return decorated_call
+        issue['platform'] = platform.platform()
+        issue['node'] = platform.node()
+        return issue

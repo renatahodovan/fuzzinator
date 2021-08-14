@@ -61,33 +61,30 @@ class SubprocessPropertyDecorator(CallDecorator):
         self.timeout = int(timeout) if timeout else None
         self.encoding = encoding
 
-    def decorate(self, call):
-        def decorated_call(obj, *, test, **kwargs):
-            issue = call(obj, test=test, **kwargs)
-            if not issue:
-                return issue
-
-            try:
-                result = subprocess.run(as_pargs(self.command),
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE,
-                                        cwd=self.cwd,
-                                        env=self.env,
-                                        timeout=self.timeout,
-                                        check=True)
-                issue[self.property] = decode(result.stdout, self.encoding)
-            except subprocess.TimeoutExpired as e:
-                logger.warning('SubprocessPropertyDecorator execution timeout (%ds) expired while setting the \'%s\' property.\n%s\n%s',
-                               e.timeout,
-                               self.property,
-                               decode(e.stdout, self.encoding),
-                               decode(e.stderr, self.encoding))
-            except subprocess.CalledProcessError as e:
-                logger.warning('SubprocessPropertyDecorator exited with nonzero exit code (%d) while setting the \'%s\' property.\n%s\n%s',
-                               e.returncode,
-                               self.property,
-                               decode(e.stdout, self.encoding),
-                               decode(e.stderr, self.encoding))
+    def call(self, cls, obj, *, test, **kwargs):
+        issue = super(cls, obj).__call__(test=test, **kwargs)
+        if not issue:
             return issue
 
-        return decorated_call
+        try:
+            result = subprocess.run(as_pargs(self.command),
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    cwd=self.cwd,
+                                    env=self.env,
+                                    timeout=self.timeout,
+                                    check=True)
+            issue[self.property] = decode(result.stdout, self.encoding)
+        except subprocess.TimeoutExpired as e:
+            logger.warning('SubprocessPropertyDecorator execution timeout (%ds) expired while setting the \'%s\' property.\n%s\n%s',
+                           e.timeout,
+                           self.property,
+                           decode(e.stdout, self.encoding),
+                           decode(e.stderr, self.encoding))
+        except subprocess.CalledProcessError as e:
+            logger.warning('SubprocessPropertyDecorator exited with nonzero exit code (%d) while setting the \'%s\' property.\n%s\n%s',
+                           e.returncode,
+                           self.property,
+                           decode(e.stdout, self.encoding),
+                           decode(e.stderr, self.encoding))
+        return issue

@@ -18,20 +18,21 @@ class ValidateJob(CallJob):
 
     def __init__(self, id, config, issue, db, listener):
         sut_name = issue['sut']
+        sut_section = 'sut.' + sut_name
         fuzzer_name = issue['fuzzer']
         subconfig_id = issue['subconfig'].get('subconfig') if isinstance(issue.get('subconfig'), dict) else None
         super().__init__(id, config, subconfig_id, sut_name, fuzzer_name, db, listener)
 
         self.issue = issue
         capacity = int(config.get('fuzzinator', 'cost_budget'))
-        self.cost = min(int(config.get('sut.' + sut_name, 'validate_cost', fallback=config.get('sut.' + sut_name, 'cost', fallback=1))), capacity)
+        self.cost = min(int(config.get(sut_section, 'validate_cost', fallback=config.get(sut_section, 'cost', fallback=1))), capacity)
 
     def run(self):
         _, new_issues = self.validate()
         return new_issues
 
     def validate(self):
-        sut_call = config_get_object(self.config, 'sut.' + self.sut_name, ['validate_call', 'reduce_call', 'call'])
+        sut_call = config_get_object(self.config, 'sut.' + self.sut_name, ['validate_call', 'call'])
         with sut_call:
             issue = sut_call(**self.issue)
 

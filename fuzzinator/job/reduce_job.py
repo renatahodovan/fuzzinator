@@ -27,7 +27,7 @@ class ReduceJob(CallJob):
 
         self.issue = issue
         capacity = int(config.get('fuzzinator', 'cost_budget'))
-        self.cost = min(int(config.get(sut_section, 'reduce_cost', fallback=config.get(sut_section, 'cost', fallback=1))), capacity)
+        self.cost = min(int(config.get(sut_section, 'reduce_cost', fallback=config.get(sut_section, 'validate_cost', fallback=config.get(sut_section, 'cost', fallback=1)))), capacity)
 
     def run(self):
         valid, issues = ValidateJob(id=self.id,
@@ -39,7 +39,7 @@ class ReduceJob(CallJob):
             return issues
 
         sut_section = 'sut.' + self.sut_name
-        sut_call = config_get_object(self.config, sut_section, ['reduce_call', 'call'])
+        sut_call = config_get_object(self.config, sut_section, ['reduce_call', 'validate_call', 'call'])
         reduce = config_get_object(self.config, sut_section, 'reduce')
 
         reduced_src, new_issues = reduce(sut_call=sut_call,

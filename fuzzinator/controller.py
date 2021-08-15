@@ -67,6 +67,15 @@ class Controller(object):
 
         - Option ``cost``: (Optional, default: 1)
 
+        - Option ``validate_call``: Fully qualified name of a callable context
+          manager class that acts as the SUT's ``call`` option during test case
+          validation. (Optional, default: the value of option ``call``)
+
+          See package :mod:`fuzzinator.call` for potential SUT calls.
+
+        - Option ``validate_cost``: (Optional, default: the value of option
+          ``cost``)
+
         - Option ``reduce``: Fully qualified name of a callable class. When an
           instance of the class is called, it must accept ``issue``,
           ``sut_call``, ``on_job_progressed`` keyword arguments representing
@@ -80,21 +89,12 @@ class Controller(object):
 
         - Option ``reduce_call``: Fully qualified name of a callable context
           manager class that acts as the SUT's ``call`` option during test case
-          reduction. (Optional, default: the value of option ``call``)
+          reduction. (Optional, default: the value of option ``validate_call``
+          if defined, otherwise the value of option ``call``)
 
           See package :mod:`fuzzinator.call` for potential SUT calls.
 
         - Option ``reduce_cost``: (Optional, default: the value of option
-          ``cost``)
-
-        - Option ``validate_call``: Fully qualified name of a callable context
-          manager class that acts as the SUT's ``call`` option during test case
-          validation. (Optional, default: the value of option ``reduce_call`` if
-          defined, otherwise the value of option ``call``)
-
-          See package :mod:`fuzzinator.call` for potential SUT calls.
-
-        - Option ``validate_cost``: (Optional, default: the value of option
           ``cost``)
 
         - Option ``update_condition``: Fully qualified name of a callable class.

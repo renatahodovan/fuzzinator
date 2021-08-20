@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2019-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -239,7 +239,7 @@ class IssueReportAPIHandler(BaseAPIHandler):
             raise HTTPError(404, reason='tracker not found')  # 404 Client Error: Not Found
 
         try:
-            self._db.update_issue_by_oid(issue_oid, {'reported': tracker.report_issue(**self.get_content())['url']})
+            self._db.update_issue_by_oid(issue_oid, {'reported': tracker.report_issue(**self.get_content())})
             self._wui.send_notification('refresh_issues')
             self.set_status(204, reason='issue reported')  # 204 Success: No Content
         except TrackerError as e:

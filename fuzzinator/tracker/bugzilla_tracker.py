@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -11,12 +11,43 @@ from io import BytesIO
 
 from bugzilla import *
 
-from .base import BaseTracker, TrackerError
+from .tracker import Tracker, TrackerError
 
 
-class BugzillaTracker(BaseTracker):
+class BugzillaTracker(Tracker):
+    """
+    Bugzilla_ issue tracker.
 
-    def __init__(self, product, url, api_key=None):
+    .. _Bugzilla: https://www.bugzilla.org/
+
+    **Mandatory parameters of the issue tracker:**
+
+      - ``url``: URL of the Bugzilla installation.
+      - ``product``: the name of the SUT in the Bugzilla.
+
+    **Optional parameter of the issue tracker:**
+
+      - ``api_key``: an API key for authenticating.
+
+    **Example configuration snippet:**
+
+        .. code-block:: ini
+
+            [sut.foo]
+            tracker=fuzzinator.tracker.BugzillaTracker
+
+            [sut.foo.tracker]
+            url=https://bugzilla.example.org
+            product=foo
+            api_key=1234567890123456789012345678901234567890
+    """
+
+    ui_extension = {
+        'tui': 'fuzzinator.ui.tui.BugzillaReportDialog',
+        'wui': 'report/bugzilla.html',
+    }
+
+    def __init__(self, *, product, url, api_key=None):
         self.product = product
         self.bzapi = Bugzilla(url, api_key=api_key)
 
@@ -26,17 +57,17 @@ class BugzillaTracker(BaseTracker):
         if os.path.exists(self.bzapi.cookiefile):
             os.remove(self.bzapi.cookiefile)
 
-    def find_issue(self, query):
+    def find_duplicates(self, *, title):
         try:
             issues = self.bzapi.query(self.bzapi.build_query(product=self.product,
                                                              status=['NEW', 'REOPENED', 'ASSIGNED'],
-                                                             short_desc=query,
+                                                             short_desc=title,
                                                              include_fields=['id', 'summary', 'weburl']))
-            return [{'id': issue.bug_id, 'title': issue.summary, 'url': issue.weburl} for issue in issues]
+            return [(issue.weburl, issue.summary) for issue in issues]
         except BugzillaError as e:
             raise TrackerError('Finding possible duplicates failed') from e
 
-    def report_issue(self, title, body, product, product_version, component, blocks, test=None, extension='txt'):
+    def report_issue(self, *, title, body, product, product_version, component, blocks, test=None, extension='txt'):
         try:
             create_info = self.bzapi.build_createbug(summary=title,
                                                      description=body,
@@ -49,7 +80,7 @@ class BugzillaTracker(BaseTracker):
             if test:
                 with BytesIO(test) as f:
                     self.bzapi.attachfile(idlist=bug.bug_id, attachfile=f, description='Test', is_patch=False, file_name='test.{ext}'.format(ext=extension))
-            return {'id': bug.bug_id, 'title': bug.summary, 'url': bug.weburl}
+            return bug.weburl
         except BugzillaError as e:
             raise TrackerError('Issue reporting failed') from e
 

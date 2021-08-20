@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <!--
- Copyright (c) 2019-2021 Renata Hodovan, Akos Kiss.
+ Copyright (c) 2019-2022 Renata Hodovan, Akos Kiss.
 
  Licensed under the BSD 3-Clause License
  <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -79,9 +79,9 @@ $(document).ready(function () {
 
     <!-- mark as reported form starts -->
     <form id="markAsReportedForm" class="list-group col-12 mt-3 mb-3">
-      {% for issue in duplicates %}
-      <input type="radio" name="url" value="{{ issue['url'] }}" id="{{ issue['id'] }}" />
-      <label class="col-12 list-group-item text-truncate" for="{{ issue['id'] }}"><a target="_blank" href="{{ issue['url'] }}">#{{ issue['id'] }}</a> {{ issue['title'] }}</label>
+      {% for dup_url, dup_title in duplicates %}
+      <input type="radio" name="url" value="{{ dup_url }}" id="dup-{{ loop.index0 }}" />
+      <label class="col-12 list-group-item text-truncate" for="dup-{{ loop.index0 }}"><a target="_blank" href="{{ dup_url }}">#dup-{{ loop.index0 }}</a> {{ dup_title }}</label>
       {% end %}
       <div class="input-group mb-3">
         <div class="input-group-prepend">

@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2020-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -22,7 +22,7 @@ class AddApiToToc(Transform):
             domain = descnode['domain']
             objtype = descnode['objtype']
             # only interested in py:class and py:function entities
-            if domain != 'py' or objtype not in ['class', 'function']:
+            if domain != 'py' or objtype not in ['class', 'exception', 'function']:
                 continue
 
             # wrap the desc node in a section node, which will appear in TOC

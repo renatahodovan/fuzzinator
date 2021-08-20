@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -157,6 +157,12 @@ class Controller(object):
           this SUT if option is missing.)
 
           See package :mod:`fuzzinator.exporter` for potential exporters.
+
+        - Option ``tracker``: Fully qualified name of a class that can report
+          issues to an external issue tracker. (Optional, no reporting to
+          tracker if option is missing.)
+
+          See package :mod:`fuzzinator.tracker` for potential trackers.
 
       - Sections ``fuzz.NAME``: Definitions of a fuzz job named *NAME*
 

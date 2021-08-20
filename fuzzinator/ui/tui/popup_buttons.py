@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -7,8 +7,13 @@
 
 from os import get_terminal_size
 
+from inators.imp import import_object
+from urwid import *
+
+from ...config import config_get_object
+from .button import FormattedButton
 from .dialogs import AboutDialog, EditIssueDialog, FormattedIssueDialog
-from .reporter_dialogs import *
+from .reporter_dialogs import ReportDialog
 
 
 class FullScreenPopupLauncher(PopUpLauncher):
@@ -94,14 +99,14 @@ class ReportButton(FullScreenPopupLauncher):
         focus = self.issues_table.listbox.focus
         if not focus:
             return None
-
         issue = self.issues_table.db.find_issue_by_oid(focus.data['_id'])
-        try:
-            tracker_cls = self.config.get('sut.' + issue['sut'], 'tracker').split('.')[-1]
-            popup_cls = globals()[tracker_cls.replace('Tracker', 'ReportDialog')]
-        except Exception:
-            # If there is no reporter interface for the given tracker
-            # then we only display the formatted issue.
+
+        tracker = config_get_object(self.config, 'sut.' + issue['sut'], 'tracker')
+        if tracker:
+            dialog = tracker.ui_extension.get('tui')
+            popup_cls = import_object(dialog) if dialog else ReportDialog
+        else:
+            # If there is no tracker then we only display the formatted issue.
             popup_cls = FormattedIssueDialog
 
         pop_up = popup_cls(issue=issue, config=self.config, db=self.issues_table.db)

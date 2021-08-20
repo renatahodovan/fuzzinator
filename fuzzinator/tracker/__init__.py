@@ -1,12 +1,12 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-from .base import BaseTracker, TrackerError
-from .bugzilla import BugzillaTracker
-from .github import GithubTracker
-from .gitlab import GitlabTracker
-from .monorail import MonorailTracker
+from .bugzilla_tracker import BugzillaTracker
+from .github_tracker import GithubTracker
+from .gitlab_tracker import GitlabTracker
+from .monorail_tracker import MonorailTracker
+from .tracker import Tracker, TrackerError

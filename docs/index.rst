@@ -22,6 +22,7 @@ Fuzzinator
    fuzzinator.fuzzer
    fuzzinator.listener
    fuzzinator.reduce
+   fuzzinator.tracker
    fuzzinator.update
 
 

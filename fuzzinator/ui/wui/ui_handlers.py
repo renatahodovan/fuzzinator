@@ -1,5 +1,5 @@
 # Copyright (c) 2019 Tamas Keri.
-# Copyright (c) 2019-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2019-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -12,7 +12,6 @@ import pkgutil
 import threading
 import traceback
 
-from os.path import exists, join
 from urllib.parse import urljoin, urlparse, urlunparse
 
 from bson.json_util import dumps, RELAXED_JSON_OPTIONS
@@ -119,22 +118,19 @@ class IssueReportUIHandler(BaseUIHandler):
             self.send_error(404)
             return
 
-        formatter = config_get_object(self._config, 'sut.' + issue['sut'], ['formatter']) or JsonFormatter()
+        formatter = config_get_object(self._config, 'sut.' + issue['sut'], 'formatter') or JsonFormatter()
+        issue_title = formatter(issue=issue, format='short')
 
         duplicates = []
         try:
-            duplicates = tracker.find_issue(issue['id'])
+            duplicates = tracker.find_duplicates(title=issue_title)
         except TrackerError as e:
-            logger.error(str(e), exc_info=e)
+            logger.warning(str(e), exc_info=e)
 
-        tracker_name = tracker.__class__.__name__.replace('Tracker', '')
-        template = 'report-' + tracker_name.lower() + '.html'
-        template = template if exists(join(self.get_template_path(), template)) else 'report.html'
-
-        self.render(template,
+        self.render(tracker.ui_extension.get('wui') or 'report.html',
                     issue_oid=issue_oid,
-                    tracker_name=tracker_name,
-                    title=formatter(issue=issue, format='short'),
+                    tracker_name=tracker.__class__.__name__.replace('Tracker', ''),
+                    title=issue_title,
                     body=formatter(issue=issue),
                     duplicates=duplicates,
                     settings=tracker.settings())

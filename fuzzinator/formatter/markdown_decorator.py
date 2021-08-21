@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -13,17 +13,17 @@ from .formatter_decorator import FormatterDecorator
 
 class MarkdownDecorator(FormatterDecorator):
     """
-    Decorator for formatters that produce their output in
-    `Markdown <https://github.com/Python-Markdown/markdown>`_ format.
+    Decorator for formatters that produce their output in Markdown_ format.
 
-    This decorator converts the ``long`` version of an issue descriptor
-    to HTML, while the ``short`` version remains untouched. The reason is
-    that ``short`` versions usually serve as a summary in e-mail subjects
-    or as a title of bug reports. In these cases having an HTML-converted
-    summary isn't suitable, while the main content, i.e., the ``long`` format,
-    is expected to be in HTML.
+    .. _Markdown: https://github.com/Python-Markdown/markdown
 
-    **Optional parameters of the decorator:**
+    This decorator converts the full string representation of an issue to HTML,
+    while the summary remains untouched. The reason is that the summary usually
+    serves as a subject in e-mails or as a title of bug reports. In these cases
+    having an HTML-converted summary isn't suitable, while the main content,
+    i.e., the ``long`` format, is expected to be in HTML.
+
+    **Optional parameter of the decorator:**
 
       - ``extensions``: array of markdown extensions to enable (enable
         ``extra`` by default).
@@ -47,8 +47,5 @@ class MarkdownDecorator(FormatterDecorator):
     def __init__(self, *, extensions=None, **kwargs):
         self.extensions = as_list(extensions) if extensions else ['extra']
 
-    def call(self, cls, obj, *, issue, format='long'):
-        formatted = super(cls, obj).__call__(issue=issue, format=format)
-        if format != 'short':
-            formatted = markdown.markdown(formatted, extensions=self.extensions)
-        return formatted
+    def call(self, cls, obj, *, issue):
+        return markdown.markdown(super(cls, obj).__call__(issue=issue), extensions=self.extensions)

@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -120,7 +120,7 @@ class FormattedIssueDialog(Dialog):
 
     def __init__(self, config, issue, db):
         formatter = config_get_object(config, 'sut.' + issue['sut'], ['tui_formatter', 'formatter']) or JsonFormatter()
-        super().__init__(title=formatter(issue=issue, format='short'),
+        super().__init__(title=formatter.summary(issue=issue),
                          body=[Padding(Text(line, wrap='clip'), left=2, right=2) for line in formatter(issue=issue).splitlines()],
                          footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))])
 

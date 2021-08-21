@@ -45,7 +45,7 @@ class ReportDialog(PopUpTarget):
         self.settings = self.tracker.settings()
 
         formatter = config_get_object(config, 'sut.' + issue['sut'], 'formatter') or JsonFormatter()
-        self.issue_title = BugEditor(edit_text=formatter(issue=issue, format='short'))
+        self.issue_title = BugEditor(edit_text=formatter.summary(issue=issue))
         self.issue_desc = BugEditor(edit_text=formatter(issue=issue), multiline=True, wrap='clip')
 
         self.duplicate = None

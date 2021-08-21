@@ -120,31 +120,22 @@ class Controller(object):
         - Option ``formatter``: Fully qualified name of a callable class. When
           an instance of the class is called, it must format the issue
           dictionary of the SUT by returning a custom string representation. It
-          must accept ``issue`` and ``format`` keyword arguments representing an
-          issue to be formatted and a formatting instruction. If ``format`` is
-          ``'long'`` or not specified, the issue should be formatted in full,
-          while if ``'short'`` is given, a summary description (preferably a
-          single line of text) should be returned. (Optional, default:
-          :func:`fuzzinator.formatter.JsonFormatter`.)
+          must accept an ``issue`` keyword argument representing an issue to be
+          formatted. The class must also contain a method named ``summary``,
+          also accepting an ``issue`` keyword argument, which should return a
+          summary description (preferably a single line of text). (Optional,
+          default: :func:`fuzzinator.formatter.JsonFormatter`.)
 
           See package :mod:`fuzzinator.formatter` for further potential
           formatters.
 
-        - Option ``tui_formatter``: Fully qualified name of a callable class
-          that formats the issue dictionary of the SUT to display it in the TUI
-          issue viewer interface. (Optional, default: the value of option
-          ``formatter``)
+        - Options ``tui_formatter``, ``wui_formatter``, and ``email_formatter``:
+          Fully qualified name of a callable class that formats the issue
+          dictionary of the SUT to display it in the TUI issue viewer, on the
+          WUI issue page, or to insert it into an e-mail notification.
+          (Optional, default: the value of option ``formatter``)
 
-          See package :mod:`fuzzinator.formatter` for further potential
-          formatters.
-
-        - Option ``email_formatter``: Fully qualified name of a callable class
-          that formats the issue dictionary of the SUT to insert it into an
-          e-mail notification. (Optional, default: the value of option
-          ``formatter``)
-
-          See package :mod:`fuzzinator.formatter` for further potential
-          formatters.
+          See package :mod:`fuzzinator.formatter` for potential formatters.
 
         - Option ``exporter``: Fully qualified name of a callable class. When an
           instance of the class is called, it must export the issue dictionary

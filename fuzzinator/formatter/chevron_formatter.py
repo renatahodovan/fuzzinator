@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -12,25 +12,22 @@ from .template_formatter import TemplateFormatter
 
 class ChevronFormatter(TemplateFormatter):
     """
-    Formatter class following the format of the
-    `mustache <http://mustache.github.io/>`_ templating language and using the
-    `Chevron <https://github.com/noahmorrison/chevron>`_ module for
-    interpreting it.
+    Formatter class following the format of the mustache_ templating language
+    and using the Chevron_ module for interpreting it.
 
-    The formatter renders both the ``short`` and ``long`` versions
-    of the issue according to the user-defined templates. If either of
-    the templates is missing, then that version will be presented as an
-    empty string (default).
+    .. _mustache: https://mustache.github.io/
+    .. _Chevron: https://github.com/noahmorrison/chevron
+
+    The formatter renders both the short and long versions of the issue
+    according to the user-defined templates. If either of the templates is
+    missing, then that version will be presented as an empty string (default).
 
     **Optional parameters of the formatter:**
 
       - ``short``: the issue summary template string (default: empty string).
-
       - ``short_file``: path to a file containing the issue summary template
         (default: ``None``).
-
       - ``long``: the detailed issue template string (default: empty string).
-
       - ``long_file``: path to a file containing the detailed issue template
         (default: ``None``).
 
@@ -47,6 +44,5 @@ class ChevronFormatter(TemplateFormatter):
             long_file=/path/to/templates/foo.md
     """
 
-    def __call__(self, *, issue, format='long'):
-        template = self.templates[format]
+    def render(self, *, issue, template):
         return chevron.render(template, issue)

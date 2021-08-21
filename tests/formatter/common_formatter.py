@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -32,7 +32,10 @@ class MockIdFormatter(fuzzinator.formatter.Formatter):
     def __init__(self, **kwargs):
         pass
 
-    def __call__(self, issue, format='long', **kwargs):
+    def __call__(self, *, issue):
+        return str(issue['id'])
+
+    def summary(self, *, issue):
         return str(issue['id'])
 
 
@@ -41,11 +44,12 @@ class MockFixedFormatter(fuzzinator.formatter.Formatter):
     Always return fixed strings for short and long variants.
     """
 
-    def __init__(self, short, long, **kwargs):
-        self.strings = {
-            'short': short,
-            'long': long,
-        }
+    def __init__(self, *, short, long, **kwargs):
+        self.short_string = short
+        self.long_string = long
 
-    def __call__(self, issue, format='long', **kwargs):
-        return self.strings[format]
+    def __call__(self, *, issue):
+        return self.long_string
+
+    def summary(self, *, issue):
+        return self.short_string

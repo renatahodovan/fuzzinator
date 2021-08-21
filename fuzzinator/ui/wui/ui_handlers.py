@@ -119,7 +119,7 @@ class IssueReportUIHandler(BaseUIHandler):
             return
 
         formatter = config_get_object(self._config, 'sut.' + issue['sut'], 'formatter') or JsonFormatter()
-        issue_title = formatter(issue=issue, format='short')
+        issue_title = formatter.summary(issue=issue)
 
         duplicates = []
         try:

@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -74,7 +74,7 @@ class EmailListener(EventListener):
         from ..formatter import JsonFormatter
         formatter = config_get_object(self.config, 'sut.' + data['sut'], ['email_formatter', 'formatter']) or JsonFormatter()
 
-        subject = formatter(issue=data, format='short')
+        subject = formatter.summary(issue=data)
         content = formatter(issue=data)
 
         msg = MIMEText(content)

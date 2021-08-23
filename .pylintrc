@@ -26,7 +26,9 @@ disable=
     useless-object-inheritance, unnecessary-pass, duplicate-code,
     abstract-method, arguments-differ, cyclic-import, bad-whitespace,
     import-outside-toplevel, consider-using-with, deprecated-module,
-    consider-using-dict-items, too-many-boolean-expressions
+    consider-using-dict-items, too-many-boolean-expressions,
+    unspecified-encoding, use-dict-literal, use-list-literal,
+    redundant-u-string-prefix
 
 [TYPECHECK]
 

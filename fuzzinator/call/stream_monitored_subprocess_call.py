@@ -102,7 +102,7 @@ class StreamMonitoredSubprocessCall(Call):
             fl = fcntl.fcntl(fd, fcntl.F_GETFL)
             fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
-        issue = dict()
+        issue = {}
         end_loop = False
         regex_automaton = RegexAutomaton(self.end_patterns)
         while not end_loop:

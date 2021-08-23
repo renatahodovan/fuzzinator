@@ -86,11 +86,11 @@ def execute():
         from .ui import cli as ui
 
     parser = argparse.ArgumentParser(description='Fuzzinator Random Testing Framework', fromfile_prefix_chars='@', parents=[pre_parser])
-    parser.add_argument('config', default=list(), nargs='*',
+    parser.add_argument('config', default=[], nargs='*',
                         help='config files describing the fuzz jobs to run (if no config is provided and TUI is enabled, then the framework starts in issue viewer mode)')
-    parser.add_argument('-D', metavar='SECT:OPT=VAL', dest='defines', default=list(), action='append',
+    parser.add_argument('-D', metavar='SECT:OPT=VAL', dest='defines', default=[], action='append',
                         help='define additional config options')
-    parser.add_argument('-U', metavar='SECT[:OPT]', dest='undefs', default=list(), action='append',
+    parser.add_argument('-U', metavar='SECT[:OPT]', dest='undefs', default=[], action='append',
                         help='undefine config sections or options')
     parser.add_argument('--max-cycles', metavar='N', default=None, type=int,
                         help='limit number of fuzz job cycles to %(metavar)s (default: no limit)')

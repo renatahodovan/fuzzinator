@@ -330,7 +330,7 @@ class JobsTable(WidgetWrap):
     _selectable = False
 
     def __init__(self):
-        self.jobs = dict()
+        self.jobs = {}
         self.title_text = 'JOBS (0)'
         self.walker = SimpleListWalker([])
         self.listbox = ListBox(self.walker)
@@ -435,11 +435,11 @@ class JobWidget(WidgetWrap):
         'prop_value': 'selected'
     })
 
-    title = ''          # To be redefined by subclasses.
-    labels = dict()     # To be redefined by subclasses.
+    title = ''  # To be redefined by subclasses.
+    labels = {}  # To be redefined by subclasses.
 
     def __init__(self, data, pb_done=None):
-        self.values = dict()
+        self.values = {}
         for x in data:
             if isinstance(data[x], int):
                 value = str(data[x])

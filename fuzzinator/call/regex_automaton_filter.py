@@ -42,7 +42,7 @@ class RegexAutomatonFilter(CallDecorator):
     """
 
     def __init__(self, **kwargs):
-        self.patterns = dict()
+        self.patterns = {}
         for stream, desc in kwargs.items():
             self.patterns[stream] = [RegexAutomaton.split_pattern(p) for p in as_list(desc)]
 
@@ -51,7 +51,7 @@ class RegexAutomatonFilter(CallDecorator):
         if not issue:
             return issue
 
-        issue_details = dict()
+        issue_details = {}
         for field, instructions in self.patterns.items():
             # Process the field content line-by-line.
             regex_automaton = RegexAutomaton(instructions, existing_fields=set(issue.keys()))

@@ -18,7 +18,7 @@ class TableRowsListWalker(ListWalker):
         self.table = table
         self.sort = sort
         self.focus = 0
-        self.rows = list()
+        self.rows = []
         super().__init__()
 
     def __getitem__(self, position):
@@ -290,7 +290,7 @@ class TableRow(WidgetWrap):
 
         # Create tuples to describe the sizing of the column.
         for i, col in enumerate(self.table.columns):
-            lst = list()
+            lst = []
             if col.sizing == 'weight':
                 lst.extend([col.sizing, col.width])
             else:

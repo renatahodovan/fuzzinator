@@ -70,7 +70,7 @@ class ReportDialog(PopUpTarget):
 
     def get_report_data(self):
         assert False, 'Should never be reached.'
-        return dict()
+        return {}
 
     def send_report(self):
         try:

@@ -102,7 +102,7 @@ class PicireReducer(Reducer):
         else:
             encoding = self.encoding or 'latin-1'
 
-        new_issues = dict()
+        new_issues = {}
         tester_config = dict(sut_call=sut_call,
                              issue=issue,
                              on_job_progressed=on_job_progressed,

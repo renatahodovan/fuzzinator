@@ -86,7 +86,7 @@ class AFLRunner(Fuzzer):
         self.input = as_path(input)
         self.sut_command = as_pargs(sut_command.format(test='@@'))
         self.cwd = as_path(cwd) if cwd else None
-        self.env = as_dict(env) if env else dict()
+        self.env = as_dict(env) if env else {}
         self.env.update(AFL_NO_UI='1')
         self.timeout = timeout
         self.dictionary = as_path(dictionary) if dictionary else None
@@ -96,7 +96,7 @@ class AFLRunner(Fuzzer):
         self.work_dir = work_dir
         self.iteration = 1
         self.checked = set()
-        self.tests = list()
+        self.tests = []
 
     def __enter__(self):
         os.makedirs(self.work_dir, exist_ok=True)

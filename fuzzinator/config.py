@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 def config_get_kwargs(config, section):
-    return dict(config.items(section)) if config.has_section(section) else dict()
+    return dict(config.items(section)) if config.has_section(section) else {}
 
 
 def config_init_object(config, cls, kwargs):
@@ -88,7 +88,7 @@ def config_get_object(config, section, options, *, init_kwargs=None):
             obj_class = decorator(obj_class)
 
         # 3) compute class instantiation arguments
-        obj_kwargs = dict()
+        obj_kwargs = {}
 
         # 3.a) get old-style arguments from $(section.option.init:*)
         init_section = section + '.' + option + '.init'

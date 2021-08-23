@@ -147,8 +147,8 @@ class EditIssueDialog(Dialog):
         self.issue = issue
         self.db = db
 
-        self.edit_boxes = dict()
-        self.type_dict = dict()
+        self.edit_boxes = {}
+        self.type_dict = {}
         rows = []
         for prop in issue:
             if prop == '_id':
@@ -194,7 +194,7 @@ class EditIssueDialog(Dialog):
         return literal_eval(value)
 
     def save_modifications(self, btn):
-        updated = dict()
+        updated = {}
         for prop, box in self.edit_boxes.items():
             updated[prop] = self._from_str(prop, box.edit_text)
         self.db.update_issue_by_oid(self.issue['_id'], updated)

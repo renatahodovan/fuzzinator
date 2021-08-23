@@ -264,7 +264,7 @@ class Controller(object):
         load = 0
         job_id = 0
         job_queue = []
-        running_jobs = dict()
+        running_jobs = {}
 
         def _update_load():
             current_load = 0

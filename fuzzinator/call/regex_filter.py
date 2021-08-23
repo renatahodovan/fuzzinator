@@ -42,7 +42,7 @@ class RegexFilter(CallDecorator):
     """
 
     def __init__(self, **kwargs):
-        self.patterns = dict()
+        self.patterns = {}
         for field, patterns_str in kwargs.items():
             self.patterns[field] = [re.compile(pattern, flags=re.MULTILINE | re.DOTALL) for pattern in as_list(patterns_str)]
 

@@ -10,7 +10,7 @@ class Multiton(type):
 
     def __init__(cls, name, bases, dct):
         super().__init__(name, bases, dct)
-        cls._instances = dict()
+        cls._instances = {}
 
     def __call__(cls, *args, **kwargs):
         key = tuple(args) + tuple(sorted(kwargs.items()))
@@ -30,7 +30,7 @@ class BaseTracker(metaclass=Multiton):
         pass
 
     def settings(self):
-        return dict()
+        return {}
 
 
 class TrackerError(Exception):

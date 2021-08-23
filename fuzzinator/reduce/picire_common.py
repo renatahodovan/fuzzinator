@@ -87,9 +87,9 @@ class PicireReducer(Reducer):
                 self.reduce_config = dict(subset_iterator=subset_iterator,
                                           complement_iterator=complement_iterator,
                                           subset_first=subset_first)
-            self.reduce_config.update(dict(proc_num=jobs,
-                                           max_utilization=max_utilization))
-        self.reduce_config.update(dict(split=split_class(n=granularity)))
+            self.reduce_config.update(proc_num=jobs,
+                                      max_utilization=max_utilization)
+        self.reduce_config.update(split=split_class(n=granularity))
 
     TestTuple = namedtuple('TestTuple', ['src', 'encoding'])
     TesterTuple = namedtuple('TesterTuple', ['tester_class', 'tester_config', 'new_issues'])

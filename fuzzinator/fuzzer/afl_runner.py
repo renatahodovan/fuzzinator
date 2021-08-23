@@ -87,7 +87,7 @@ class AFLRunner(Fuzzer):
         self.sut_command = as_pargs(sut_command.format(test='@@'))
         self.cwd = as_path(cwd) if cwd else None
         self.env = as_dict(env) if env else dict()
-        self.env.update({'AFL_NO_UI': '1'})
+        self.env.update(AFL_NO_UI='1')
         self.timeout = timeout
         self.dictionary = as_path(dictionary) if dictionary else None
         self.master_name = master_name

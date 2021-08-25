@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -58,9 +58,9 @@ class PatternVLine(BoxWidget):
 class PatternBox(WidgetDecoration, WidgetWrap):
 
     def __init__(self, original_widget, title='',
-                 tlcorner=u'┌', tline=u'─', lline=u'│',
-                 trcorner=u'┐', blcorner=u'└', rline=u'│',
-                 bline=u'─', brcorner=u'┘'):
+                 tlcorner='┌', tline='─', lline='│',
+                 trcorner='┐', blcorner='└', rline='│',
+                 bline='─', brcorner='┘'):
         tline, bline = PatternHLine(tline), PatternHLine(bline)
         lline, rline = PatternVLine(lline), PatternVLine(rline)
         tlcorner, trcorner = Text(tlcorner), Text(trcorner)

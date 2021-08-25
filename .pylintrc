@@ -27,8 +27,7 @@ disable=
     abstract-method, arguments-differ, cyclic-import, bad-whitespace,
     import-outside-toplevel, consider-using-with, deprecated-module,
     consider-using-dict-items, too-many-boolean-expressions,
-    unspecified-encoding, redundant-u-string-prefix, bad-super-call,
-    consider-using-f-string
+    unspecified-encoding, bad-super-call, consider-using-f-string
 
 [TYPECHECK]
 

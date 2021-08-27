@@ -23,8 +23,7 @@ from ...tracker import TrackerError
 
 class BaseAPIHandler(RequestHandler):
 
-    def __init__(self, *args, wui, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialize(self, wui):
         self._wui = wui
 
     @property

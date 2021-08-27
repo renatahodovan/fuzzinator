@@ -171,7 +171,7 @@ def execute(arguments):
     if arguments.style:
         raw_style = json.load(arguments.style)
     else:
-        raw_style = json.loads(pkgutil.get_data(__package__, os.path.join('resources', 'default_style.json')).decode(encoding='utf-8'))
+        raw_style = json.loads(pkgutil.get_data(__package__, 'resources/default_style.json').decode(encoding='utf-8'))
     style = load_style(raw_style)
 
     if arguments.force_encoding:

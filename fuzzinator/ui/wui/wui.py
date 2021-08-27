@@ -12,14 +12,13 @@ import signal
 import sys
 
 from multiprocessing import Lock, Manager, Process, Queue
-from pkg_resources import resource_filename
+
 from rainbow_logging_handler import RainbowLoggingHandler
 from tornado import ioloop, web
 
 from ... import Controller
-
 from .api_handlers import IssueAPIHandler, IssueReportAPIHandler, IssuesAPIHandler, JobAPIHandler, JobsAPIHandler, NotFoundAPIHandler, StatsAPIHandler
-from .ui_handlers import ConfigUIHandler, IssueReportUIHandler, IssuesUIHandler, IssueUIHandler, NotFoundHandler, NotificationsHandler, StatsUIHandler
+from .ui_handlers import ConfigUIHandler, IssueReportUIHandler, IssuesUIHandler, IssueUIHandler, NotFoundHandler, NotificationsHandler, ResourceLoader, StaticResourceHandler, StatsUIHandler
 from .wui_listener import WuiListener
 
 logger = logging.getLogger(__name__)
@@ -50,8 +49,8 @@ class Wui(object):
                                     (r'/api/stats', StatsAPIHandler, handler_args),
                                     (r'/api/.*', NotFoundAPIHandler)],
                                    default_handler_class=NotFoundHandler, default_handler_args=handler_args,
-                                   template_path=resource_filename(__name__, os.path.join('resources', 'templates')),
-                                   static_path=resource_filename(__name__, os.path.join('resources', 'static')),
+                                   template_loader=ResourceLoader(__package__, 'resources/templates'),
+                                   static_handler_class=StaticResourceHandler, static_handler_args=dict(package=__package__), static_path='resources/static',
                                    autoreload=False, debug=debug)
         # Starts an HTTP server for this application on the given port.
         self.server = self.app.listen(port, address)

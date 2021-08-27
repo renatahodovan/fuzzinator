@@ -7,13 +7,18 @@
 # according to those terms.
 
 import logging
+import mimetypes
+import pkgutil
+import threading
 import traceback
 
 from os.path import exists, join
+from urllib.parse import urljoin, urlparse, urlunparse
 
 from bson.json_util import dumps, RELAXED_JSON_OPTIONS
 from markdown import markdown
-from tornado.web import RequestHandler
+from tornado.template import BaseLoader, Template
+from tornado.web import HTTPError, RequestHandler
 from tornado.websocket import WebSocketHandler
 
 from ...config import config_get_object
@@ -166,3 +171,107 @@ class NotFoundHandler(BaseUIHandler):
 
     def prepare(self):
         self.send_error(404)
+
+
+class StaticResourceHandler(RequestHandler):
+    """
+    A request handler that serves static files from package resources.
+    """
+
+    _lock = threading.Lock()
+    _contents = {}
+
+    def initialize(self, package, path):
+        # NOTE: The argument must be called path to ensure compatibility with StaticFileHandler.
+        # The application's static_path setting is passed to static_handler_class as path.
+        self.package = package
+        self.resource_prefix = path if path.endswith('/') else path + '/'
+
+    def get(self, path):
+        resource_path = urljoin(self.resource_prefix, path)
+        if not resource_path.startswith(self.resource_prefix):
+            raise HTTPError(400, reason='invalid path')
+
+        with self._lock:
+            if resource_path not in self._contents:
+                logger.debug('loading static resource: path=%s, package=%s, resource=%s', path, self.package, resource_path)
+                try:
+                    self._contents[resource_path] = pkgutil.get_data(self.package, resource_path)
+                except Exception:
+                    self._contents[resource_path] = None
+            content = self._contents[resource_path]
+        if content is None:
+            raise HTTPError(404, reason='resource not found')
+
+        content_type, _ = mimetypes.guess_type(resource_path)
+        self.set_header("Content-Type", content_type or 'application/octet-stream')
+        self.finish(content)
+
+    @classmethod
+    def reset(cls):
+        with cls._lock:
+            cls._contents = {}
+
+
+class ResourceLoader(BaseLoader):
+    """
+    A template loader that loads package resources.
+    """
+
+    def __init__(self, package, resource_prefix, **kwargs):
+        super().__init__(**kwargs)
+        self.package = package
+        self.resource_prefix = resource_prefix if resource_prefix.endswith('/') else resource_prefix + '/'
+        self.package_prefix = urlunparse(('', self.package, self.resource_prefix, '', '', ''))
+
+    def resolve_path(self, name, parent_path=None):
+        """
+        Resolution rules:
+
+          - a relative ``name`` is only resolved against ``parent_path`` if it is
+            also relative (and exists);
+          - if ``name`` starts with ``//{self.package}/{self.resource_prefix}``,
+            it is transformed to a relative path by removing that prefix.
+        """
+        if parent_path and not parent_path.startswith('<') and not parent_path.startswith('/') and not name.startswith('/'):
+            # NOTE: parent_path can start with "<" if parent template was not loaded from a file.
+            # In that case, the filename of the parent template is "<string>".
+            name = urljoin(parent_path, name)
+
+        if name.startswith(self.package_prefix):
+            name = name[len(self.package_prefix):]
+
+        return name
+
+    def _create_template(self, name):
+        """
+        If ``name`` is like
+
+          - ``/path/to/file``, load template from file system via absolute path;
+          - ``//package.module/resource/path/to/file``, load template from
+            resource of a package via pkgutil;
+          - ``path/to/file``, construct path
+            ``//{self.package}/{self.resource_prefix}/path/to/file`` and load
+            template from resource via pkgutil.
+        """
+        parts = urlparse(name)
+        if parts.scheme != '' or parts.params != '' or parts.query != '' or parts.fragment != '':
+            raise ValueError('invalid template path: %s' % name)
+
+        if parts.netloc == '' and parts.path.startswith('/'):
+            logger.debug('loading template file: name=%s, path=%s', name, parts.path)
+            with open(parts.path, 'rb') as f:
+                data = f.read()
+        else:
+            if parts.netloc != '':
+                assert parts.path.startswith('/')
+                package = parts.netloc
+                resource = parts.path[1:]
+            else:
+                assert not parts.path.startswith('/')
+                package = self.package
+                resource = self.resource_prefix + parts.path
+            logger.debug('loading template resource: name=%s, package=%s, resource=%s', name, package, resource)
+            data = pkgutil.get_data(package, resource)
+
+        return Template(data, name=name, loader=self)

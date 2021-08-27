@@ -10,6 +10,8 @@ import os
 import fuzzinator
 
 
+linesep = os.linesep
+blinesep = str.encode(linesep)
 resources_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'resources')
 
 

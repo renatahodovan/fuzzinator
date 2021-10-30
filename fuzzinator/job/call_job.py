@@ -26,12 +26,12 @@ class CallJob(object):
         test = issue['test']
 
         # Save issue details.
-        issue.update(dict(sut=self.sut_name,
-                          fuzzer=self.fuzzer_name,
-                          subconfig=dict(subconfig=self.subconfig_id),
-                          test=test,
-                          reduced=None,
-                          reported=False))
+        issue.update(sut=self.sut_name,
+                     fuzzer=self.fuzzer_name,
+                     subconfig=dict(subconfig=self.subconfig_id),
+                     test=test,
+                     reduced=None,
+                     reported=False)
 
         # Generate default hash ID for the test if does not exist.
         self.ensure_id(issue)

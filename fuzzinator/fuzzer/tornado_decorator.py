@@ -168,7 +168,7 @@ class TornadoDecorator(FuzzerDecorator):
             app = Application(handlers,
                               template_path=self.template_path,
                               static_path=self.static_path,
-                              debug=True)
+                              debug=False)
             app.listen(obj._port, ssl_options=self.ssl_ctx)
 
             # Run the event loop and the application within.

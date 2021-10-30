@@ -71,13 +71,13 @@ class FileWriterDecorator(CallDecorator):
             self.uid += 1
         file_path = os.path.join(self.work_dir, filename)
 
-        os.makedirs(self.work_dir, exist_ok=True)
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w' if not isinstance(test, bytes) else 'wb') as f:
             f.write(test if isinstance(test, (str, bytes)) else str(test))
 
         issue = super(cls, obj).__call__(test=file_path, **kwargs)
         if issue:
-            issue['filename'] = filename
+            issue['filename'] = os.path.basename(filename)
 
         os.remove(file_path)
         return issue

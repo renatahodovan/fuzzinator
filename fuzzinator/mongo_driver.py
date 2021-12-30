@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
 # Copyright (c) 2019 Tamas Keri.
 #
 # Licensed under the BSD 3-Clause License
@@ -57,7 +57,7 @@ class MongoDriver(object):
             self.update_config(fuzz_data['subconfig'], fuzz_data['src'])
 
             stats.find_one_and_update(filter={'sut': fuzz_data['sut'], 'fuzzer': fuzz_name, 'subconfig': fuzz_data['subconfig']},
-                                      update={'$setOnInsert': {'sut': fuzz_data['sut'], 'fuzzer': fuzz_name, 'subconfig': fuzz_data['subconfig'], 'exec': 0, 'issues': 0}},
+                                      update={'$setOnInsert': {'sut': fuzz_data['sut'], 'fuzzer': fuzz_name, 'subconfig': fuzz_data['subconfig'], 'exec': 0, 'issues': 0, 'time': 0}},
                                       upsert=True)
 
     def add_issue(self, issue):
@@ -168,7 +168,7 @@ class MongoDriver(object):
             {'$project': {'_id': 1}},
             {'$project': {'_id': 0}},
 
-            # Get unique crash counts from the issues (exec and crash counts are set to 0).
+            # Get unique crash counts from the issues (exec and crash counts and exec time are set to 0).
             {'$lookup': {
                 'from': 'fuzzinator_issues',
                 'pipeline': ([] if not session_start else [
@@ -178,7 +178,7 @@ class MongoDriver(object):
                     {'$group': {
                         '_id': {'sut': '$sut', 'fuzzer': '$fuzzer', 'subconfig': '$subconfig'},
                         'sut': {'$first': '$sut'}, 'fuzzer': {'$first': '$fuzzer'}, 'subconfig': {'$first': '$subconfig'},
-                        'exec': {'$sum': 0}, 'issues': {'$sum': 0}, 'unique': {'$sum': 1},
+                        'exec': {'$sum': 0}, 'issues': {'$sum': 0}, 'unique': {'$sum': 1}, 'time': {'$sum': 0},
                     }},
                 ],
                 'as': 'fuzzinator_issues',
@@ -204,7 +204,7 @@ class MongoDriver(object):
 
                     # Add all baseline records as separate documents
                     {'$addFields': {'session_baseline': [{'sut': results['sut'], 'fuzzer': results['fuzzer'], 'subconfig': subconfig['subconfig'],
-                                                          'exec': -subconfig['exec'], 'issues': -subconfig['issues']}
+                                                          'exec': -subconfig['exec'], 'issues': -subconfig['issues'], 'time': -subconfig['time']}
                                                          for results in session_baseline for subconfig in results['subconfigs']]}},
                     {'$unwind': '$session_baseline'},
                     {'$replaceRoot': {'newRoot': '$session_baseline'}},
@@ -221,7 +221,7 @@ class MongoDriver(object):
             {'$group': {
                 '_id': {'sut': '$sut', 'fuzzer': '$fuzzer', 'subconfig': '$subconfig'},
                 'sut': {'$first': '$sut'}, 'fuzzer': {'$first': '$fuzzer'}, 'subconfig': {'$first': '$subconfig'},
-                'exec': {'$sum': '$exec'}, 'issues': {'$sum': '$issues'}, 'unique': {'$sum': '$unique'},
+                'exec': {'$sum': '$exec'}, 'issues': {'$sum': '$issues'}, 'unique': {'$sum': '$unique'}, 'time': {'$sum': '$time'},
             }},
             {'$match': {'$or': [{'exec': {'$gt': 0}}, {'issues': {'$gt': 0}}, {'unique': {'$gt': 0}}]}},
         ] + ([] if not detailed else [
@@ -238,9 +238,9 @@ class MongoDriver(object):
             {'$group': {
                 '_id': {'sut': '$sut', 'fuzzer': '$fuzzer'},
                 'sut': {'$first': '$sut'}, 'fuzzer': {'$first': '$fuzzer'},
-                'exec': {'$sum': '$exec'}, 'issues': {'$sum': '$issues'}, 'unique': {'$sum': '$unique'},
+                'exec': {'$sum': '$exec'}, 'issues': {'$sum': '$issues'}, 'unique': {'$sum': '$unique'}, 'time': {'$sum': '$time'},
                 'subconfigs': {'$push': {'subconfig': '$subconfig', 'src': '$fuzzinator_configs.src',
-                                         'exec': '$exec', 'issues': '$issues', 'unique': '$unique'}},
+                                         'exec': '$exec', 'issues': '$issues', 'unique': '$unique', 'time': '$time'}},
             }},
             {'$project': {'_id': 0}},
         ]
@@ -256,7 +256,7 @@ class MongoDriver(object):
 
         return list(self._db.fuzzinator_stats.aggregate(aggregator))
 
-    def update_stat(self, sut, fuzzer, subconfig, batch, issues):
+    def update_stat(self, sut, fuzzer, subconfig, batch, issues, time):
         self._db.fuzzinator_stats.find_one_and_update({'sut': sut, 'fuzzer': fuzzer, 'subconfig': subconfig},
-                                                      {'$inc': {'exec': int(batch), 'issues': issues}},
+                                                      {'$inc': {'exec': int(batch), 'issues': issues, 'time': time}},
                                                       upsert=True)

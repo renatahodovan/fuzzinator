@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,6 +6,7 @@
 # according to those terms.
 
 import signal
+import time
 
 from ..config import config_get_object
 from .call_job import CallJob
@@ -38,6 +39,7 @@ class FuzzJob(CallJob):
 
         index = 0
         issue_count = 0
+        start_time = time.time()
         stat_updated = 0
         new_issues = []
 
@@ -80,9 +82,10 @@ class FuzzJob(CallJob):
 
                         if index - stat_updated >= self.refresh:
                             self.listener.on_job_progressed(job_id=self.id, progress=index)
-                            self.db.update_stat(self.sut_name, self.fuzzer_name, self.subconfig_id, index - stat_updated, issue_count)
+                            self.db.update_stat(self.sut_name, self.fuzzer_name, self.subconfig_id, index - stat_updated, issue_count, time.time() - start_time)
                             self.listener.on_stats_updated()
                             issue_count = 0
+                            start_time = time.time()
                             stat_updated = index
 
                         if issue:
@@ -90,6 +93,6 @@ class FuzzJob(CallJob):
                             break
 
         # Update statistics.
-        self.db.update_stat(self.sut_name, self.fuzzer_name, self.subconfig_id, index - stat_updated, issue_count)
+        self.db.update_stat(self.sut_name, self.fuzzer_name, self.subconfig_id, index - stat_updated, issue_count, time.time() - start_time)
         self.listener.on_stats_updated()
         return new_issues

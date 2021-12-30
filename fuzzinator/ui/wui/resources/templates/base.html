@@ -2,7 +2,7 @@
 
 <!--
  Copyright (c) 2019 Tamas Keri.
- Copyright (c) 2019-2021 Renata Hodovan, Akos Kiss.
+ Copyright (c) 2019-2022 Renata Hodovan, Akos Kiss.
 
  Licensed under the BSD 3-Clause License
  <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -135,10 +135,12 @@
         <!-- stat card start -->
         <div class="card stat container-fluid border-light pl-2 bg-danger rounded-0 detail-icon">
           <div class="row bg-white ml-0 pt-2 pb-2">
-            <div class="col-12 col-md-6 text-truncate" data-toggle="tool-tip" title="fuzzer"><span class="material-icons-outlined md-18 align-text-top">shuffle</span> <span class="fuzzer"></span></div>
+            <div class="col-12 col-md-4 text-truncate" data-toggle="tool-tip" title="fuzzer"><span class="material-icons-outlined md-18 align-text-top">shuffle</span> <span class="fuzzer"></span></div>
             <div class="col-12 col-md-2 text-truncate text-md-right" data-toggle="tool-tip" title="executed"><span class="material-icons-outlined md-18 align-text-top">repeat</span> <span class="exec"></span></div>
-            <div class="col-12 col-md-2 text-truncate text-md-right" data-toggle="tool-tip" title="issues"><span class="material-icons-outlined md-18 align-text-top">error_outline</span> <span class="issues"></span></div>
-            <div class="col-12 col-md-2 text-truncate text-md-right" data-toggle="tool-tip" title="unique issues"><span class="material-icons-outlined md-18 align-text-top">priority_high</span> <span class="unique"></span></div>
+            <div class="col-12 col-md-1 text-truncate text-md-right" data-toggle="tool-tip" title="issues"><span class="material-icons-outlined md-18 align-text-top">error_outline</span> <span class="issues"></span></div>
+            <div class="col-12 col-md-1 text-truncate text-md-right" data-toggle="tool-tip" title="unique issues"><span class="material-icons-outlined md-18 align-text-top">priority_high</span> <span class="unique"></span></div>
+            <div class="col-12 col-md-1 text-md-right" data-toggle="tool-tip" title="exec time"><span class="material-icons-outlined md-18 align-text-top">access_time</span> <span class="time"></span></div>
+            <div class="col-12 col-md-3 text-truncate text-md-right" data-toggle="tool-tip" title="speed"><span class="material-icons md-18 align-text-top">speed</span> <span class="speed"></span></div>
           </div>
         </div>
         <!-- stat card end -->
@@ -148,11 +150,13 @@
       <div class="card container-fluid border-light pl-2 bg-info rounded-0">
         <!-- stat row card start -->
         <div class="row bg-white ml-0 pt-1 pb-1 small">
-          <div class="col-12 col-md-3 text-truncate" data-toggle="tool-tip" title="config"><i class="material-icons-outlined md-14 align-text-top">description</i> <a class="config-ref"></a></div>
-          <div class="col-12 col-md-3 text-truncate" data-toggle="tool-tip" title="sut"><i class="material-icons-outlined md-14 align-text-top">my_location</i> <span class="sut"></span></div>
+          <div class="col-12 col-md-2 text-truncate" data-toggle="tool-tip" title="config"><i class="material-icons-outlined md-14 align-text-top">description</i> <a class="config-ref"></a></div>
+          <div class="col-12 col-md-2" data-toggle="tool-tip" title="sut"><i class="material-icons-outlined md-14 align-text-top">my_location</i> <span class="sut"></span></div>
           <div class="col-12 col-md-2 text-truncate text-md-right" data-toggle="tool-tip" title="executed"><i class="material-icons-outlined md-14 align-text-top">repeat</i> <span class="exec"></span></div>
-          <div class="col-12 col-md-2 text-truncate text-md-right" data-toggle="tool-tip" title="issues"><i class="material-icons-outlined md-14 align-text-top">error_outline</i> <span class="issues"></span></div>
-          <div class="col-12 col-md-2 text-truncate text-md-right" data-toggle="tool-tip" title="unique issues"><i class="material-icons-outlined md-14 align-text-top">priority_high</i> <span class="unique"></span></div>
+          <div class="col-12 col-md-1 text-truncate text-md-right" data-toggle="tool-tip" title="issues"><i class="material-icons-outlined md-14 align-text-top">error_outline</i> <span class="issues"></span></div>
+          <div class="col-12 col-md-1 text-truncate text-md-right" data-toggle="tool-tip" title="unique issues"><i class="material-icons-outlined md-14 align-text-top">priority_high</i> <span class="unique"></span></div>
+          <div class="col-12 col-md-1 text-md-right" data-toggle="tool-tip" title="exec time"><i class="material-icons-outlined md-14 align-text-top">access_time</i> <span class="time"></span></div>
+          <div class="col-12 col-md-3 text-truncate text-md-right" data-toggle="tool-tip" title="speed"><i class="material-icons md-14 align-text-top">speed</i> <span class="speed"></span></div>
         </div>
         <!-- stat row card end -->
       </div>

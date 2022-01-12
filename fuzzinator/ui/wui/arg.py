@@ -1,5 +1,5 @@
 # Copyright (c) 2019 Tamas Keri.
-# Copyright (c) 2019-2020 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2019-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -16,5 +16,9 @@ def add_arguments(parser):
                         help='bind service to all available addresses (alias for --bind-ip=%(const)r)')
     parser.add_argument('--port', metavar='NUM', default=8080, type=int,
                         help='port to start the service on (default: %(default)d)')
+    parser.add_argument('--cert', metavar='FILE',
+                        help='path to a PEM file containing the certificate (required to serve the UI through SSL)')
+    parser.add_argument('--key', metavar='FILE',
+                        help='path to a file containing the private key (optional to serve the UI though SSL)')
     parser.add_argument('--develop', action='store_true',
                         help='run the service in development mode')

@@ -1,5 +1,5 @@
 # Copyright (c) 2019 Tamas Keri.
-# Copyright (c) 2019-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2019-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -9,6 +9,7 @@
 import logging
 import os
 import signal
+import ssl
 import sys
 
 from multiprocessing import Lock, Manager, Process, Queue
@@ -27,7 +28,7 @@ root_logger = logging.getLogger()
 
 class Wui(object):
 
-    def __init__(self, controller, port, address, debug):
+    def __init__(self, controller, port, address, cert, key, debug):
         self.events = Queue()
         self.lock = Lock()
         # Main controller of Fuzzinator.
@@ -53,7 +54,14 @@ class Wui(object):
                                    static_handler_class=StaticResourceHandler, static_handler_args=dict(package=__package__), static_path='resources/static',
                                    autoreload=False, debug=debug)
         # Starts an HTTP server for this application on the given port.
-        self.server = self.app.listen(port, address)
+        if cert:
+            ssl_ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+            ssl_ctx.check_hostname = False
+            ssl_ctx.verify_mode = ssl.CERT_NONE
+            ssl_ctx.load_cert_chain(certfile=cert, keyfile=key)
+        else:
+            ssl_ctx = None
+        self.server = self.app.listen(port, address, ssl_options=ssl_ctx)
         # List of opened WebSockets.
         self.sockets = set()
         # Share dict between processes.
@@ -144,10 +152,10 @@ def execute(arguments):
     # not displayed on INFO level.
     if root_logger.getEffectiveLevel() == logging.INFO:
         logging.getLogger('tornado.access').setLevel(logging.WARNING)
-    logger.info('Server started at: http://%s:%d', arguments.bind_ip or 'localhost', arguments.port)
+    logger.info('Server started at: %s://%s:%d', 'https' if arguments.cert else 'http', arguments.bind_ip or 'localhost', arguments.port)
 
     controller = Controller(config=arguments.config)
-    wui = Wui(controller, arguments.port, arguments.bind_ip, arguments.develop)
+    wui = Wui(controller, arguments.port, arguments.bind_ip, arguments.cert, arguments.key, arguments.develop)
     fuzz_process = Process(target=controller.run, args=(), kwargs={'max_cycles': arguments.max_cycles, 'validate': arguments.validate, 'reduce': arguments.reduce})
 
     iol = ioloop.IOLoop.instance()

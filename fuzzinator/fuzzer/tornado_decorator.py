@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -51,8 +51,7 @@ class TornadoDecorator(FuzzerDecorator):
       - ``refresh``: Integer number denoting the time interval (in seconds)
         for the document at the root path (i.e., the test case) to refresh
         itself. Setting it to 0 means no refresh. (Default: 0)
-      - ``certfile``: Path to a PEM file containing the certificate needed
-        to establish the certificate’s authenticity (Default: None).
+      - ``certfile``: Path to a PEM file containing the certificate (Default: None).
       - ``keyfile``: Path to a file containing the private key (Default: None).
 
     **Example configuration snippet:**

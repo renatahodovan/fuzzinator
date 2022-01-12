@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019 Tamas Keri.
- * Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+ * Copyright (c) 2019-2022 Renata Hodovan, Akos Kiss.
  *
  * Licensed under the BSD 3-Clause License
  * <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -22,7 +22,7 @@
   var ws = null;
 
   notifications.start = function () {
-    ws = new WebSocket(`ws://${window.location.host}/notifications`);
+    ws = new WebSocket(`${window.location.protocol == 'https:' ? 'wss' : 'ws'}://${window.location.host}/notifications`);
 
     ws.onopen = function (evt) {
       if (notifications.onopen !== null) {

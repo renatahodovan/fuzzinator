@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -79,8 +79,8 @@ class SubprocessPropertyDecorator(CallDecorator):
             logger.warning('SubprocessPropertyDecorator execution timeout (%ds) expired while setting the \'%s\' property.\n%s\n%s',
                            e.timeout,
                            self.property,
-                           decode(e.stdout, self.encoding),
-                           decode(e.stderr, self.encoding))
+                           decode(e.stdout or b'', self.encoding),
+                           decode(e.stderr or b'', self.encoding))
         except subprocess.CalledProcessError as e:
             logger.warning('SubprocessPropertyDecorator exited with nonzero exit code (%d) while setting the \'%s\' property.\n%s\n%s',
                            e.returncode,

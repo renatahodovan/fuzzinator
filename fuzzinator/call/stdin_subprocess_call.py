@@ -92,7 +92,7 @@ class StdinSubprocessCall(Call):
         except subprocess.TimeoutExpired as e:
             logger.debug('StdinSubprocessCall execution timeout (%ds) expired.\n%s\n%s',
                          e.timeout,
-                         decode(e.stdout, self.encoding),
-                         decode(e.stderr, self.encoding))
+                         decode(e.stdout or b'', self.encoding),
+                         decode(e.stderr or b'', self.encoding))
 
         return NonIssue(issue)

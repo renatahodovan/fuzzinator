@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -16,6 +16,7 @@ import time
 from ..config import as_bool, as_dict, as_list, as_pargs, as_path, decode
 from ..controller import Controller
 from .call import Call
+from .non_issue import NonIssue
 
 logger = logging.getLogger(__name__)
 
@@ -53,10 +54,9 @@ class TestRunnerSubprocessCall(Call):
         try:
             self.proc.stdin.write((test + '\n').encode('utf-8'))
             self.proc.stdin.flush()
-            issue = self.wait_til_end()
-            return issue
+            return self.wait_til_end()
         except Exception:
-            return None
+            return NonIssue()
 
     def start(self, init_wait=True):
         self.proc = subprocess.Popen(self.command,

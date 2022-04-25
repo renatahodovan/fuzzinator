@@ -79,9 +79,9 @@ $(document).ready(function () {
 
     <!-- mark as reported form starts -->
     <form id="markAsReportedForm" class="list-group col-12 mt-3 mb-3">
-      {% for dup_url, dup_title in duplicates %}
-      <input type="radio" name="url" value="{{ dup_url }}" id="dup-{{ loop.index0 }}" />
-      <label class="col-12 list-group-item text-truncate" for="dup-{{ loop.index0 }}"><a target="_blank" href="{{ dup_url }}">#dup-{{ loop.index0 }}</a> {{ dup_title }}</label>
+      {% for index, (dup_url, dup_title) in enumerate(duplicates) %}
+      <input type="radio" name="url" value="{{ dup_url }}" id="dup-{{ index }}" />
+      <label class="col-12 list-group-item text-truncate" for="dup-{{ index }}"><a target="_blank" href="{{ dup_url }}">#dup-{{ index }}</a> {{ dup_title }}</label>
       {% end %}
       <div class="input-group mb-3">
         <div class="input-group-prepend">

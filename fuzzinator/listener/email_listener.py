@@ -44,20 +44,19 @@ class EmailListener(EventListener):
         self.smtp_port = smtp_port
 
         # Initialize connection to the smtp server.
-        server = smtplib.SMTP(self.smtp_host, self.smtp_port)
-        server.starttls()
+        with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
+            server.starttls()
 
-        pwd = keyring.get_password('fuzzinator', self.from_address)
-        while not pwd:
-            pwd = getpass.getpass(prompt='Password of {mail}: '.format(mail=self.from_address))
-            try:
-                server.login(self.from_address, pwd)
-            except Exception as e:
-                logger.warning('Authentication failed.', exc_info=e)
-                pwd = None
-        keyring.set_password('fuzzinator', self.from_address, pwd)
-        self.pwd = pwd if platform.system() == 'Darwin' else None
-        server.quit()
+            pwd = keyring.get_password('fuzzinator', self.from_address)
+            while not pwd:
+                pwd = getpass.getpass(prompt='Password of {mail}: '.format(mail=self.from_address))
+                try:
+                    server.login(self.from_address, pwd)
+                except Exception as e:
+                    logger.warning('Authentication failed.', exc_info=e)
+                    pwd = None
+            keyring.set_password('fuzzinator', self.from_address, pwd)
+            self.pwd = pwd if platform.system() == 'Darwin' else None
 
         setattr(self, event, lambda *args, **kwargs: self.send_mail(kwargs[param_name]))
 
@@ -83,10 +82,9 @@ class EmailListener(EventListener):
         msg['Subject'] = subject
 
         try:
-            server = smtplib.SMTP(self.smtp_host, self.smtp_port)
-            server.starttls()
-            server.login(self.from_address, self.pwd or keyring.get_password('fuzzinator', self.from_address))
-            server.send_message(msg)
-            server.quit()
+            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
+                server.starttls()
+                server.login(self.from_address, self.pwd or keyring.get_password('fuzzinator', self.from_address))
+                server.send_message(msg)
         except Exception as e:
             logger.warning('E-mail sending failed.', exc_info=e)

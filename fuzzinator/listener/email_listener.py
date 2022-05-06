@@ -26,7 +26,7 @@ class EmailListener(EventListener):
     various events.
     """
 
-    def __init__(self, config, event, param_name, from_address, to_address, smtp_host, smtp_port):
+    def __init__(self, config, event, param_name, from_address, to_address, smtp_host, smtp_port, smtp_timeout=5):
         """
         :param config: ConfigParser object containing information about the fuzz session.
         :param event: The name of the event to send notification about.
@@ -35,6 +35,8 @@ class EmailListener(EventListener):
         :param to_address: Target e-mail address to send the notification to.
         :param smtp_host: Host of the smtp server to send e-mails from.
         :param smtp_port: Port of the smtp server to send e-mails from.
+        :param smtp_timeout: Timeout in seconds for blocking SMTP operations like the connection attempt.
+        (Optional, default: 5)
         """
         super().__init__(config)
         self.param_name = param_name
@@ -42,9 +44,10 @@ class EmailListener(EventListener):
         self.to_address = to_address
         self.smtp_host = smtp_host
         self.smtp_port = smtp_port
+        self.smtp_timeout = smtp_timeout
 
         # Initialize connection to the smtp server.
-        with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
+        with smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=self.smtp_timeout) as server:
             server.starttls()
 
             pwd = keyring.get_password('fuzzinator', self.from_address)
@@ -82,7 +85,7 @@ class EmailListener(EventListener):
         msg['Subject'] = subject
 
         try:
-            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
+            with smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=self.smtp_timeout) as server:
                 server.starttls()
                 server.login(self.from_address, self.pwd or keyring.get_password('fuzzinator', self.from_address))
                 server.send_message(msg)

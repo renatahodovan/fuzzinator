@@ -19,11 +19,11 @@ $(document).ready(function () {
     var product = $(this).find(':selected').val();
     $('#componentSelect').find('option').remove();
     for (var component of product_info[product]['components']) {
-      $('#componentSelect').append($(`<option value=${component}>${component}</option>`));
+      $('#componentSelect').append($(`<option value="${component}">${component}</option>`));
     }
     $('#versionSelect').find('option').remove();
     for (var version of product_info[product]['versions']) {
-      $('#versionSelect').append($(`<option value=${version}>${version}</option>`));
+      $('#versionSelect').append($(`<option value="${version}">${version}</option>`));
     }
   });
 });

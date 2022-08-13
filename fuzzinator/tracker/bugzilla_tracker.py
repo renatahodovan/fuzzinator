@@ -73,13 +73,16 @@ class BugzillaTracker(Tracker):
                                                      description=body,
                                                      product=product,
                                                      version=product_version,
-                                                     component=component,
-                                                     blocks=blocks)
+                                                     component=component)
 
             bug = self.bzapi.createbug(create_info)
             if test:
                 with BytesIO(test) as f:
                     self.bzapi.attachfile(idlist=bug.bug_id, attachfile=f, description='Test', is_patch=False, file_name='test.{ext}'.format(ext=extension))
+
+            if blocks:
+                self.bzapi.update_bugs(ids=bug.bug_id, updates=self.bzapi.build_update(blocks_add=blocks))
+
             return bug.weburl
         except BugzillaError as e:
             raise TrackerError('Issue reporting failed') from e

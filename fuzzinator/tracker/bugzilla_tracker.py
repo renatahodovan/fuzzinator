@@ -7,7 +7,7 @@
 
 import os
 
-from io import BytesIO
+from io import BytesIO, StringIO
 
 from bugzilla import *
 
@@ -77,8 +77,8 @@ class BugzillaTracker(Tracker):
 
             bug = self.bzapi.createbug(create_info)
             if test:
-                with BytesIO(test) as f:
-                    self.bzapi.attachfile(idlist=bug.bug_id, attachfile=f, description='Test', is_patch=False, file_name='test.{ext}'.format(ext=extension))
+                with (BytesIO if isinstance(test, bytes) else StringIO)(test) as f:
+                    self.bzapi.attachfile(idlist=bug.bug_id, attachfile=f, description='Test', is_patch=False, file_name='test.{ext}'.format(ext=extension), content_type='text/plain')
 
             if blocks:
                 self.bzapi.update_bugs(ids=bug.bug_id, updates=self.bzapi.build_update(blocks_add=blocks))

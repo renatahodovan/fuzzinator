@@ -69,7 +69,7 @@ class TestRunnerSubprocessCall(Call):
             self.wait_til_end()
 
     def wait_til_end(self):
-        streams = {'stdout': b'', 'stderr': b''}
+        streams = {'stdout': '', 'stderr': ''}
 
         select_fds = [stream.fileno() for stream in [self.proc.stderr, self.proc.stdout]]
         for fd in select_fds:

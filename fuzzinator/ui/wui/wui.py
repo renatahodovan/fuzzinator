@@ -13,6 +13,7 @@ import ssl
 import sys
 
 from multiprocessing import Lock, Manager, Process, Queue
+from queue import Empty
 
 from rainbow_logging_handler import RainbowLoggingHandler
 from tornado import ioloop, web
@@ -73,7 +74,10 @@ class Wui(object):
                 event = self.events.get_nowait()
                 if hasattr(self, event['fn']):
                     getattr(self, event['fn'])(**event['kwargs'])
-            except Exception:
+            except Empty:
+                break
+            except Exception as e:
+                logger.warning('Exception in WUI', exc_info=e)
                 break
 
     def register_ws(self, socket):

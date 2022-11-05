@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
 # Copyright (c) 2019 Tamas Keri.
 #
 # Licensed under the BSD 3-Clause License
@@ -66,6 +66,10 @@ def process_args(args):
     args.config = config
 
     inators.arg.process_log_level_argument(args, root_logger)
+    # Force chatty third-party libraries to report at least on INFO level.
+    log_level_chatty = max(inators.log.levels[args.log_level], inators.log.INFO)
+    for logger_name in ('asyncio', 'chardet.charsetprober', 'keyring.backend'):
+        logging.getLogger(logger_name).setLevel(log_level_chatty)
     inators.arg.process_sys_recursion_limit_argument(args)
 
     return None

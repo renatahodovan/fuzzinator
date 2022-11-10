@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -18,17 +18,17 @@ class FuzzJob(CallJob):
     """
 
     def __init__(self, id, config, subconfig_id, fuzzer_name, db, listener):
-        fuzz_section = 'fuzz.' + fuzzer_name
+        fuzz_section = f'fuzz.{fuzzer_name}'
         sut_name = config.get(fuzz_section, 'sut')
         super().__init__(id, config, subconfig_id, sut_name, fuzzer_name, db, listener)
 
         capacity = int(config.get('fuzzinator', 'cost_budget'))
-        self.cost = min(int(config.get('sut.' + sut_name, 'cost', fallback=1)), capacity)
+        self.cost = min(int(config.get(f'sut.{sut_name}', 'cost', fallback=1)), capacity)
         self.batch = float(config.get(fuzz_section, 'batch', fallback=1))
         self.refresh = float(config.get(fuzz_section, 'refresh', fallback=self.batch))
 
     def run(self):
-        fuzzer = config_get_object(self.config, 'fuzz.' + self.fuzzer_name, 'fuzzer')
+        fuzzer = config_get_object(self.config, f'fuzz.{self.fuzzer_name}', 'fuzzer')
 
         # Register signal handler to catch keyboard interrupts.
         def terminate(signum, frame):
@@ -46,7 +46,7 @@ class FuzzJob(CallJob):
         self.listener.on_stats_updated()
         with fuzzer:
             while index < self.batch:
-                sut_call = config_get_object(self.config, 'sut.' + self.sut_name, 'call')
+                sut_call = config_get_object(self.config, f'sut.{self.sut_name}', 'call')
                 with sut_call:
                     while index < self.batch:
                         test = fuzzer(index=index)
@@ -68,7 +68,7 @@ class FuzzJob(CallJob):
 
                         if issue and test is None:
                             self.batch = index
-                            self.listener.warning(job_id=self.id, msg='{sut} crashed before the first test.'.format(sut=self.sut_name))
+                            self.listener.warning(job_id=self.id, msg=f'{self.sut_name} crashed before the first test.')
                             break
 
                         if issue is not None and ('test' not in issue or not issue['test']):

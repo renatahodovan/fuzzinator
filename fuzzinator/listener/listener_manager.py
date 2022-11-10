@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -24,7 +24,7 @@ class Trampoline(object):
             try:
                 getattr(listener, self.name)(**kwargs)
             except Exception as e:
-                logger.warning('Unhandled exception in listener \'%s\'.', self.name, exc_info=e)
+                logger.warning('Unhandled exception in listener %r.', self.name, exc_info=e)
 
 
 class ListenerManager(object):

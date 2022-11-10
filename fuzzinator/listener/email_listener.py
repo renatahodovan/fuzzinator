@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -52,7 +52,7 @@ class EmailListener(EventListener):
 
             pwd = keyring.get_password('fuzzinator', self.from_address)
             while not pwd:
-                pwd = getpass.getpass(prompt='Password of {mail}: '.format(mail=self.from_address))
+                pwd = getpass.getpass(prompt=f'Password of {self.from_address!r}: ')
                 try:
                     server.login(self.from_address, pwd)
                 except Exception as e:
@@ -74,7 +74,7 @@ class EmailListener(EventListener):
         data = dict((name, raw.decode('utf-8', 'ignore') if isinstance(raw, bytes) else raw) for name, raw in data.items())
 
         from ..formatter import JsonFormatter
-        formatter = config_get_object(self.config, 'sut.' + data['sut'], ['email_formatter', 'formatter']) or JsonFormatter()
+        formatter = config_get_object(self.config, f'sut.{data["sut"]}', ['email_formatter', 'formatter']) or JsonFormatter()
 
         subject = formatter.summary(issue=data)
         content = formatter(issue=data)

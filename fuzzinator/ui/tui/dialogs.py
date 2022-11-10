@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -68,20 +68,11 @@ class AboutDialog(Dialog):
                          footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))])
 
     def compile_about_data(self, prop_width=15):
-        return '{name_prop}: {name}\n' \
-               '{version_prop}: {version}\n' \
-               '{authors_prop}: {authors}\n' \
-               '{mail_prop}: {email}\n' \
-               '{homepage_prop}: {homepage}\n'.format(name_prop='Name'.ljust(prop_width),
-                                                      name=__pkg_name__,
-                                                      version_prop='Version'.ljust(prop_width),
-                                                      version=__version__,
-                                                      authors_prop='Authors'.ljust(prop_width),
-                                                      authors=__author__,
-                                                      mail_prop='E-mail'.ljust(prop_width),
-                                                      email=__author_email__,
-                                                      homepage_prop='Homepage'.ljust(prop_width),
-                                                      homepage=__url__)
+        return f'{"Name":<{prop_width}}: {__pkg_name__}\n' \
+               f'{"Version":<{prop_width}}: {__version__}\n' \
+               f'{"Authors":<{prop_width}}: {__author__}\n' \
+               f'{"E-mail":<{prop_width}}: {__author_email__}\n' \
+               f'{"Homepage":<{prop_width}}: {__url__}\n'
 
 
 class WarningDialog(Dialog):
@@ -119,7 +110,7 @@ class FormattedIssueDialog(Dialog):
     exit_keys = ['esc', 'f3']
 
     def __init__(self, config, issue, db):
-        formatter = config_get_object(config, 'sut.' + issue['sut'], ['tui_formatter', 'formatter']) or JsonFormatter()
+        formatter = config_get_object(config, f'sut.{issue["sut"]}', ['tui_formatter', 'formatter']) or JsonFormatter()
         super().__init__(title=formatter.summary(issue=issue),
                          body=[Padding(Text(line, wrap='clip'), left=2, right=2) for line in formatter(issue=issue).splitlines()],
                          footer_btns=[FormattedButton('Close', lambda button: self._emit('close'))])
@@ -155,7 +146,7 @@ class EditIssueDialog(Dialog):
                 continue
 
             self.edit_boxes[prop] = BugEditor('', self._to_str(prop, issue[prop]), multiline=True)
-            rows.append(Columns([('weight', 1, Text(('dialog_secondary', prop + ': '))),
+            rows.append(Columns([('weight', 1, Text(('dialog_secondary', f'{prop}: '))),
                                  ('weight', 10, self.edit_boxes[prop])], dividechars=1))
 
         super().__init__(title=issue['id'],

@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -18,7 +18,7 @@ class ValidateJob(CallJob):
 
     def __init__(self, id, config, issue, db, listener):
         sut_name = issue['sut']
-        sut_section = 'sut.' + sut_name
+        sut_section = f'sut.{sut_name}'
         fuzzer_name = issue['fuzzer']
         subconfig_id = issue['subconfig'].get('subconfig') if isinstance(issue.get('subconfig'), dict) else None
         super().__init__(id, config, subconfig_id, sut_name, fuzzer_name, db, listener)
@@ -32,7 +32,7 @@ class ValidateJob(CallJob):
         return new_issues
 
     def validate(self):
-        sut_call = config_get_object(self.config, 'sut.' + self.sut_name, ['validate_call', 'call'])
+        sut_call = config_get_object(self.config, f'sut.{self.sut_name}', ['validate_call', 'call'])
         with sut_call:
             issue = sut_call(**self.issue)
 

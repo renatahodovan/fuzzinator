@@ -1,5 +1,5 @@
 # Copyright (c) 2019 Tamas Keri.
-# Copyright (c) 2019-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2019-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -71,7 +71,7 @@ class BaseUIHandler(RequestHandler):
         if 'exc_info' in kwargs:
             icon = 'sentiment_very_dissatisfied'
             if self.application.settings.get('serve_traceback'):
-                exc_info = markdown('```\n%s\n```' % ''.join(traceback.format_exception(*kwargs['exc_info'])), extensions=['extra', 'fenced_code', 'codehilite'])
+                exc_info = markdown(f'```\n{"".join(traceback.format_exception(*kwargs["exc_info"]))}\n```', extensions=['extra', 'fenced_code', 'codehilite'])
             else:
                 exc_info = ''
         else:
@@ -94,13 +94,13 @@ class IssueUIHandler(BaseUIHandler):
             self.send_error(404)
             return
 
-        formatter = config_get_object(self._config, 'sut.' + issue['sut'], ['wui_formatter', 'formatter']) or JsonFormatter()
-        exporter = config_get_object(self._config, 'sut.' + issue['sut'], 'exporter')
+        formatter = config_get_object(self._config, f'sut.{issue["sut"]}', ['wui_formatter', 'formatter']) or JsonFormatter()
+        exporter = config_get_object(self._config, f'sut.{issue["sut"]}', 'exporter')
 
         self.render('issue.html',
                     issue=issue,
                     issue_body=formatter(issue=issue),
-                    has_tracker=self._config.has_option('sut.' + issue['sut'], 'tracker'),
+                    has_tracker=self._config.has_option(f'sut.{issue["sut"]}', 'tracker'),
                     has_exporter=exporter is not None,
                     exporter_ext=getattr(exporter, 'extension', ''))
 
@@ -113,12 +113,12 @@ class IssueReportUIHandler(BaseUIHandler):
             self.send_error(404)
             return
 
-        tracker = config_get_object(self._config, 'sut.' + issue['sut'], 'tracker')
+        tracker = config_get_object(self._config, f'sut.{issue["sut"]}', 'tracker')
         if not tracker:
             self.send_error(404)
             return
 
-        formatter = config_get_object(self._config, 'sut.' + issue['sut'], 'formatter') or JsonFormatter()
+        formatter = config_get_object(self._config, f'sut.{issue["sut"]}', 'formatter') or JsonFormatter()
         issue_title = formatter.summary(issue=issue)
 
         duplicates = []
@@ -153,7 +153,7 @@ class ConfigUIHandler(BaseUIHandler):
             self.send_error(404)
             return
 
-        config_src = markdown('```ini\n%s\n```' % config['src'], extensions=['extra', 'fenced_code', 'codehilite'])
+        config_src = markdown(f'```ini\n{config["src"]}\n```', extensions=['extra', 'fenced_code', 'codehilite'])
         self.render('config.html', subconfig=subconfig, issue_oid=issue_oid, data=data, config_src=config_src)
 
 
@@ -181,7 +181,7 @@ class StaticResourceHandler(RequestHandler):
         # NOTE: The argument must be called path to ensure compatibility with StaticFileHandler.
         # The application's static_path setting is passed to static_handler_class as path.
         self.package = package
-        self.resource_prefix = path if path.endswith('/') else path + '/'
+        self.resource_prefix = path if path.endswith('/') else f'{path}/'
 
     def get(self, path):
         resource_path = urljoin(self.resource_prefix, path)
@@ -217,7 +217,7 @@ class ResourceLoader(BaseLoader):
     def __init__(self, package, resource_prefix, **kwargs):
         super().__init__(**kwargs)
         self.package = package
-        self.resource_prefix = resource_prefix if resource_prefix.endswith('/') else resource_prefix + '/'
+        self.resource_prefix = resource_prefix if resource_prefix.endswith('/') else f'{resource_prefix}/'
         self.package_prefix = urlunparse(('', self.package, self.resource_prefix, '', '', ''))
 
     def resolve_path(self, name, parent_path=None):
@@ -252,7 +252,7 @@ class ResourceLoader(BaseLoader):
         """
         parts = urlparse(name)
         if parts.scheme != '' or parts.params != '' or parts.query != '' or parts.fragment != '':
-            raise ValueError('invalid template path: %s' % name)
+            raise ValueError(f'invalid template path: {name}')
 
         if parts.netloc == '' and parts.path.startswith('/'):
             logger.debug('loading template file: name=%s, path=%s', name, parts.path)
@@ -266,7 +266,7 @@ class ResourceLoader(BaseLoader):
             else:
                 assert not parts.path.startswith('/')
                 package = self.package
-                resource = self.resource_prefix + parts.path
+                resource = f'{self.resource_prefix}{parts.path}'
             logger.debug('loading template resource: name=%s, package=%s, resource=%s', name, package, resource)
             data = pkgutil.get_data(package, resource)
 

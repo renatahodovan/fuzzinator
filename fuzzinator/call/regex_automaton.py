@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2021-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -72,7 +72,7 @@ class RegexAutomaton(object):
             elif field_op == 'n':
                 pass
             else:
-                raise ValueError('Unknown instruction for operation on fields: %s.' % field_op)
+                raise ValueError(f'Unknown instruction for operation on fields: {field_op}.')
 
             # Terminate pattern matching and return with the current result.
             if next_line_op == 't':
@@ -84,7 +84,7 @@ class RegexAutomaton(object):
             if next_line_op == 'c':
                 pass
             else:
-                raise ValueError('Unknown instruction for input processing: %s.' % next_line_op)
+                raise ValueError(f'Unknown instruction for input processing: {next_line_op}.')
 
         return False, updated
 

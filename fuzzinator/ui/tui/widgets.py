@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -115,8 +115,8 @@ class MainWindow(PopUpLauncher):
     def add_reduce_job(self):
         if self.issues_table.selection:
             issue = self.db.find_issue_by_oid(self.issues_table.selection.data['_id'])
-            if not self.config.has_section('sut.' + issue['sut']):
-                self.warning_popup(msg='{sut} is not defined.'.format(sut=issue['sut']))
+            if not self.config.has_section(f'sut.{issue["sut"]}'):
+                self.warning_popup(msg=f'{issue["sut"]} is not defined.')
             else:
                 self.controller.add_reduce_job(issue)
 
@@ -127,7 +127,7 @@ class MainWindow(PopUpLauncher):
         if self.issues_table.selection:
             issue = self.db.find_issue_by_oid(self.issues_table.selection.data['_id'])
             if not self.controller.add_validate_job(issue):
-                self.warning_popup(msg='{sut} is not defined.'.format(sut=issue['sut']))
+                self.warning_popup(msg=f'{issue["sut"]} is not defined.')
 
     def copy_selected(self, test_bytes=False):
         if self.issues_table.selection:
@@ -135,7 +135,7 @@ class MainWindow(PopUpLauncher):
             if test_bytes:
                 pyperclip.copy(str(issue['test']))
             else:
-                formatter = config_get_object(self.config, 'sut.' + issue['sut'], ['tui_formatter', 'formatter']) or JsonFormatter()
+                formatter = config_get_object(self.config, f'sut.{issue["sut"]}', ['tui_formatter', 'formatter']) or JsonFormatter()
                 pyperclip.copy(formatter(issue=issue))
 
     def keypress(self, size, key):
@@ -339,11 +339,11 @@ class JobsTable(WidgetWrap):
 
     @property
     def title(self):
-        return ['[', ('border_title', ' {txt} '.format(txt=self.title_text)), ']']
+        return ['[', ('border_title', f' {self.title_text} '), ']']
 
     @title.setter
     def title(self, value):
-        self.pattern_box.set_title(['[', ('border_title', ' JOBS ({cnt}) '.format(cnt=value)), ']'])
+        self.pattern_box.set_title(['[', ('border_title', f' JOBS ({value}) '), ']'])
 
     @property
     def active_jobs(self):
@@ -560,16 +560,13 @@ class TimerWidget(Text):
         super().__init__(self.format_text(0))
         self.update()
 
-    def to_hms(self, ss):
+    def format_text(self, ss):
         hh = ss // 3600
         r = ss - hh * 3600
         mm = r // 60
         # truncate to first digit after decimal
         ss = (r - mm * 60)
-        return hh, mm, ss
-
-    def format_text(self, ss):
-        return '%02d:%02d:%04.1f' % self.to_hms(ss)
+        return f'{hh:02.0f}:{mm:02.0f}:{ss:04.1f}'
 
     def update(self):
         self.set_text(('time', self.format_text(time.time() - self._started)))

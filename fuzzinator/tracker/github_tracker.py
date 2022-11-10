@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -52,7 +52,7 @@ class GithubTracker(Tracker):
 
     def find_duplicates(self, *, title):
         try:
-            issues = list(self.ghapi.search_issues('repo:{repository} is:issue is:open {title}'.format(repository=self.repository, title=title)))
+            issues = list(self.ghapi.search_issues(f'repo:{self.repository} is:issue is:open {title}'))
             return [(issue.html_url, issue.title) for issue in issues]
         except GithubException as e:
             raise TrackerError('Finding possible duplicates failed') from e

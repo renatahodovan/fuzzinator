@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -178,9 +178,9 @@ class TableColumn(object):
         if v is None:
             v = ''
         elif isinstance(v, int):
-            v = '%d' % v
+            v = str(v)
         elif isinstance(v, float):
-            v = '%.03f' % v
+            v = f'{v:.03f}'
 
         # If v doesn't match any of the previous options than it might be a Widget.
         if not isinstance(v, Widget):
@@ -310,7 +310,7 @@ class TableRow(WidgetWrap):
         elif isinstance(table.border, int):
             border_width = table.border
         else:
-            raise Exception('Invalid border specification: %s' % table.border)
+            raise Exception(f'Invalid border specification: {table.border}')
 
         self.row = self.column_class(self.contents)
         if self.header:
@@ -454,7 +454,7 @@ class Table(WidgetWrap):
         self.pile = Pile([('pack', self.header),
                           ('weight', 1, self.listbox)])
 
-        self.pattern_box = PatternBox(self.pile, title=['[', ('border_title', ' {title} (0) '.format(title=self.title)), ']'], **fz_box_pattern())
+        self.pattern_box = PatternBox(self.pile, title=['[', ('border_title', f' {self.title} (0) '), ']'], **fz_box_pattern())
         self.attr = AttrMap(self.pattern_box, attr_map=self.attr_map)
         super().__init__(self.attr)
 
@@ -466,7 +466,7 @@ class Table(WidgetWrap):
             self.requery(self.query_data)
 
     def update_header(self):
-        self.pattern_box.set_title(['[', ('border_title', ' {title} ({cnt}) '.format(title=self.title, cnt=len(self.walker))), ']'])
+        self.pattern_box.set_title(['[', ('border_title', f' {self.title} ({len(self.walker)}) '), ']'])
 
     def __delitem__(self, i):
         del self.body[i]
@@ -618,7 +618,7 @@ class Table(WidgetWrap):
             sort_field = self.columns[index // 2].name
 
         if not isinstance(index, int):
-            raise Exception('invalid column index: %s' % index)
+            raise Exception(f'invalid column index: {index}')
 
         if reverse is not None:
             self.sort_reverse = reverse ^ self.columns[index // 2].sort_reverse

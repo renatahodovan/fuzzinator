@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -52,7 +52,7 @@ class TestRunnerSubprocessCall(Call):
             self.start(self.init_wait)
 
         try:
-            self.proc.stdin.write((test + '\n').encode('utf-8'))
+            self.proc.stdin.write(f'{test}\n'.encode('utf-8'))
             self.proc.stdin.flush()
             return self.wait_til_end()
         except Exception:

@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -41,10 +41,10 @@ class ReportDialog(PopUpTarget):
         self.issue = issue
         self.db = db
 
-        self.tracker = config_get_object(config, 'sut.' + issue['sut'], 'tracker')
+        self.tracker = config_get_object(config, f'sut.{issue["sut"]}', 'tracker')
         self.settings = self.tracker.settings()
 
-        formatter = config_get_object(config, 'sut.' + issue['sut'], 'formatter') or JsonFormatter()
+        formatter = config_get_object(config, f'sut.{issue["sut"]}', 'formatter') or JsonFormatter()
         self.issue_title = BugEditor(edit_text=formatter.summary(issue=issue))
         self.issue_desc = BugEditor(edit_text=formatter(issue=issue), multiline=True, wrap='clip')
 

@@ -12,6 +12,16 @@ jobs:
           # wheel available for windows+pypy
           - os: windows-latest
             python-version: 'pypy-3.7'
+          # Python3.5 and Python3.6 are only available in GH Actions up to Ubuntu 20.04.
+          - os: ubuntu-latest
+            python-version: '3.5'
+          - os: ubuntu-latest
+            python-version: '3.6'
+        include:
+          - os: ubuntu-20.04
+            python-version: '3.5'
+          - os: ubuntu-20.04
+            python-version: '3.6'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2

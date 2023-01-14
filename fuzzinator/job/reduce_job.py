@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -19,9 +19,8 @@ class ReduceJob(CallJob):
 
     def __init__(self, id, config, issue, db, listener):
         sut_name = issue['sut']
-        sut_section = 'sut.' + sut_name
-        fuzzer_name = '{fuzzer}/{reducer}'.format(fuzzer=issue['fuzzer'].split('/')[0],
-                                                  reducer=config.get(sut_section, 'reduce'))
+        sut_section = f'sut.{sut_name}'
+        fuzzer_name = f'{issue["fuzzer"].split("/")[0]}/{config.get(sut_section, "reduce")}'
         subconfig_id = issue['subconfig'].get('subconfig') if isinstance(issue.get('subconfig'), dict) else None
         super().__init__(id, config, subconfig_id, sut_name, fuzzer_name, db, listener)
 
@@ -38,7 +37,7 @@ class ReduceJob(CallJob):
         if not valid:
             return issues
 
-        sut_section = 'sut.' + self.sut_name
+        sut_section = f'sut.{self.sut_name}'
         sut_call = config_get_object(self.config, sut_section, ['reduce_call', 'validate_call', 'call'])
         reduce = config_get_object(self.config, sut_section, 'reduce')
 
@@ -47,7 +46,7 @@ class ReduceJob(CallJob):
                                          on_job_progressed=partial(self.listener.on_job_progressed, job_id=self.id))
 
         if reduced_src is None:
-            self.listener.warning(job_id=self.id, msg='Reduce of {issue_id} failed.'.format(issue_id=self.issue['id']))
+            self.listener.warning(job_id=self.id, msg=f'Reduce of {self.issue["id"]} failed.')
         else:
             self.db.update_issue_by_oid(self.issue['_id'], {'reduced': reduced_src})
             self.listener.on_issue_reduced(job_id=self.id, issue=self.issue)

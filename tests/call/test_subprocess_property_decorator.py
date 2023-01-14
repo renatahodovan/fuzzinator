@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -18,11 +18,11 @@ from common_call import linesep, resources_dir, MockAlwaysFailCall, MockNeverFai
     ({'init_foo': 'init_bar'}, {'test': 'bar'})
 ])
 @pytest.mark.parametrize('call_class, dec_kwargs, exp', [
-    (MockAlwaysFailCall, {'property': 'baz', 'command': '%s %s --print-args qux' % (sys.executable, os.path.join(resources_dir, 'mock_tool.py'))}, {'init_foo': 'init_bar', 'test': 'bar', 'baz': 'qux' + linesep}),
-    (MockAlwaysFailCall, {'property': 'baz', 'command': '%s %s --print-args qux' % (sys.executable, os.path.join('.', 'mock_tool.py')), 'cwd': resources_dir}, {'init_foo': 'init_bar', 'test': 'bar', 'baz': 'qux' + linesep}),
-    (MockAlwaysFailCall, {'property': 'baz', 'command': '%s %s --print-env QUX' % (sys.executable, os.path.join('.', 'mock_tool.py')), 'cwd': resources_dir, 'env': '{"QUX": "qux"}'}, {'init_foo': 'init_bar', 'test': 'bar', 'baz': 'qux' + linesep}),
+    (MockAlwaysFailCall, {'property': 'baz', 'command': f'{sys.executable} {os.path.join(resources_dir, "mock_tool.py")} --print-args qux'}, {'init_foo': 'init_bar', 'test': 'bar', 'baz': f'qux{linesep}'}),
+    (MockAlwaysFailCall, {'property': 'baz', 'command': f'{sys.executable} {os.path.join(resources_dir, "mock_tool.py")} --print-args qux', 'cwd': resources_dir}, {'init_foo': 'init_bar', 'test': 'bar', 'baz': f'qux{linesep}'}),
+    (MockAlwaysFailCall, {'property': 'baz', 'command': f'{sys.executable} {os.path.join(resources_dir, "mock_tool.py")} --print-env QUX', 'cwd': resources_dir, 'env': '{"QUX": "qux"}'}, {'init_foo': 'init_bar', 'test': 'bar', 'baz': f'qux{linesep}'}),
 
-    (MockNeverFailCall, {'property': 'baz', 'command': '%s %s --print-env QUX' % (sys.executable, os.path.join('.', 'mock_tool.py')), 'cwd': resources_dir, 'env': '{"QUX": "qux"}'}, None),
+    (MockNeverFailCall, {'property': 'baz', 'command': f'{sys.executable} {os.path.join(resources_dir, "mock_tool.py")} --print-env QUX', 'cwd': resources_dir, 'env': '{"QUX": "qux"}'}, None),
 ])
 def test_subprocess_property_decorator(call_class, call_init_kwargs, call_kwargs, dec_kwargs, exp):
     call_class = fuzzinator.call.SubprocessPropertyDecorator(**dec_kwargs)(call_class)

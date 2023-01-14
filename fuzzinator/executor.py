@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 # Copyright (c) 2019 Tamas Keri.
 #
 # Licensed under the BSD 3-Clause License
@@ -37,12 +37,12 @@ def process_args(args):
 
     parsed_fn = config.read(args.config)
     if len(parsed_fn) != len(args.config):
-        return 'Config file(s) do(es) not exist: {fn}'.format(fn=', '.join(fn for fn in args.config if fn not in parsed_fn))
+        return f'Config file(s) do(es) not exist: {", ".join(fn for fn in args.config if fn not in parsed_fn)}'
 
     for define in args.defines:
         parts = re.fullmatch('([^:=]*):([^:=]*)=(.*)', define)
         if not parts:
-            return 'Config option definition not in SECT:OPT=VAL format: {d}'.format(d=define)
+            return f'Config option definition not in SECT:OPT=VAL format: {define}'
 
         section, option, value = parts.group(1, 2, 3)
         if not config.has_section(section):
@@ -52,7 +52,7 @@ def process_args(args):
     for undef in args.undefs:
         parts = re.fullmatch('([^:=]*)(:([^:=]*))?', undef)
         if not parts:
-            return 'Config section/option undefinition not in SECT[:OPT] format: {u}'.format(u=undef)
+            return f'Config section/option undefinition not in SECT[:OPT] format: {undef}'
 
         section, option = parts.group(1, 3)
         if option is None:

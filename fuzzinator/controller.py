@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -364,7 +364,7 @@ class Controller(object):
                     # Determine fuzz job to be queued and then update fuzz_idx
                     # to point to the next job's parameters.
                     fuzzer_name = fuzz_names[fuzz_idx]
-                    fuzz_section = 'fuzz.' + fuzzer_name
+                    fuzz_section = f'fuzz.{fuzzer_name}'
                     fuzz_idx = (fuzz_idx + 1) % len(self.fuzzers)
 
                     # Skip fuzz job if limit on parallel instances is reached.
@@ -376,7 +376,7 @@ class Controller(object):
                     # with the latest version of the SUT and queue an update if
                     # needed.
                     sut_name = self.config.get(fuzz_section, 'sut')
-                    update_condition = config_get_object(self.config, 'sut.' + sut_name, 'update_condition')
+                    update_condition = config_get_object(self.config, f'sut.{sut_name}', 'update_condition')
                     if update_condition and update_condition():
                         self.add_update_job(sut_name)
 
@@ -410,7 +410,7 @@ class Controller(object):
         except KeyboardInterrupt:
             pass
         except Exception as e:
-            self.listener.warning(job_id=None, msg='Exception in the main controller loop: {exception}\n{trace}'.format(exception=e, trace=traceback.format_exc()))
+            self.listener.warning(job_id=None, msg=f'Exception in the main controller loop: {e}\n{traceback.format_exc()}')
         finally:
             Controller.kill_process_tree(os.getpid(), kill_root=False)
             if os.path.exists(self.work_dir):
@@ -423,10 +423,7 @@ class Controller(object):
                 if not self.add_reduce_job(issue=issue):
                     self.add_validate_job(issue=issue)
         except Exception as e:
-            self.listener.warning(job_id=job.id, msg='Exception in {job}: {exception}\n{trace}'.format(
-                job=repr(job),
-                exception=e,
-                trace=traceback.format_exc()))
+            self.listener.warning(job_id=job.id, msg=f'Exception in {job!r}: {e}\n{traceback.format_exc()}')
 
     def add_fuzz_job(self, fuzzer_name, priority=False):
         # Added for the sake of completeness and consistency.
@@ -436,7 +433,7 @@ class Controller(object):
         return True
 
     def add_validate_job(self, issue, priority=False):
-        if not self.config.has_section('sut.' + issue['sut']):
+        if not self.config.has_section(f'sut.{issue["sut"]}'):
             return False
 
         with self._shared_lock:
@@ -444,7 +441,7 @@ class Controller(object):
         return True
 
     def add_reduce_job(self, issue, priority=False):
-        if not self.config.has_option('sut.' + issue['sut'], 'reduce'):
+        if not self.config.has_option(f'sut.{issue["sut"]}', 'reduce'):
             return False
 
         with self._shared_lock:
@@ -452,13 +449,13 @@ class Controller(object):
         return True
 
     def add_update_job(self, sut_name, priority=False):
-        if not self.config.has_option('sut.' + sut_name, 'update'):
+        if not self.config.has_option(f'sut.{sut_name}', 'update'):
             return False
 
         with self._shared_lock:
             self._shared_queue.put((UpdateJob, dict(sut_name=sut_name), priority))
 
-        if as_bool(self.config.get('sut.' + sut_name, 'validate_after_update', fallback=self.validate_after_update)):
+        if as_bool(self.config.get(f'sut.{sut_name}', 'validate_after_update', fallback=self.validate_after_update)):
             self.validate_all(sut_name)
 
         return True

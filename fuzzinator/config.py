@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -32,8 +32,7 @@ def config_get_kwargs(config, section):
 
 def config_init_object(config, cls, kwargs):
     if any(param == 'work_dir' for param in signature(cls.__init__).parameters):
-        kwargs['work_dir'] = os.path.join(as_path(config.get('fuzzinator', 'work_dir')),
-                                          '{pid}-{cls}-{uid}'.format(pid=os.getpid(), cls=cls.__name__, uid=uuid4().hex))
+        kwargs['work_dir'] = os.path.join(as_path(config.get('fuzzinator', 'work_dir')), f'{os.getpid()}-{cls.__name__}-{uuid4().hex}')
     return cls(**kwargs)
 
 
@@ -76,14 +75,14 @@ def config_get_object(config, section, options, *, init_kwargs=None):
 
         # 2) find decorator classes named in $(section:option.decorate(*)) and apply
         # them with their arguments given in $(section.option.decorate(*):*)
-        opt_prefix = option + '.decorate('
+        opt_prefix = f'{option}.decorate('
         opt_suffix = ')'
         decorator_options = [opt for opt in config.options(section)
                              if opt.startswith(opt_prefix) and opt.endswith(opt_suffix)]
         decorator_options.sort(key=lambda opt, pre=opt_prefix, suf=opt_suffix: int(opt[len(pre):-len(suf)]))
         for decopt in decorator_options:
             decorator_class = import_object(config.get(section, decopt))
-            decorator_kwargs = config_get_kwargs(config, section + '.' + decopt)
+            decorator_kwargs = config_get_kwargs(config, f'{section}.{decopt}')
             decorator = config_init_object(config, decorator_class, decorator_kwargs)
             obj_class = decorator(obj_class)
 
@@ -91,13 +90,13 @@ def config_get_object(config, section, options, *, init_kwargs=None):
         obj_kwargs = {}
 
         # 3.a) get old-style arguments from $(section.option.init:*)
-        init_section = section + '.' + option + '.init'
+        init_section = f'{section}.{option}.init'
         if config.has_section(init_section):
             logger.warning('.init sections are deprecated (%s)', init_section)
             obj_kwargs.update(config_get_kwargs(config, init_section))
 
         # 3.b) get arguments from $(section.option:*)
-        obj_kwargs.update(config_get_kwargs(config, section + '.' + option))
+        obj_kwargs.update(config_get_kwargs(config, f'{section}.{option}'))
 
         # 3.c) get arguments from init_kwargs
         if init_kwargs:
@@ -125,16 +124,16 @@ def config_get_fuzzers(config):
         for option in config.options(section_name):
             sub_parser[section_name][option] = config.get(section_name, option).replace(work_dir, '')
 
-            for subsection_name in (section_name + '.' + option, section_name + '.' + option + '.init'):
+            for subsection_name in (f'{section_name}.{option}', f'{section_name}.{option}.init'):
                 filter_available_sections(subsection_name)
 
-            opt_prefix = option + '.decorate('
+            opt_prefix = f'{option}.decorate('
             opt_suffix = ')'
             decorator_options = [opt for opt in config.options(section_name) if
                                  opt.startswith(opt_prefix) and opt.endswith(opt_suffix)]
             decorator_options.sort(key=lambda opt, pre=opt_prefix, suf=opt_suffix: int(opt[len(pre):-len(suf)]))
             for decopt in decorator_options:
-                for subsection_name in (section_name + '.' + decopt, section_name + '.' + decopt + '.init'):
+                for subsection_name in (f'{section_name}.{decopt}', f'{section_name}.{decopt}.init'):
                     filter_available_sections(subsection_name)
 
     work_dir = config.get('fuzzinator', 'work_dir')
@@ -143,10 +142,10 @@ def config_get_fuzzers(config):
     fuzzers = OrderedDict()
 
     for fuzzer in fuzzer_names:
-        sut = config.get('fuzz.' + fuzzer, 'sut')
+        sut = config.get(f'fuzz.{fuzzer}', 'sut')
         sub_parser = ConfigParser(interpolation=None, strict=False, allow_no_value=True)
-        filter_available_sections('sut.' + sut)
-        filter_available_sections('fuzz.' + fuzzer)
+        filter_available_sections(f'sut.{sut}')
+        filter_available_sections(f'fuzz.{fuzzer}')
 
         config_str = StringIO()
         sub_parser.write(config_str, space_around_delimiters=False)

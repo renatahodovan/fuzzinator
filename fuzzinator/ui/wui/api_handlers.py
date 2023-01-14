@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2019-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -115,7 +115,7 @@ class BaseAPIHandler(RequestHandler):
         def _mime():
             format = self.get_query_argument('format', None)
             if format:
-                mime = 'application/%s' % format
+                mime = f'application/{format}'
                 if mime in self.dumps:
                     return mime
 
@@ -138,7 +138,7 @@ class IssuesAPIHandler(BaseAPIHandler):
         zipbuf = BytesIO()
         with ZipFile(zipbuf, mode='w', compression=ZIP_DEFLATED) as zf:
             for issue in issues:
-                exporter = config_get_object(self._config, 'sut.' + issue['sut'], 'exporter')
+                exporter = config_get_object(self._config, f'sut.{issue["sut"]}', 'exporter')
                 if not exporter:
                     continue  # silently skip issues with no exporter
                 ext = getattr(exporter, 'extension', '')
@@ -178,10 +178,10 @@ class IssuesAPIHandler(BaseAPIHandler):
 class IssueAPIHandler(BaseAPIHandler):
 
     def send_export(self, issue):
-        exporter = config_get_object(self._config, 'sut.' + issue['sut'], 'exporter')
+        exporter = config_get_object(self._config, f'sut.{issue["sut"]}', 'exporter')
         if not exporter:
             self._wui.send_notification('error', data={'title': 'Issue export failed',
-                                                       'body': 'The exporter setup is missing from the configuration (sut.{sut}.exporter).'.format(sut=issue['sut'])})
+                                                       'body': f'The exporter setup is missing from the configuration (sut.{issue["sut"]}.exporter).'})
             raise HTTPError(404, reason='exporter not found')  # 404 Client Error: Not Found
 
         if getattr(exporter, 'type', None):
@@ -192,7 +192,7 @@ class IssueAPIHandler(BaseAPIHandler):
         issue = self._db.find_issue_by_oid(issue_oid, detailed=True)
         if issue is None:
             self._wui.send_notification('error', data={'title': 'Issue request failed',
-                                                       'body': 'No issue with id={id}.'.format(id=issue_oid)})
+                                                       'body': f'No issue with id={issue_oid}.'})
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
         if self.get_query_argument('format', None) == 'custom':
@@ -204,7 +204,7 @@ class IssueAPIHandler(BaseAPIHandler):
         issue = self._db.find_issue_by_oid(issue_oid)
         if issue is None:
             self._wui.send_notification('error', data={'title': 'Issue editing failed',
-                                                       'body': 'No issue with id={id}.'.format(id=issue_oid)})
+                                                       'body': f'No issue with id={issue_oid}.'})
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
         self._db.update_issue_by_oid(issue_oid, self.get_content())
@@ -215,7 +215,7 @@ class IssueAPIHandler(BaseAPIHandler):
         issue = self._db.find_issue_by_oid(issue_oid)
         if issue is None:
             self._wui.send_notification('error', data={'title': 'Issue deletion failed',
-                                                       'body': 'No issue with id={id}.'.format(id=issue_oid)})
+                                                       'body': f'No issue with id={issue_oid}.'})
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
         self._db.remove_issue_by_oid(issue_oid)
@@ -229,13 +229,13 @@ class IssueReportAPIHandler(BaseAPIHandler):
         issue = self._db.find_issue_by_oid(issue_oid)
         if issue is None:
             self._wui.send_notification('error', data={'title': 'Issue reporting failed',
-                                                       'body': 'No issue with id={id}.'.format(id=issue_oid)})
+                                                       'body': f'No issue with id={issue_oid}.'})
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
-        tracker = config_get_object(self._config, 'sut.' + issue['sut'], 'tracker')
+        tracker = config_get_object(self._config, f'sut.{issue["sut"]}', 'tracker')
         if not tracker:
             self._wui.send_notification('error', data={'title': 'Issue reporting failed',
-                                                       'body': 'The tracker setup is missing from the configuration (sut.{sut}.tracker).'.format(sut=issue['sut'])})
+                                                       'body': f'The tracker setup is missing from the configuration (sut.{issue["sut"]}.tracker).'})
             raise HTTPError(404, reason='tracker not found')  # 404 Client Error: Not Found
 
         try:
@@ -263,8 +263,8 @@ class JobsAPIHandler(BaseAPIHandler):
 
         issue = self._db.find_issue_by_oid(issue_oid)
         if issue is None:
-            self._wui.send_notification('error', data={'title': '{job} job creation failed'.format(job=job_type.capitalize()),
-                                                       'body': 'No issue with id={id}.'.format(id=issue_oid)})
+            self._wui.send_notification('error', data={'title': f'{job_type.capitalize()} job creation failed',
+                                                       'body': f'No issue with id={issue_oid}.'})
             raise HTTPError(404, reason='issue not found')  # 404 Client Error: Not Found
 
         success = {
@@ -274,9 +274,8 @@ class JobsAPIHandler(BaseAPIHandler):
 
         if not success:
             self._wui.send_notification('error',
-                                        data={'title': '{job} job creation failed'.format(job=job_type.capitalize()),
-                                              'body': 'The {job} setup is missing from the configuration ({conf}).'.format(job=job_type,
-                                                                                                                           conf='sut.{sut}{reduce}'.format(sut=issue['sut'], reduce='.reduce' if job_type == 'reduce' else ''))})
+                                        data={'title': f'{job_type.capitalize()} job creation failed',
+                                              'body': f'The {job_type} setup is missing from the configuration (sut.{issue["sut"]}{".reduce" if job_type == "reduce" else ""}).'})
             raise HTTPError(400, reason='missing config')   # 400 Client Error: Bad Request
         self.set_status(201, reason='job added')    # 201 Success: Created
 
@@ -288,7 +287,7 @@ class JobAPIHandler(BaseAPIHandler):
         job = self._wui.jobs.get(job_id)
         if job is None:
             self._wui.send_notification('error', data={'title': 'Job request failed',
-                                                       'body': 'No job with id={id}.'.format(id=job_id)})
+                                                       'body': f'No job with id={job_id}.'})
             raise HTTPError(404, reason='job not found')    # 404 Client Error: Not Found
 
         self.send_content(job)
@@ -298,7 +297,7 @@ class JobAPIHandler(BaseAPIHandler):
         job = self._wui.jobs.get(job_id)
         if job is None:
             self._wui.send_notification('error', data={'title': 'Job cancelation failed',
-                                                       'body': 'No job with id={id}.'.format(id=job_id)})
+                                                       'body': f'No job with id={job_id}.'})
             raise HTTPError(404, reason='job not found')    # 404 Client Error: Not Found
 
         self._controller.cancel_job(job_id)

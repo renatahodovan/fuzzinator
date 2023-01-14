@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -17,9 +17,9 @@ class UpdateJob(object):
         self.config = config
         self.sut_name = sut_name
         capacity = int(config.get('fuzzinator', 'cost_budget'))
-        self.cost = min(int(config.get('sut.' + sut_name, 'update_cost', fallback=config.get('fuzzinator', 'cost_budget'))), capacity)
+        self.cost = min(int(config.get(f'sut.{sut_name}', 'update_cost', fallback=config.get('fuzzinator', 'cost_budget'))), capacity)
 
     def run(self):
-        update = config_get_object(self.config, 'sut.' + self.sut_name, 'update')
+        update = config_get_object(self.config, f'sut.{self.sut_name}', 'update')
         update()
         return []

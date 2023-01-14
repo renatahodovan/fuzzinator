@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -101,7 +101,7 @@ class ReportButton(FullScreenPopupLauncher):
             return None
         issue = self.issues_table.db.find_issue_by_oid(focus.data['_id'])
 
-        tracker = config_get_object(self.config, 'sut.' + issue['sut'], 'tracker')
+        tracker = config_get_object(self.config, f'sut.{issue["sut"]}', 'tracker')
         if tracker:
             dialog = tracker.ui_extension.get('tui')
             popup_cls = import_object(dialog) if dialog else ReportDialog

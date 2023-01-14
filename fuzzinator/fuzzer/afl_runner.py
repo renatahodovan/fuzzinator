@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -125,7 +125,7 @@ class AFLRunner(Fuzzer):
                 self.sut_command
 
             child = pexpect.spawn(self.afl_fuzz, command, cwd=self.cwd, env=self.env)
-            child.expect(['Fuzzing test case [#]{next_it}.*'.format(next_it=self.iteration), pexpect.EOF], timeout=None)
+            child.expect([f'Fuzzing test case [#]{self.iteration}.*', pexpect.EOF], timeout=None)
             child.terminate(force=True)
 
             self.tests = [os.path.join(crash_dir, test) for test in os.listdir(crash_dir) if test.startswith('id') and test not in self.checked]

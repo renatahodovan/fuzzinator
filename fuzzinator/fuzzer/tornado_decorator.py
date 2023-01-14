@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -79,7 +79,7 @@ class TornadoDecorator(FuzzerDecorator):
     def __init__(self, *, template_path=None, static_path=None, url=None, refresh=None, certfile=None, keyfile=None, **kwargs):
         self.template_path = template_path
         self.static_path = static_path
-        self.url = url or ('https' if certfile else 'http') + '://localhost:{port}?index={index}'
+        self.url = url or f'{"https" if certfile else "http"}://localhost:{{port}}?index={{index}}'
         self.refresh = int(refresh) if refresh else 0
         if certfile:
             self.ssl_ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
@@ -108,7 +108,7 @@ class TornadoDecorator(FuzzerDecorator):
         return self.url.format(port=obj._port, index=obj.index)
 
     def _service(self, obj):
-        return '{scheme}://localhost:{port}'.format(scheme='https' if self.ssl_ctx else 'http', port=obj._port)
+        return f'{"https" if self.ssl_ctx else "http"}://localhost:{obj._port}'
 
     def call(self, cls, obj, *, index):
         if index != 0 and obj.test is None:
@@ -131,9 +131,7 @@ class TornadoDecorator(FuzzerDecorator):
                     if obj.test is not None:
                         obj.index += 1
                         if decorator.refresh > 0:
-                            self.set_header('Refresh', '{timeout}; url={url}'
-                                            .format(timeout=decorator.refresh,
-                                                    url=decorator._url(obj)))
+                            self.set_header('Refresh', f'{decorator.refresh}; url={decorator._url(obj)}')
                         test = obj.test
                         if not isinstance(test, (str, bytes, dict)):
                             test = str(test)
@@ -145,7 +143,7 @@ class TornadoDecorator(FuzzerDecorator):
 
             def get(self, page):
                 try:
-                    self.render(page + '.html')
+                    self.render(f'{page}.html')
                 except FileNotFoundError:
                     logger.debug('%s not found', page)
                     self.send_error(404)

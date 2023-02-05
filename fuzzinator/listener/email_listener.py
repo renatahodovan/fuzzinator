@@ -28,15 +28,17 @@ class EmailListener(EventListener):
 
     def __init__(self, config, event, param_name, from_address, to_address, smtp_host, smtp_port, smtp_timeout=5):
         """
-        :param config: ConfigParser object containing information about the fuzz session.
+        :param config: ConfigParser object containing information about the fuzz
+            session.
         :param event: The name of the event to send notification about.
-        :param param_name: The name of the event's parameter containing the information to send.
+        :param param_name: The name of the event's parameter containing the
+            information to send.
         :param from_address: E-mail address to send notifications from.
         :param to_address: Target e-mail address to send the notification to.
         :param smtp_host: Host of the smtp server to send e-mails from.
         :param smtp_port: Port of the smtp server to send e-mails from.
-        :param smtp_timeout: Timeout in seconds for blocking SMTP operations like the connection attempt.
-        (Optional, default: 5)
+        :param smtp_timeout: Timeout in seconds for blocking SMTP operations
+            like the connection attempt. (Optional, default: 5)
         """
         super().__init__(config)
         self.param_name = param_name

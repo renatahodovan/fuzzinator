@@ -310,7 +310,7 @@ class TableRow(WidgetWrap):
         elif isinstance(table.border, int):
             border_width = table.border
         else:
-            raise Exception(f'Invalid border specification: {table.border}')
+            raise ValueError(f'Invalid border specification: {table.border}')
 
         self.row = self.column_class(self.contents)
         if self.header:
@@ -618,7 +618,7 @@ class Table(WidgetWrap):
             sort_field = self.columns[index // 2].name
 
         if not isinstance(index, int):
-            raise Exception(f'invalid column index: {index}')
+            raise ValueError(f'invalid column index: {index}')
 
         if reverse is not None:
             self.sort_reverse = reverse ^ self.columns[index // 2].sort_reverse

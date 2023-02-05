@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -75,18 +75,18 @@ class PicireReducer(Reducer):
         # Choose the reducer class that will be used and its configuration.
         if not parallel:
             self.reduce_class = picire.DD
-            self.reduce_config = dict(subset_iterator=subset_iterator,
-                                      complement_iterator=complement_iterator,
-                                      subset_first=subset_first)
+            self.reduce_config = {'subset_iterator': subset_iterator,
+                                  'complement_iterator': complement_iterator,
+                                  'subset_first': subset_first}
         else:
             if combine_loops:
                 self.reduce_class = picire.CombinedParallelDD
-                self.reduce_config = dict(config_iterator=picire.CombinedIterator(subset_first, subset_iterator, complement_iterator))
+                self.reduce_config = {'config_iterator': picire.CombinedIterator(subset_first, subset_iterator, complement_iterator)}
             else:
                 self.reduce_class = picire.ParallelDD
-                self.reduce_config = dict(subset_iterator=subset_iterator,
-                                          complement_iterator=complement_iterator,
-                                          subset_first=subset_first)
+                self.reduce_config = {'subset_iterator': subset_iterator,
+                                      'complement_iterator': complement_iterator,
+                                      'subset_first': subset_first}
             self.reduce_config.update(proc_num=jobs,
                                       max_utilization=max_utilization)
         self.reduce_config.update(split=split_class(n=granularity))
@@ -103,11 +103,11 @@ class PicireReducer(Reducer):
             encoding = self.encoding or 'latin-1'
 
         new_issues = {}
-        tester_config = dict(sut_call=sut_call,
-                             issue=issue,
-                             on_job_progressed=on_job_progressed,
-                             filename=issue.get('filename', 'test'),
-                             encoding=encoding,
-                             new_issues=new_issues)
+        tester_config = {'sut_call': sut_call,
+                         'issue': issue,
+                         'on_job_progressed': on_job_progressed,
+                         'filename': issue.get('filename', 'test'),
+                         'encoding': encoding,
+                         'new_issues': new_issues}
 
         return self.TestTuple(src, encoding), self.TesterTuple(PicireTester, tester_config, new_issues)

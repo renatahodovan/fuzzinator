@@ -89,6 +89,6 @@ class BugzillaTracker(Tracker):
 
     def settings(self):
         products = self.bzapi.getproducts(ptype='selectable')
-        return {product['name']: dict(components=self.bzapi.getcomponents(product['name']),
-                                      versions=[version['name'] for version in product['versions'] if version['is_active']])
+        return {product['name']: {'components': self.bzapi.getcomponents(product['name']),
+                                  'versions': [version['name'] for version in product['versions'] if version['is_active']]}
                 for product in products if product['components']}

@@ -79,14 +79,14 @@ class BaseAPIHandler(RequestHandler):
         detailed = self.get_query_argument('detailed', None)
         show_all = self.get_query_argument('showAll', None) in ('true', 'True', '1')
 
-        return dict(
-            filter={'$or': [{c: {'$regex': search, '$options': 'i'}} for c in columns]} if search else None,
-            skip=int(offset) if offset else 0,
-            limit=int(limit) if limit else None,
-            sort={sort: {'asc': ASCENDING, 'desc': DESCENDING}[order]} if sort and order else None,
-            detailed=detailed in ('true', 'True', '1') if detailed else True,
-            session_start=None if show_all else self._controller.session_start,
-        )
+        return {
+            'filter': {'$or': [{c: {'$regex': search, '$options': 'i'}} for c in columns]} if search else None,
+            'skip': int(offset) if offset else 0,
+            'limit': int(limit) if limit else None,
+            'sort': {sort: {'asc': ASCENDING, 'desc': DESCENDING}[order]} if sort and order else None,
+            'detailed': detailed in ('true', 'True', '1') if detailed else True,
+            'session_start': None if show_all else self._controller.session_start,
+        }
 
     def load_mime(self, mime):
         if mime in self.loads:

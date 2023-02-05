@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 # Copyright (c) 2019 Tamas Keri.
 #
 # Licensed under the BSD 3-Clause License
@@ -79,8 +79,8 @@ class MongoDriver(object):
             result = self._db.fuzzinator_issues.find_one_and_update(
                 {'sut': issue['sut'], 'id': issue['id'], 'invalid': invalid or {'$exists': False}},
                 {'$setOnInsert': dict(issue, first_seen=first_seen),
-                 '$max': dict(last_seen=last_seen),
-                 '$inc': dict(count=1)},
+                 '$max': {'last_seen': last_seen},
+                 '$inc': {'count': 1}},
                 upsert=True,
                 return_document=ReturnDocument.AFTER,
             )
@@ -88,7 +88,7 @@ class MongoDriver(object):
             if count:
                 result = self._db.fuzzinator_issues.find_one_and_update(
                     {'sut': issue['sut'], 'id': issue['id'], 'invalid': invalid or {'$exists': False}},
-                    {'$max': dict(count=count)},
+                    {'$max': {'count': count}},
                     return_document=ReturnDocument.AFTER,
                 )
 

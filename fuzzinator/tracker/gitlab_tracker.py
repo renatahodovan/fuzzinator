@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2019-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -52,7 +52,7 @@ class GitlabTracker(Tracker):
 
     def report_issue(self, *, title, body):
         try:
-            new_issue = self.project.issues.create(dict(title=title, description=body))
+            new_issue = self.project.issues.create({'title': title, 'description': body})
             return new_issue.attributes['web_url']
         except (exceptions.GitlabAuthenticationError, exceptions.GitlabCreateError) as e:
             raise TrackerError('Issue reporting failed') from e

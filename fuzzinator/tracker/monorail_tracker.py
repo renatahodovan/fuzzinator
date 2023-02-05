@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2017-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -69,11 +69,11 @@ class MonorailTracker(Tracker):
     def report_issue(self, *, title, body):
         try:
             new_issue = self.monorail.issues().insert(projectId=self.project_id,
-                                                      body=dict(summary=title,
-                                                                labels=self.labels,
-                                                                status=self.status,
-                                                                projectId=self.project_id,
-                                                                description=body)).execute()
+                                                      body={'summary': title,
+                                                            'labels': self.labels,
+                                                            'status': self.status,
+                                                            'projectId': self.project_id,
+                                                            'description': body}).execute()
             return self.weburl_template.format(project_id=self.project_id, issue_id=new_issue['id'])
         except Exception as e:
             raise TrackerError('Issue reporting failed') from e

@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2020-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -8,32 +8,6 @@
 from docutils import nodes
 from docutils.transforms import Transform
 from sphinx import addnodes
-
-
-# Add section header above all top-level classes and functions in
-# autodoc-generated documentation to make them appear in TOC.
-class AddApiToToc(Transform):
-    default_priority = 50
-    def apply(self):
-        # desc nodes of sphinx represent domain-specific entities,
-        # their first children, desc_signature nodes, are their "heads"
-        for signode in self.document.traverse(addnodes.desc_signature):
-            descnode = signode.parent
-            domain = descnode['domain']
-            objtype = descnode['objtype']
-            # only interested in py:class and py:function entities
-            if domain != 'py' or objtype not in ['class', 'exception', 'function']:
-                continue
-
-            # wrap the desc node in a section node, which will appear in TOC
-            name = signode['fullname']
-            secname = objtype + ' ' + name
-            _ = ''
-            secnode = nodes.section(_, nodes.title(_, objtype + ' ', nodes.literal(_, name)),
-                                    ids=[nodes.make_id(secname)],
-                                    names=[nodes.fully_normalize_name(secname)])
-            descnode.replace_self(secnode)
-            secnode += descnode
 
 
 # Useful for README.rst that is also included by docs/introduction.rst but
@@ -64,7 +38,6 @@ class FixOuterDocLinks(Transform):
 
 
 def setup(app):
-    app.add_transform(AddApiToToc)
     app.add_transform(FixOuterDocLinks)
 
     return {

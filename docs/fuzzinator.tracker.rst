@@ -15,12 +15,9 @@ UI Extensions
 .. autoclass:: fuzzinator.ui.tui.ReportDialog
    :members:
 
-.. _template-report.html:
+.. _template-report:
 
-template ``report.html``
-------------------------
-
-.. describe:: report.html
+.. describe:: template report.html
 
     Parent template of pages that allow preparing an issue report on the
     Tornado_-based web UI. To be extended using ``{% extends "report.html" %}``.

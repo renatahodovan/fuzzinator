@@ -236,7 +236,7 @@ class Controller(object):
 
         self.listener = ListenerManager()
         for name in config_get_kwargs(self.config, 'listeners'):
-            self.listener += config_get_object(self.config, 'listeners', name, init_kwargs=dict(config=config))
+            self.listener += config_get_object(self.config, 'listeners', name, init_kwargs={'config': config})
 
         self._shared_queue = Queue()
         self._shared_lock = Lock()
@@ -403,7 +403,7 @@ class Controller(object):
                     continue
 
                 proc = Process(target=self._run_job, args=(next_job,))
-                running_jobs[next_job.id] = dict(job=next_job, proc=proc)
+                running_jobs[next_job.id] = {'job': next_job, 'proc': proc}
                 self.listener.on_job_activated(job_id=next_job.id)
                 proc.start()
 
@@ -429,7 +429,7 @@ class Controller(object):
         # Added for the sake of completeness and consistency.
         # Should not be used by UI to add fuzz jobs.
         with self._shared_lock:
-            self._shared_queue.put((FuzzJob, dict(fuzzer_name=fuzzer_name, subconfig_id=self.fuzzers[fuzzer_name]['subconfig']), priority))
+            self._shared_queue.put((FuzzJob, {'fuzzer_name': fuzzer_name, 'subconfig_id': self.fuzzers[fuzzer_name]['subconfig']}, priority))
         return True
 
     def add_validate_job(self, issue, priority=False):
@@ -437,7 +437,7 @@ class Controller(object):
             return False
 
         with self._shared_lock:
-            self._shared_queue.put((ValidateJob, dict(issue=issue), priority))
+            self._shared_queue.put((ValidateJob, {'issue': issue}, priority))
         return True
 
     def add_reduce_job(self, issue, priority=False):
@@ -445,7 +445,7 @@ class Controller(object):
             return False
 
         with self._shared_lock:
-            self._shared_queue.put((ReduceJob, dict(issue=issue), priority))
+            self._shared_queue.put((ReduceJob, {'issue': issue}, priority))
         return True
 
     def add_update_job(self, sut_name, priority=False):
@@ -453,7 +453,7 @@ class Controller(object):
             return False
 
         with self._shared_lock:
-            self._shared_queue.put((UpdateJob, dict(sut_name=sut_name), priority))
+            self._shared_queue.put((UpdateJob, {'sut_name': sut_name}, priority))
 
         if as_bool(self.config.get(f'sut.{sut_name}', 'validate_after_update', fallback=self.validate_after_update)):
             self.validate_all(sut_name)
@@ -474,7 +474,7 @@ class Controller(object):
 
     def cancel_job(self, job_id):
         with self._shared_lock:
-            self._shared_queue.put((None, dict(job_id=job_id), None))
+            self._shared_queue.put((None, {'job_id': job_id}, None))
         return True
 
     @staticmethod

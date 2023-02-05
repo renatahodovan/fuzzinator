@@ -34,10 +34,10 @@ class AboutButton(PopUpLauncher):
         width = max(len(line) for line in self.about.content.splitlines()) + 10
         height = self.about.content.count('\n') + 4
         cols, rows = get_terminal_size()
-        return dict(left=max(cols // 2 - width // 2, 1),
-                    top=min(-rows // 2 - height // 2, -1),
-                    overlay_width=width,
-                    overlay_height=height)
+        return {'left': max(cols // 2 - width // 2, 1),
+                'top': min(-rows // 2 - height // 2, -1),
+                'overlay_width': width,
+                'overlay_height': height}
 
     def create_pop_up(self):
         connect_signal(self.about, 'close', lambda button: self.close_pop_up())

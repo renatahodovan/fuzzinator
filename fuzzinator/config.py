@@ -150,7 +150,7 @@ def config_get_fuzzers(config):
         config_str = StringIO()
         sub_parser.write(config_str, space_around_delimiters=False)
         src = config_str.getvalue()
-        fuzzers[fuzzer] = dict(sut=sut, subconfig=hashlib.md5(src.encode('utf-8', errors='ignore')).hexdigest()[:9], src=src)
+        fuzzers[fuzzer] = {'sut': sut, 'subconfig': hashlib.md5(src.encode('utf-8', errors='ignore')).hexdigest()[:9], 'src': src}
 
     return fuzzers
 

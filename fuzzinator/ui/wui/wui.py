@@ -1,5 +1,5 @@
 # Copyright (c) 2019 Tamas Keri.
-# Copyright (c) 2019-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2019-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -36,7 +36,7 @@ class Wui(object):
         self.controller = controller
         self.controller.listener += WuiListener(self.events, self.lock)
         # Collection of request handlers that make up a web application.
-        handler_args = dict(wui=self)
+        handler_args = {'wui': self}
         self.app = web.Application([(r'/', IssuesUIHandler, handler_args),
                                     (r'/issues/([0-9a-f]{24})', IssueUIHandler, handler_args),
                                     (r'/issues/([0-9a-f]{24})/report', IssueReportUIHandler, handler_args),
@@ -52,7 +52,7 @@ class Wui(object):
                                     (r'/api/.*', NotFoundAPIHandler)],
                                    default_handler_class=NotFoundHandler, default_handler_args=handler_args,
                                    template_loader=ResourceLoader(__package__, 'resources/templates'),
-                                   static_handler_class=StaticResourceHandler, static_handler_args=dict(package=__package__), static_path='resources/static',
+                                   static_handler_class=StaticResourceHandler, static_handler_args={'package': __package__}, static_path='resources/static',
                                    autoreload=False, debug=debug)
         # Starts an HTTP server for this application on the given port.
         if cert:

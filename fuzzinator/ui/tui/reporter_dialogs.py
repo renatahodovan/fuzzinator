@@ -151,8 +151,8 @@ class ReportDialog(PopUpTarget):
         :return: the data to be reported to the issue tracker.
         :rtype: dict
         """
-        return dict(title=self.issue_title.edit_text,
-                    body=self.issue_desc.edit_text)
+        return {'title': self.issue_title.edit_text,
+                'body': self.issue_desc.edit_text}
 
 
 class BugzillaReportDialog(ReportDialog):

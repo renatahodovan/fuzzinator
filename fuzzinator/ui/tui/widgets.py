@@ -81,10 +81,10 @@ class MainWindow(PopUpLauncher):
         width = max(max(len(line) for line in msg.splitlines()), 20)
         height = msg.count('\n') + 4
         cols, rows = os.get_terminal_size()
-        self.pop_up_params = dict(left=max(cols // 2 - width // 2, 1),
-                                  top=max(rows // 2 - height // 2, 1),
-                                  overlay_width=width,
-                                  overlay_height=height)
+        self.pop_up_params = {'left': max(cols // 2 - width // 2, 1),
+                              'top': max(rows // 2 - height // 2, 1),
+                              'overlay_width': width,
+                              'overlay_height': height}
         return self.open_pop_up()
 
     def warning_popup(self, msg):
@@ -358,16 +358,16 @@ class JobsTable(WidgetWrap):
             self.listbox.focus_position = 0
 
     def on_fuzz_job_added(self, job_id, fuzzer, sut, cost, batch):
-        self.insert_widget(job_id, FuzzerJobWidget(dict(fuzzer=fuzzer, sut=sut, cost=cost), pb_done=batch))
+        self.insert_widget(job_id, FuzzerJobWidget({'fuzzer': fuzzer, 'sut': sut, 'cost': cost}, pb_done=batch))
 
     def on_reduce_job_added(self, job_id, sut, cost, issue_id, size):
-        self.insert_widget(job_id, ReduceJobWidget(dict(sut=sut, cost=cost, issue=issue_id), pb_done=size))
+        self.insert_widget(job_id, ReduceJobWidget({'sut': sut, 'cost': cost, 'issue': issue_id}, pb_done=size))
 
     def on_update_job_added(self, job_id, sut):
-        self.insert_widget(job_id, UpdateJobWidget(dict(sut=sut)))
+        self.insert_widget(job_id, UpdateJobWidget({'sut': sut}))
 
     def on_validate_job_added(self, job_id, sut, issue_id):
-        self.insert_widget(job_id, ValidateJobWidget(dict(sut=sut, issue=issue_id)))
+        self.insert_widget(job_id, ValidateJobWidget({'sut': sut, 'issue': issue_id}))
 
     def on_job_activated(self, job_id):
         idx = self.walker.index(self.jobs[job_id])
@@ -483,7 +483,7 @@ class JobWidget(WidgetWrap):
 
 class FuzzerJobWidget(JobWidget):
 
-    labels = dict(fuzzer='Fuzzer', sut='Sut', cost='Cost')
+    labels = {'fuzzer': 'Fuzzer', 'sut': 'Sut', 'cost': 'Cost'}
     title = 'Fuzzer Job'
 
     def __init__(self, data, pb_done):
@@ -492,7 +492,7 @@ class FuzzerJobWidget(JobWidget):
 
 class ReduceJobWidget(JobWidget):
 
-    labels = dict(sut='Sut', cost='Cost', issue='Issue')
+    labels = {'sut': 'Sut', 'cost': 'Cost', 'issue': 'Issue'}
     title = 'Reduce Job'
     height = 8
 
@@ -503,13 +503,13 @@ class ReduceJobWidget(JobWidget):
 
 class UpdateJobWidget(JobWidget):
 
-    labels = dict(sut='Sut')
+    labels = {'sut': 'Sut'}
     title = 'Update Job'
 
 
 class ValidateJobWidget(JobWidget):
 
-    labels = dict(sut='Sut', issue='Issue')
+    labels = {'sut': 'Sut', 'issue': 'Issue'}
     title = 'Validate Job'
 
 
@@ -565,7 +565,7 @@ class TimerWidget(Text):
         r = ss - hh * 3600
         mm = r // 60
         # truncate to first digit after decimal
-        ss = (r - mm * 60)
+        ss = r - mm * 60
         return f'{hh:02.0f}:{mm:02.0f}:{ss:04.1f}'
 
     def update(self):

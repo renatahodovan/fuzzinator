@@ -24,9 +24,9 @@ class Dialog(PopUpTarget):
 
     def __init__(self, title, body, footer_btns, warning=False):
         if not warning:
-            style = dict(body='dialog', title='dialog_title', border='dialog_border')
+            style = {'body': 'dialog', 'title': 'dialog_title', 'border': 'dialog_border'}
         else:
-            style = dict(body='warning', title='warning_title', border='warning_border')
+            style = {'body': 'warning', 'title': 'warning_title', 'border': 'warning_border'}
 
         self.walker = SimpleListWalker(body)
         self.listbox = ListBox(self.walker)

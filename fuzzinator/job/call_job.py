@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -28,7 +28,7 @@ class CallJob(object):
         # Save issue details.
         issue.update(sut=self.sut_name,
                      fuzzer=self.fuzzer_name,
-                     subconfig=dict(subconfig=self.subconfig_id),
+                     subconfig={'subconfig': self.subconfig_id},
                      test=test,
                      reduced=None,
                      reported=False)

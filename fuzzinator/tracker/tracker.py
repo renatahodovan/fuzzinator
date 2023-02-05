@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -39,9 +39,9 @@ class Tracker(metaclass=Multiton):
     If it contains the key ``'wui'``, then the associated value must either be
     an absolute file path (formatted as ``/path/to/file``) or a reference to a
     resource in a package (formatted as ``//package.module/path/to/file``),
-    naming a child template of :ref:`template-report.html`. That specialized
-    template page will be used by the web UI to prepare the report of an issue
-    with this tracker.
+    naming a child template of :ref:`report.html <template-report>`. That
+    specialized template page will be used by the web UI to prepare the report
+    of an issue with this tracker.
 
     See :ref:`ui-extensions`.
     """
@@ -86,7 +86,7 @@ class Tracker(metaclass=Multiton):
         collect input from the user that will be passed to the extra arguments
         (see: :attr:`ui_extension`, and
         :meth:`fuzzinator.ui.tui.ReportDialog.data` or
-        :ref:`template-report.html`).
+        :ref:`report.html <template-report>`).
         """
         raise NotImplementedError()
 
@@ -97,7 +97,7 @@ class Tracker(metaclass=Multiton):
         when reporting an issue and need some tracker-specific information to
         build the UI extension (see :attr:`ui_extension`, and
         :meth:`fuzzinator.ui.tui.ReportDialog.init`
-        or :ref:`template-report.html`).
+        or :ref:`report.html <template-report>`).
 
         Return ``None`` by default.
 

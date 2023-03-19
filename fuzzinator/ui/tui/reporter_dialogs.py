@@ -7,7 +7,10 @@
 
 import logging
 
-from urwid import *
+from urwid import (
+    AttrMap, BoxAdapter, Columns, Frame, LineBox, ListBox, PopUpTarget, RadioButton,
+    SimpleFocusListWalker, SimpleListWalker, Text
+)
 
 from ...config import config_get_object
 from ...formatter import JsonFormatter

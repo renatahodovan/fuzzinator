@@ -8,7 +8,7 @@
 from os import get_terminal_size
 
 from inators.imp import import_object
-from urwid import *
+from urwid import connect_signal, PopUpLauncher
 
 from ...config import config_get_object
 from .button import FormattedButton

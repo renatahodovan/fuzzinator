@@ -15,7 +15,10 @@ from math import ceil
 
 import pyperclip
 
-from urwid import *
+from urwid import (
+    AttrMap, BoxAdapter, Columns, connect_signal, emit_signal, ExitMainLoop, Filler,
+    Frame, ListBox, Pile, PopUpLauncher, ProgressBar, SimpleListWalker, Text, WidgetWrap
+)
 
 from ...config import config_get_object
 from ...formatter import JsonFormatter

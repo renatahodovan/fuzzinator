@@ -9,7 +9,7 @@ import os
 
 from io import BytesIO, StringIO
 
-from bugzilla import *
+from bugzilla import Bugzilla, BugzillaError
 
 from .tracker import Tracker, TrackerError
 

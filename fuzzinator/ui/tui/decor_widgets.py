@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -9,7 +9,7 @@
 Widgets to extend Urwid capabilities
 """
 
-from urwid import *
+from urwid import apply_target_encoding, BoxWidget, Columns, Pile, Text, TextCanvas, Widget, WidgetDecoration, WidgetWrap
 
 
 class PatternHLine(Widget):

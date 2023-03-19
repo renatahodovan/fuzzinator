@@ -7,7 +7,10 @@
 
 from functools import cmp_to_key
 
-from urwid import *
+from urwid import (
+    AttrMap, Columns, connect_signal, Divider, emit_signal, ListBox, ListWalker,
+    Padding, Pile, Text, Widget, WidgetWrap
+)
 
 from .decor_widgets import PatternBox
 from .graphics import fz_box_pattern

@@ -8,7 +8,7 @@
 from ast import literal_eval
 from datetime import datetime
 
-from urwid import *
+from urwid import AttrMap, Columns, Edit, Frame, ListBox, Padding, PopUpTarget, SimpleListWalker, Text
 
 from ...config import config_get_object
 from ...formatter import JsonFormatter

@@ -29,7 +29,7 @@ class AFLRunner(Fuzzer):
       - ``afl_fuzz``: path to the AFL fuzzer tool.
       - ``sut_command``: the string to append to the command string used to
         invoke AFL, probably the same string that is used for
-        :func:`fuzzinator.call.SubprocessCall`'s command parameter (the
+        :class:`fuzzinator.call.SubprocessCall`'s command parameter (the
         ``{test}`` substring is automatically replaced with the ``@@`` input
         file placeholder used by AFL).
       - ``input``: the directory of initial test cases for AFL.

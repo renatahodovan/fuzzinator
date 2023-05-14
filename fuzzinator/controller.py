@@ -124,7 +124,7 @@ class Controller(object):
           formatted. The class must also contain a method named ``summary``,
           also accepting an ``issue`` keyword argument, which should return a
           summary description (preferably a single line of text). (Optional,
-          default: :func:`fuzzinator.formatter.JsonFormatter`.)
+          default: :class:`fuzzinator.formatter.JsonFormatter`.)
 
           See package :mod:`fuzzinator.formatter` for further potential
           formatters.

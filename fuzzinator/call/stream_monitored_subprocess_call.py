@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -26,7 +26,7 @@ class StreamMonitoredSubprocessCall(Call):
     """
     Subprocess invocation-based call of a SUT that takes test input on its
     command line. The main difference from
-    :func:`fuzzinator.call.SubprocessCall` is that it continuously monitors
+    :class:`fuzzinator.call.SubprocessCall` is that it continuously monitors
     the stdout and stderr streams of the SUT and forces it to terminate if
     some predefined patterns are appearing.
 

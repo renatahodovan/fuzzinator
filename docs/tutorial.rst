@@ -35,8 +35,8 @@ Minimum Configuration
 =====================
 
 Let's start with the *minimum configuration* example that defines one SUT with
-:func:`fuzzinator.call.StdinSubprocessCall`, expecting input from *stdin* and
-one test generator with :func:`fuzzinator.fuzzer.RandomContent` that simply
+:class:`fuzzinator.call.StdinSubprocessCall`, expecting input from *stdin* and
+one test generator with :class:`fuzzinator.fuzzer.RandomContent` that simply
 produces random strings.
 
 .. literalinclude:: ../examples/configs/jerry_minimal.ini

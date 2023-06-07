@@ -14,8 +14,8 @@ import sys
 
 from collections import OrderedDict
 from configparser import ConfigParser
-from io import StringIO
 from inspect import signature
+from io import StringIO
 from math import inf
 from uuid import uuid4
 

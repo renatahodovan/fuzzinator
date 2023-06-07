@@ -5,7 +5,7 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-from gitlab import Gitlab, exceptions
+from gitlab import exceptions, Gitlab
 
 from .tracker import Tracker, TrackerError
 

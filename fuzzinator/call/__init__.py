@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -27,8 +27,8 @@ from .subprocess_property_decorator import SubprocessPropertyDecorator
 from .unique_id_decorator import UniqueIdDecorator
 
 try:
-    from .stream_monitored_subprocess_call import StreamMonitoredSubprocessCall
     from .sanitized_stream_monitored_subprocess_call import SanitizedStreamMonitoredSubprocessCall
+    from .stream_monitored_subprocess_call import StreamMonitoredSubprocessCall
 except ImportError:
     pass
 

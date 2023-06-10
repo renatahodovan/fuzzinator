@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2021-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -18,7 +18,7 @@ class FuzzerDecorator(object):
         Initialize ``obj`` of type ``cls``. The default operation is to call the
         ``__init__`` method of the original version of the fuzzer class.
 
-        Sub-classes of :class:`FuzzerDecorator` may override this method if
+        Subclasses of :class:`FuzzerDecorator` may override this method if
         customization of the initialization is needed. Usually, the overridden
         method has to call the original ``__init__`` at some point, which can
         be performed either by ``super().init(cls, obj, **kwargs)`` (which will
@@ -38,7 +38,7 @@ class FuzzerDecorator(object):
         operation is to call the ``__enter__`` method of the original version of
         the fuzzer class and return its result.
 
-        Sub-classes of :class:`FuzzerDecorator` may override this method if
+        Subclasses of :class:`FuzzerDecorator` may override this method if
         customization of entering the context is needed. Usually, the overridden
         method has to call the original ``__enter__`` at some point, which can
         be performed either by ``super().enter(cls, obj)`` (which will call this
@@ -60,7 +60,7 @@ class FuzzerDecorator(object):
         operation is to call the ``__exit__`` method of the original version of
         the fuzzer class and return its result.
 
-        Sub-classes of :class:`FuzzerDecorator` may override this method if
+        Subclasses of :class:`FuzzerDecorator` may override this method if
         customization of exiting the context is needed. Usually, the overridden
         method has to call the original ``__exit__`` at some point, which can
         be performed either by ``super().exit(cls, obj, *exc)`` (which will call
@@ -84,7 +84,7 @@ class FuzzerDecorator(object):
         ``__call__`` method of the original version of the fuzzer class and
         return its result.
 
-        Sub-classes of :class:`FuzzerDecorator` may override this method if
+        Subclasses of :class:`FuzzerDecorator` may override this method if
         customization of calling the fuzzer is needed. Usually, the overridden
         method has to call the original ``__call__`` at some point, which can
         be performed either by ``super().call(cls, obj, index=index)`` (which
@@ -102,7 +102,7 @@ class FuzzerDecorator(object):
 
     def __call__(self, fuzzer_class):
         """
-        Return a decorated version of ``fuzzer_class``. Create a sub-class of
+        Return a decorated version of ``fuzzer_class``. Create a subclass of
         ``fuzzer_class`` that transfers control to :meth:`init`, :meth:`enter`,
         :meth:`exit`, or :meth:`call` when its ``__init__``, ``__enter__``,
         ``__exit__``, or ``__call__`` methods are invoked.

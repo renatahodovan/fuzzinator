@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2021-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -18,7 +18,7 @@ class FormatterDecorator(object):
         Initialize ``obj`` of type ``cls``. The default operation is to call the
         ``__init__`` method of the original version of the formatter class.
 
-        Sub-classes of :class:`FormatterDecorator` may override this method if
+        Subclasses of :class:`FormatterDecorator` may override this method if
         customization of the initialization is needed. Usually, the overridden
         method has to call the original ``__init__`` at some point, which can
         be performed either by ``super().init(cls, obj, **kwargs)`` (which will
@@ -38,7 +38,7 @@ class FormatterDecorator(object):
         ``__call__`` method of the original version of the formatter class and
         return its result.
 
-        Sub-classes of :class:`FormatterDecorator` may override this method if
+        Subclasses of :class:`FormatterDecorator` may override this method if
         customization of calling the formatter is needed. Usually, the
         overridden method has to call the original ``__call__`` at some point,
         which can be performed either by ``super().call(cls, obj, issue=issue)``
@@ -62,7 +62,7 @@ class FormatterDecorator(object):
         call the ``summary`` method of the original version of the formatter
         class and return its result.
 
-        Sub-classes of :class:`FormatterDecorator` may override this method if
+        Subclasses of :class:`FormatterDecorator` may override this method if
         customization of the issue summary is needed. Usually, the overridden
         method has to call the original ``summary`` at some point, which can be
         performed either by ``super().summary(cls, obj, issue=issue)`` (which
@@ -82,7 +82,7 @@ class FormatterDecorator(object):
 
     def __call__(self, formatter_class):
         """
-        Return a decorated version of ``formatter_class``. Create a sub-class of
+        Return a decorated version of ``formatter_class``. Create a subclass of
         ``formatter_class`` that transfers control to :meth:`init`,
         :meth:`call`, or :meth:`summary` when its ``__init__``, ``__call__``, or
         ``summary`` methods are invoked.

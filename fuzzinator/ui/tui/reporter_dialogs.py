@@ -39,7 +39,7 @@ class ReportDialog(PopUpTarget):
 
           - A new dialog is instantiated for every report.
           - Instead of ``__init__``, the :meth:`init` method must be overridden
-            in sub-classes.
+            in subclasses.
         """
         self.issue = issue
         self.db = db
@@ -85,12 +85,12 @@ class ReportDialog(PopUpTarget):
     def init(self):
         """
         This method is called to finish initialization after ``__init__`` sets
-        up the basic layout of the dialog. Sub-classes shall override this
+        up the basic layout of the dialog. Subclasses shall override this
         method if they want to add extra UI elements to the dialog to get input
         from the user that is necessary to submit the issue report to the
         tracker.
 
-        This method is a no-op by default, therefore sub-classes don't have to
+        This method is a no-op by default, therefore subclasses don't have to
         invoke it from the overridden version.
 
         Information about the issue to be reported and about the tracker, and UI
@@ -145,7 +145,7 @@ class ReportDialog(PopUpTarget):
         issue-to-be-reported assigned to ``'title'`` and ``'body'``,
         respectively.
 
-        Sub-classes may override this method, where they call this original
+        Subclasses may override this method, where they call this original
         operation to build the default dictionary and then extend it with
         additional fields (usually with information coming from extra UI
         elements set up in :meth:`init`), as expected by the corresponding

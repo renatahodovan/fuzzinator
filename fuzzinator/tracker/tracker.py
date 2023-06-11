@@ -31,7 +31,7 @@ class Tracker(metaclass=Multiton):
     A dictionary to reference UI extensions for the tracker (if it needs any).
 
     If it contains the key ``'tui'``, then the associated value must be the
-    fully qualified name of a sub-class of
+    fully qualified name of a subclass of
     :class:`fuzzinator.ui.tui.ReportDialog`. That specialized dialog will be
     used by the text-based UI to prepare the report of an issue with this
     tracker.
@@ -81,7 +81,7 @@ class Tracker(metaclass=Multiton):
         :rtype: str
         :raises TrackerError: If the issue cannot be reported.
 
-        Sub-classes may extend the signature of this method in overridden
+        Subclasses may extend the signature of this method in overridden
         versions. In that case, they should also define UI extensions that
         collect input from the user that will be passed to the extra arguments
         (see: :attr:`ui_extension`, and

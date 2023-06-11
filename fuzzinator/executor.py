@@ -37,12 +37,12 @@ def process_args(args):
 
     parsed_fn = config.read(args.config)
     if len(parsed_fn) != len(args.config):
-        return f'Config file(s) do(es) not exist: {", ".join(fn for fn in args.config if fn not in parsed_fn)}'
+        raise ValueError(f'Config file(s) do(es) not exist: {", ".join(fn for fn in args.config if fn not in parsed_fn)}')
 
     for define in args.defines:
         parts = re.fullmatch('([^:=]*):([^:=]*)=(.*)', define)
         if not parts:
-            return f'Config option definition not in SECT:OPT=VAL format: {define}'
+            raise ValueError(f'Config option definition not in SECT:OPT=VAL format: {define}')
 
         section, option, value = parts.group(1, 2, 3)
         if not config.has_section(section):
@@ -52,7 +52,7 @@ def process_args(args):
     for undef in args.undefs:
         parts = re.fullmatch('([^:=]*)(:([^:=]*))?', undef)
         if not parts:
-            return f'Config section/option undefinition not in SECT[:OPT] format: {undef}'
+            raise ValueError(f'Config section/option undefinition not in SECT[:OPT] format: {undef}')
 
         section, option = parts.group(1, 3)
         if option is None:
@@ -71,8 +71,6 @@ def process_args(args):
     for logger_name in ('asyncio', 'chardet.charsetprober', 'keyring.backend'):
         logging.getLogger(logger_name).setLevel(log_level_chatty)
     inators.arg.process_sys_recursion_limit_argument(args)
-
-    return None
 
 
 def execute():
@@ -114,8 +112,9 @@ def execute():
     ui.add_arguments(parser)
     args = parser.parse_args(more_args)
 
-    error_msg = process_args(args)
-    if error_msg:
-        parser.error(error_msg)
+    try:
+        process_args(args)
+    except ValueError as e:
+        parser.error(e)
 
     ui.execute(args)

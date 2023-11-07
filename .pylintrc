@@ -29,7 +29,7 @@ disable=
     import-outside-toplevel, consider-using-with, deprecated-module,
     consider-using-dict-items, too-many-boolean-expressions,
     unspecified-encoding, bad-super-call,
-    attribute-defined-outside-init
+    attribute-defined-outside-init, invalid-overridden-method
 
 [TYPECHECK]
 

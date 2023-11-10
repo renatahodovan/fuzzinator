@@ -6,12 +6,13 @@
 # according to those terms.
 
 import os
-import pytest
 import sys
+
+import pytest
 
 import fuzzinator
 
-from common_call import linesep, resources_dir
+from .common_call import linesep, resources_dir
 
 
 @pytest.mark.parametrize('command, cwd, env, no_exit_code, test, exp', [

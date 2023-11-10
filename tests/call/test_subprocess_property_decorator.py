@@ -6,12 +6,13 @@
 # according to those terms.
 
 import os
-import pytest
 import sys
+
+import pytest
 
 import fuzzinator
 
-from common_call import linesep, resources_dir, MockAlwaysFailCall, MockNeverFailCall
+from .common_call import linesep, resources_dir, MockAlwaysFailCall, MockNeverFailCall
 
 
 @pytest.mark.parametrize('call_init_kwargs, call_kwargs', [

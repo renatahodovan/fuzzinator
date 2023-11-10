@@ -1,17 +1,17 @@
-# Copyright (c) 2018-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import pytest
-
 from functools import partial
+
+import pytest
 
 import fuzzinator
 
-from common_reduce import MockFailIfContainsCall
+from .common_reduce import MockFailIfContainsCall
 
 
 @pytest.mark.parametrize('call, call_init_kwargs, issue, exp_test, exp_issues', [

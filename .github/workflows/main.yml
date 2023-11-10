@@ -24,6 +24,7 @@ jobs:
         with:
           java-version: 17
           distribution: temurin
+        if: matrix.os == 'windows-latest'
       - run: pip install --upgrade tox
       - run: tox -v -e py
 

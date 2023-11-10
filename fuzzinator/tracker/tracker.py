@@ -111,4 +111,3 @@ class TrackerError(Exception):
     """
     Raised when a :class:`Tracker` operation cannot be performed.
     """
-    pass

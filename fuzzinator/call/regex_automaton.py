@@ -8,7 +8,7 @@
 import re
 
 
-class RegexAutomaton(object):
+class RegexAutomaton:
     """
     Auxiliary class to recognize patterns in textual data and process them with
     user-defined automaton-like instructions.

@@ -41,10 +41,8 @@ disable=
     too-many-locals,
     too-many-return-statements,
     too-many-statements,
-    unnecessary-pass,
     unspecified-encoding,
     unused-argument,
-    useless-object-inheritance,
     useless-option-value,  # disables warning in recent pylint that does not check for no-self-use anymore
 
 [TYPECHECK]

@@ -104,7 +104,6 @@ class ReportDialog(PopUpTarget):
             collect input from the user, usually based on ``settings`` (empty by
             default).
         """
-        pass
 
     def set_duplicate(self, btn, state):
         if state:

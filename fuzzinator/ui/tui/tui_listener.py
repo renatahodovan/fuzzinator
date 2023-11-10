@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -11,13 +11,13 @@ import os
 from ...listener import EventListener
 
 
-class TuiListener(object):
+class TuiListener:
 
     def __init__(self, pipe, events, lock):
         for fn, _ in inspect.getmembers(EventListener, predicate=inspect.isfunction):
             setattr(self, fn, self.Trampoline(name=fn, pipe=pipe, events=events, lock=lock))
 
-    class Trampoline(object):
+    class Trampoline:
         def __init__(self, name, pipe, events, lock):
             self.name = name
             self.pipe = pipe

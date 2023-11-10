@@ -148,7 +148,7 @@ class ScrollingListBox(WidgetWrap):
         return None
 
 
-class TableColumn(object):
+class TableColumn:
     align = 'left'
     wrap = 'space'
     padding = None

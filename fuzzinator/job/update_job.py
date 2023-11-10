@@ -8,7 +8,7 @@
 from ..config import config_get_object
 
 
-class UpdateJob(object):
+class UpdateJob:
     """
     Class for running SUT update jobs.
     """

@@ -8,7 +8,7 @@
 from inspect import signature
 
 
-class FuzzerDecorator(object):
+class FuzzerDecorator:
     """
     Base class for :class:`Fuzzer` decorators.
     """

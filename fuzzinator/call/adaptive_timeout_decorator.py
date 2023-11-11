@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2021-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -10,7 +10,7 @@ from math import ceil, sqrt
 from multiprocessing import Value
 
 
-class AdaptiveTimeoutDecorator(object):
+class AdaptiveTimeoutDecorator:
     """
     Decorator for SUT calls used in validate or reduce jobs. It helps
     dynamically optimizing the timeout of SUT calls. It works with SUTs

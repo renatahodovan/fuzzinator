@@ -16,7 +16,7 @@ from pymongo import ASCENDING, MongoClient, ReturnDocument
 logger = logging.getLogger(__name__)
 
 
-class MongoDriver(object):
+class MongoDriver:
 
     def __init__(self, uri, server_selection_timeout):
         self.uri = uri

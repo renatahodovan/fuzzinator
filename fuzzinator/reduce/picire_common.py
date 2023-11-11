@@ -17,7 +17,7 @@ from ..config import as_bool, as_int_or_inf
 from .reducer import Reducer
 
 
-class PicireTester(object):
+class PicireTester:
 
     def __init__(self, *, test_builder, sut_call, issue, on_job_progressed, filename, encoding, new_issues):
         self._test_builder = test_builder

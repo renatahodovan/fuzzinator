@@ -8,7 +8,7 @@
 from inspect import signature
 
 
-class CallDecorator(object):
+class CallDecorator:
     """
     Base class for SUT call (i.e., :class:`Call`) decorators.
     """

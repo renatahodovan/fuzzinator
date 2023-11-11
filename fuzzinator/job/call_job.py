@@ -8,7 +8,7 @@
 import hashlib
 
 
-class CallJob(object):
+class CallJob:
     """
     Base class for jobs that call SUTs and can find new issues.
     """

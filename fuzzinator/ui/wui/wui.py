@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 root_logger = logging.getLogger()
 
 
-class Wui(object):
+class Wui:
 
     def __init__(self, controller, port, address, cert, key, debug):
         self.events = Queue()

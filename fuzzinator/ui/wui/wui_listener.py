@@ -1,5 +1,5 @@
 # Copyright (c) 2019 Tamas Keri.
-# Copyright (c) 2019 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2019-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -11,7 +11,7 @@ import inspect
 from ...listener import EventListener
 
 
-class Trampoline(object):
+class Trampoline:
 
     def __init__(self, name, events, lock):
         self.name = name
@@ -26,7 +26,7 @@ class Trampoline(object):
                 pass
 
 
-class WuiListener(object):
+class WuiListener:
 
     def __init__(self, events, lock):
         for fn, _ in inspect.getmembers(EventListener, predicate=inspect.isfunction):

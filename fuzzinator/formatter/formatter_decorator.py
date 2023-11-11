@@ -8,7 +8,7 @@
 from inspect import signature
 
 
-class FormatterDecorator(object):
+class FormatterDecorator:
     """
     Base class for :class:`Formatter` decorators.
     """

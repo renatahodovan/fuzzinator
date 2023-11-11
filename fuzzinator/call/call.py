@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2021-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,7 +6,7 @@
 # according to those terms.
 
 
-class Call(object):
+class Call:
     """
     Abstract base class to represent how a software-under-test (SUT) can be
     called/executed.

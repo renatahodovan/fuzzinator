@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,7 +6,7 @@
 # according to those terms.
 
 
-class EventListener(object):
+class EventListener:
     """
     A no-op base class for listeners that can get notified by
     :class:`fuzzinator.Controller` on various events of a fuzz sessions.
@@ -29,7 +29,6 @@ class EventListener(object):
 
         :param int load: number between 0 and controller's capacity.
         """
-        pass
 
     def on_fuzz_job_added(self, job_id, cost, sut, fuzzer, batch):
         """
@@ -45,7 +44,6 @@ class EventListener(object):
             requested from the fuzzer (may be ``inf``).
         :type batch: int, float
         """
-        pass
 
     def on_reduce_job_added(self, job_id, cost, sut, issue_oid, issue_id, size):
         """
@@ -60,7 +58,6 @@ class EventListener(object):
         :param int size: size of the test case associated with the issue to be
             reduced.
         """
-        pass
 
     def on_update_job_added(self, job_id, cost, sut):
         """
@@ -71,7 +68,6 @@ class EventListener(object):
         :param str sut: short name of the SUT to be updated (name of the
             corresponding config section without the "sut." prefix).
         """
-        pass
 
     def on_validate_job_added(self, job_id, cost, sut, issue_oid, issue_id):
         """
@@ -84,7 +80,6 @@ class EventListener(object):
         :param str issue_oid: ``'_id'`` property of the issue to be validated.
         :param Any issue_id: ``'id'`` property of the issue to be validated.
         """
-        pass
 
     def on_job_activated(self, job_id):
         """
@@ -92,7 +87,6 @@ class EventListener(object):
 
         :param int job_id: unique identifier of the activated job.
         """
-        pass
 
     def on_job_progressed(self, job_id, progress):
         """
@@ -104,7 +98,6 @@ class EventListener(object):
             reduce jobs, this is the current size of the test case being reduced
             (number between the original test size and 0).
         """
-        pass
 
     def on_job_removed(self, job_id):
         """
@@ -112,7 +105,6 @@ class EventListener(object):
 
         :param int job_id: unique identifier of the finished job.
         """
-        pass
 
     def on_issue_added(self, job_id, issue):
         """
@@ -124,7 +116,6 @@ class EventListener(object):
             the issue, the fuzzer that generated the test case, the ID of the
             issue - is stored in appropriate properties of the issue).
         """
-        pass
 
     def on_issue_invalidated(self, job_id, issue):
         """
@@ -135,7 +126,6 @@ class EventListener(object):
             (listener is free to decide how to react, an option is to remove the
             issue from the database).
         """
-        pass
 
     def on_issue_updated(self, job_id, issue):
         """
@@ -144,7 +134,6 @@ class EventListener(object):
         :param int job_id: identifier of the job that has updated the issue.
         :param dict issue: the issue object that has changed.
         """
-        pass
 
     def on_issue_reduced(self, job_id, issue):
         """
@@ -153,7 +142,6 @@ class EventListener(object):
         :param int job_id: identifier of the job that has reduced the issue.
         :param dict issue: the issue object that got reduced.
         """
-        pass
 
     def warning(self, job_id, msg):
         """
@@ -164,7 +152,6 @@ class EventListener(object):
             the core).
         :param str msg: description of the problem.
         """
-        pass
 
     def on_stats_updated(self):
         """
@@ -172,4 +159,3 @@ class EventListener(object):
         counts, issue counts, unique issue counts) are updated in the
         framework's database.
         """
-        pass

@@ -21,7 +21,7 @@ from .listener import ListenerManager
 from .mongo_driver import MongoDriver
 
 
-class Controller(object):
+class Controller:
     """
     Fuzzinator's main controller that orchestrates a fuzz session by scheduling
     all related activities (e.g., keeps SUTs up-to-date, runs fuzzers and feeds

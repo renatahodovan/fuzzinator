@@ -13,7 +13,7 @@ from .event_listener import EventListener
 logger = logging.getLogger(__name__)
 
 
-class Trampoline(object):
+class Trampoline:
 
     def __init__(self, manager, name):
         self.manager = manager
@@ -27,7 +27,7 @@ class Trampoline(object):
                 logger.warning('Unhandled exception in listener %r.', self.name, exc_info=e)
 
 
-class ListenerManager(object):
+class ListenerManager:
     """
     Class that registers listeners to various events and executes all of them
     when the event has triggered.

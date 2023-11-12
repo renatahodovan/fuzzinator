@@ -13,6 +13,9 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
+# NOTE: Uncomment if project is not installed (e.g., documentation is not
+# generated with the help of tox.)
+# sys.path.insert(0, os.path.abspath('../src'))
 sys.path.append(os.path.abspath("./_ext"))
 
 

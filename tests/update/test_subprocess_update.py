@@ -6,12 +6,13 @@
 # according to those terms.
 
 import os
-import pytest
 import sys
+
+import pytest
 
 import fuzzinator
 
-from common_update import resources_dir
+from .common_update import resources_dir
 
 
 @pytest.mark.parametrize('command, cwd, env', [

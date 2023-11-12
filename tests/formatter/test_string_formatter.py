@@ -1,4 +1,4 @@
-# Copyright (c) 2018-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2018-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,11 +6,12 @@
 # according to those terms.
 
 import os
+
 import pytest
 
 import fuzzinator
 
-from common_formatter import mock_issue, mock_templates_dir
+from .common_formatter import mock_issue, mock_templates_dir
 
 
 @pytest.mark.parametrize('issue, formatter_init_kwargs, exp_short, exp_long', [

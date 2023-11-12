@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -6,6 +6,7 @@
 # according to those terms.
 
 import os
+
 import pytest
 
 import fuzzinator
@@ -13,10 +14,10 @@ import fuzzinator
 
 @pytest.mark.parametrize('touch, age, exp', [
     (None, '0:0:1', True),
-    (-60*60*24*31, '0:0:10', True),
-    (-60*60*24*31, '0:10:0', True),
-    (-60*60*24*31, '10:0:0', True),
-    (-60*60*24*31, '1:0:0:0', True),
+    (-60 * 60 * 24 * 31, '0:0:10', True),
+    (-60 * 60 * 24 * 31, '0:10:0', True),
+    (-60 * 60 * 24 * 31, '10:0:0', True),
+    (-60 * 60 * 24 * 31, '1:0:0:0', True),
     (0, '0:0:10', False),
     (0, '0:10:0', False),
     (0, '10:0:0', False),

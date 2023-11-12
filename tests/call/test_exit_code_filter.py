@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -9,7 +9,7 @@ import pytest
 
 import fuzzinator
 
-from common_call import MockAlwaysFailCall, MockNeverFailCall
+from .common_call import MockAlwaysFailCall, MockNeverFailCall
 
 
 @pytest.mark.parametrize('call_init_kwargs, call_kwargs', [

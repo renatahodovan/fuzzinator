@@ -5,14 +5,15 @@
 # This file may not be copied, modified, or distributed except
 # according to those terms.
 
-import pytest
 import sys
 
 from os.path import join
 
+import pytest
+
 import fuzzinator
 
-from common_fuzzer import blinesep, resources_dir
+from .common_fuzzer import blinesep, resources_dir
 
 
 @pytest.mark.parametrize('command, cwd, env, contents, exp', [

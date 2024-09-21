@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2024 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -15,7 +15,8 @@ import time
 
 from multiprocessing import Lock, Process, Queue
 
-from urwid import connect_signal, ExitMainLoop, MainLoop, raw_display, util
+from urwid import connect_signal, ExitMainLoop, MainLoop, util
+from urwid.display.raw import Screen
 
 from ... import Controller
 from .tui_listener import TuiListener
@@ -33,7 +34,7 @@ class Tui:
         self.lock = Lock()
 
         self.view = MainWindow(controller)
-        self.screen = raw_display.Screen()
+        self.screen = Screen()
         self.screen.set_terminal_properties(256)
 
         self.loop = MainLoop(widget=self.view,

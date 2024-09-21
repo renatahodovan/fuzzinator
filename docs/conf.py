@@ -23,7 +23,7 @@ sys.path.append(os.path.abspath("./_ext"))
 
 project = 'Fuzzinator'
 author = 'Renata Hodovan, Akos Kiss'
-copyright = '2016-2023, %s' % author
+copyright = '2016-2024, %s' % author
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

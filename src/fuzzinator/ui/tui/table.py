@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2023 Renata Hodovan, Akos Kiss.
+# Copyright (c) 2016-2024 Renata Hodovan, Akos Kiss.
 #
 # Licensed under the BSD 3-Clause License
 # <LICENSE.rst or https://opensource.org/licenses/BSD-3-Clause>.
@@ -585,8 +585,7 @@ class Table(WidgetWrap):
         else:
             r = data
 
-        for d in r:
-            yield d
+        yield from r
 
     def requery(self, data, offset=0):
         kwargs = {'sort': (self.sort_field, self.sort_reverse)}

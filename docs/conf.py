@@ -65,22 +65,12 @@ add_function_parentheses = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-# on_rtd is whether we are on readthedocs.org
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-
-if not on_rtd:  # only import and set the theme if we're building docs locally
-    import sphinx_rtd_theme
-    html_theme = 'sphinx_rtd_theme'
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme = 'furo'
 
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
 #
-html_title = '%s %s documentation' % (project, release)
-
-# A shorter title for the navigation bar.  Default is the same as html_title.
-#
-html_short_title = '%s %s documentation' % (project, version)
+html_title = project
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

@@ -56,7 +56,7 @@ interfaces:
 Requirements
 ============
 
-* Python_ >= 3.9
+* Python_ >= 3.10
 * MongoDB_ >= 3.6 (either local installation or access to remote database)
 * Java_ SE >= 7 JRE or JDK (optional, required if the *Picireny* test case
   reducer is used)
